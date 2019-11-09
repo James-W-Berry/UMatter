@@ -1,2 +1,2 @@
 # UMatter
-UMatter iOS Application
+UMatter React Native Application
