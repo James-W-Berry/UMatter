@@ -1,9 +1,9 @@
 {
   "devToolsPort": 19002,
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 44683,
-  "expoServerNgrokUrl": "https://db-evb.anonymous.umatter.exp.direct",
-  "packagerNgrokUrl": "https://packager.db-evb.anonymous.umatter.exp.direct",
-  "ngrokPid": 44718
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null
 }
