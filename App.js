@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import { View } from "react-native";
 import Main from "./Main";
 
 class App extends Component {

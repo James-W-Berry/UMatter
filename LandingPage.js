@@ -3,7 +3,12 @@ import React, { Component } from "react";
 import { Button } from "react-native-elements";
 
 class LandingPage extends Component {
+  static navigationOptions = {
+    title: "Welcome"
+  };
+  onButtonPress() {}
   render() {
+    const { navigate } = this.props.navigation;
     return (
       <View style={styles.container}>
         <ImageBackground
@@ -17,7 +22,11 @@ class LandingPage extends Component {
             />
           </View>
           <View style={styles.bottom}>
-            <Button title={"Start the Tour"} buttonStyle={styles.button} />
+            <Button
+              title={"Start the Tour"}
+              buttonStyle={styles.button}
+              onPress={() => navigate("Onboarding")}
+            />
           </View>
         </ImageBackground>
       </View>
@@ -37,7 +46,7 @@ const styles = StyleSheet.create({
   },
   image: {
     width: "100%",
-    height: "25%"
+    height: "28%"
   },
   bottom: {
     flex: 1,

@@ -1,6 +1,15 @@
 import React, { Component } from "react";
+import OnboardingScreens from "./Onboarding";
 import LandingPage from "./LandingPage";
-import { View } from "react-native";
+import { createAppContainer } from "react-navigation";
+import { createStackNavigator } from "react-navigation-stack";
+
+const MainNavigator = createStackNavigator({
+  LandingPage: { screen: LandingPage },
+  Onboarding: { screen: OnboardingScreens }
+});
+
+const NavigationContainer = createAppContainer(MainNavigator);
 
 class Main extends Component {
   constructor(props) {
@@ -13,7 +22,11 @@ class Main extends Component {
 
   render() {
     if (this.state.firstTimeCheck) {
-      return <LandingPage />;
+      return (
+        <NavigationContainer>
+          <LandingPage />;
+        </NavigationContainer>
+      );
     }
   }
 }

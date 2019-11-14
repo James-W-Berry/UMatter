@@ -74,7 +74,7 @@ const Next = ({ isLight, ...props }) => (
   />
 );
 
-class CustomButtons extends Component {
+class OnboardingScreens extends Component {
   render() {
     return (
       <Onboarding
@@ -82,26 +82,40 @@ class CustomButtons extends Component {
         NextButtonComponent={Next}
         SkipButtonComponent={Skip}
         DoneButtonComponent={Done}
-        titleStyles={{ color: "blue" }} // set default color for the title
+        titleStyles={{ color: "black" }} // set default color for the title
         pages={[
           {
             backgroundColor: "#fff",
-            image: <Image source={require("./assets/moment_of_silence.png")} />,
-            title: "",
-            subtitle: "",
-            titleStyles: { color: "red" } // overwrite default color
+            image: (
+              <Image
+                source={require("./assets/moment_of_silence.png")}
+                style={{ width: 200, height: 280 }}
+              />
+            ),
+            title: "Discover silence",
+            subtitle: "Schedule a moment of silence and reflection"
           },
           {
-            backgroundColor: "#fe6e58",
-            image: <Image source={require("./assets/journal.png")} />,
-            title: "",
-            subtitle: ""
+            backgroundColor: "#fff",
+            image: (
+              <Image
+                source={require("./assets/journal.png")}
+                style={{ width: 300, height: 280 }}
+              />
+            ),
+            title: "Record",
+            subtitle: "Journal your thoughts in the UMatter notepad"
           },
           {
-            backgroundColor: "#999",
-            image: <Image source={require("./assets/social.png")} />,
-            title: "",
-            subtitle: ""
+            backgroundColor: "#fff",
+            image: (
+              <Image
+                source={require("./assets/social.png")}
+                style={{ width: 280, height: 340 }}
+              />
+            ),
+            title: "Share",
+            subtitle: "Share your journal entries and interact with others"
           }
         ]}
       />
@@ -109,4 +123,4 @@ class CustomButtons extends Component {
   }
 }
 
-export default CustomButtons;
+export default OnboardingScreens;
