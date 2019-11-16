@@ -22,54 +22,50 @@ const Square = ({ isLight, selected }) => {
   );
 };
 
-const backgroundColor = isLight => (isLight ? "blue" : "lightblue");
-const color = isLight => backgroundColor(!isLight);
-
-const Done = ({ isLight, ...props }) => (
+const Done = () => (
   <Button
     title={"Done"}
     buttonStyle={{
-      backgroundColor: backgroundColor(isLight)
+      backgroundColor: "#44CADD"
     }}
     containerViewStyle={{
       marginVertical: 10,
-      width: 70,
-      backgroundColor: backgroundColor(isLight)
+      width: 70
+      // backgroundColor: isLight
     }}
-    textStyle={{ color: color(isLight) }}
-    {...props}
+    textStyle={{ color: "#fff" }}
   />
 );
 
-const Skip = ({ isLight, skipLabel, ...props }) => (
+const Skip = ({ skipLabel, ...props }) => (
   <Button
     title={"Skip"}
     buttonStyle={{
-      backgroundColor: backgroundColor(isLight)
+      backgroundColor: "#44CADD"
     }}
     containerViewStyle={{
       marginVertical: 10,
       width: 70
     }}
-    textStyle={{ color: color(isLight) }}
+    textStyle={{ color: "#fff" }}
     {...props}
   >
     {skipLabel}
   </Button>
 );
 
-const Next = ({ isLight, ...props }) => (
+const Next = ({ ...props }) => (
   <Button
     title={"Next"}
     buttonStyle={{
-      backgroundColor: backgroundColor(isLight)
+      backgroundColor: "#44CADD"
     }}
     containerViewStyle={{
       marginVertical: 10,
-      width: 70,
-      backgroundColor: backgroundColor(isLight)
+      width: 70
+      // backgroundColor: isLight
     }}
-    textStyle={{ color: color(isLight) }}
+    textStyle={{ color: "#fff" }}
     {...props}
   />
 );
@@ -82,7 +78,7 @@ class OnboardingScreens extends Component {
         NextButtonComponent={Next}
         SkipButtonComponent={Skip}
         DoneButtonComponent={Done}
-        titleStyles={{ color: "black" }} // set default color for the title
+        titleStyles={{ color: "black" }}
         pages={[
           {
             backgroundColor: "#fff",

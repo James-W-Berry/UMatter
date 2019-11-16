@@ -4,10 +4,15 @@ import LandingPage from "./LandingPage";
 import { createAppContainer } from "react-navigation";
 import { createStackNavigator } from "react-navigation-stack";
 
-const MainNavigator = createStackNavigator({
-  LandingPage: { screen: LandingPage },
-  Onboarding: { screen: OnboardingScreens }
-});
+const MainNavigator = createStackNavigator(
+  {
+    LandingPage: { screen: LandingPage },
+    Onboarding: { screen: OnboardingScreens }
+  },
+  {
+    headerMode: "none"
+  }
+);
 
 const NavigationContainer = createAppContainer(MainNavigator);
 

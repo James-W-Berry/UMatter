@@ -6,6 +6,8 @@ class LandingPage extends Component {
   static navigationOptions = {
     title: "Welcome"
   };
+  static headerMode = "none";
+
   onButtonPress() {}
   render() {
     const { navigate } = this.props.navigation;
