@@ -1,5 +1,5 @@
-import { Image, View } from "react-native";
 import React, { Component } from "react";
+import { Image, View } from "react-native";
 import { Button } from "react-native-elements";
 import Onboarding from "react-native-onboarding-swiper";
 import NavigationService from "./NavigationService";
@@ -63,7 +63,6 @@ const Next = ({ ...props }) => (
     containerViewStyle={{
       marginVertical: 10,
       width: 70
-      // backgroundColor: isLight
     }}
     textStyle={{ color: "#fff" }}
     {...props}
