@@ -14,10 +14,15 @@ class Home extends Component {
   state = {
     index: 0,
     routes: [
-      { key: "journalEntries", title: "Journal", icon: "notebook" },
-      { key: "moments", title: "Moments", icon: "clock" },
-      { key: "gold", title: "Gold", icon: "treasure-chest" },
-      { key: "badges", title: "Badges", icon: "trophy-award" }
+      {
+        key: "journalEntries",
+        title: "Journal",
+        icon: "notebook",
+        color: "#44CADD"
+      },
+      { key: "moments", title: "Moments", icon: "clock", color: "#44CADD" },
+      { key: "gold", title: "Gold", icon: "treasure-chest", color: "#44CADD" },
+      { key: "badges", title: "Badges", icon: "trophy-award", color: "#44CADD" }
     ]
   };
 
@@ -33,7 +38,6 @@ class Home extends Component {
   render() {
     return (
       <BottomNavigation
-        style={{ color: "#44CADD" }}
         navigationState={this.state}
         onIndexChange={this._handleIndexChange}
         renderScene={this._renderScene}
