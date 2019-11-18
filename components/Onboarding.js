@@ -2,6 +2,7 @@ import { Image, View } from "react-native";
 import React, { Component } from "react";
 import { Button } from "react-native-elements";
 import Onboarding from "react-native-onboarding-swiper";
+import NavigationService from "./NavigationService";
 
 const Square = ({ isLight, selected }) => {
   let backgroundColor;
@@ -25,9 +26,8 @@ const Square = ({ isLight, selected }) => {
 const Done = () => (
   <Button
     title={"Done"}
-    buttonStyle={{
-      backgroundColor: "#44CADD"
-    }}
+    onPress={() => NavigationService.navigate("Home")}
+    buttonStyle={{}}
     containerViewStyle={{
       marginVertical: 10,
       width: 70
@@ -84,7 +84,7 @@ class OnboardingScreens extends Component {
             backgroundColor: "#fff",
             image: (
               <Image
-                source={require("./assets/moment_of_silence.png")}
+                source={require("../assets/moment_of_silence.png")}
                 style={{ width: 200, height: 280 }}
               />
             ),
@@ -95,7 +95,7 @@ class OnboardingScreens extends Component {
             backgroundColor: "#fff",
             image: (
               <Image
-                source={require("./assets/journal.png")}
+                source={require("../assets/journal.png")}
                 style={{ width: 300, height: 280 }}
               />
             ),
@@ -106,7 +106,7 @@ class OnboardingScreens extends Component {
             backgroundColor: "#fff",
             image: (
               <Image
-                source={require("./assets/social.png")}
+                source={require("../assets/social.png")}
                 style={{ width: 280, height: 340 }}
               />
             ),

@@ -1,25 +1,19 @@
 import { Image, View, StyleSheet, ImageBackground } from "react-native";
 import React, { Component } from "react";
 import { Button } from "react-native-elements";
+import NavigationService from "./NavigationService";
 
 class LandingPage extends Component {
-  static navigationOptions = {
-    title: "Welcome"
-  };
-  static headerMode = "none";
-
-  onButtonPress() {}
   render() {
-    const { navigate } = this.props.navigation;
     return (
       <View style={styles.container}>
         <ImageBackground
-          source={require("./assets/deep_sea_space.jpg")}
+          source={require("../assets/deep_sea_space.jpg")}
           style={{ width: "100%", height: "100%" }}
         >
           <View style={styles.banner}>
             <Image
-              source={require("./assets/umatter_banner.png")}
+              source={require("../assets/umatter_banner.png")}
               style={styles.image}
             />
           </View>
@@ -27,7 +21,7 @@ class LandingPage extends Component {
             <Button
               title={"Start the Tour"}
               buttonStyle={styles.button}
-              onPress={() => navigate("Onboarding")}
+              onPress={() => NavigationService.navigate("Onboarding")}
             />
           </View>
         </ImageBackground>
