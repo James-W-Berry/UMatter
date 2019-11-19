@@ -1,73 +1,107 @@
 import React, { Component } from "react";
-import { Text, View, StyleSheet, SafeAreaView } from "react-native";
-import AsyncStorage from "@react-native-community/async-storage";
+import {
+  AsyncStorage,
+  Text,
+  View,
+  StyleSheet,
+  SafeAreaView,
+  TouchableOpacity,
+  FlatList
+} from "react-native";
 import { Card } from "react-native-elements";
+import _ from "lodash";
+import uuid from "uuid";
+
+function JournalEntry({ id, title, body, date }) {
+  return (
+    <View key={id}>
+      <TouchableOpacity onPress={() => onSelect(id)}>
+        <Card title={title} image={require("../assets/umatter_banner.png")}>
+          <Text style={{ marginBottom: 10 }}>{body}</Text>
+          <Text style={{ marginBottom: 10 }}>{date}</Text>
+        </Card>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function onSelect(id) {
+  console.log(`journal entry ${id}`);
+}
 
 class JournalEntries extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      journalEntries: this.getJournalEntries()
+      journalEntries: this.getFromLocalStorage("journalEntries")
     };
   }
 
-  getJournalEntries = async () => {
+  componentWillMount() {
+    this.clearLocalStorage();
+    this.storeData();
+  }
+
+  clearLocalStorage() {
+    AsyncStorage.removeItem("journalEntries");
+  }
+
+  getFromLocalStorage(key) {
+    let value = {};
     try {
-      const value = await AsyncStorage.getItem("journalEntries");
-      if (value !== null) {
-        // value previously stored
-        return value;
-      }
+      value = AsyncStorage.getItem(key) || {};
     } catch (e) {
       console.log(e);
     }
-  };
-
-  createEntryCard = entry => {
-    return (
-      <View>
-        <Card
-          title={entry.title}
-          image={require("../assets/umatter_banner.png")}
-        >
-          <Text style={{ marginBottom: 10 }}>{entry.body}</Text>
-          <Text style={{ marginBottom: 10 }}>{entry.date}</Text>
-        </Card>
-      </View>
-    );
-  };
+    return value;
+  }
 
   storeData = async () => {
     try {
-      const testEntries = [
-        {
-          title: "Title 1",
-          body: "Journal Entry body 1",
-          date: "November 12, 2019"
-        },
-        {
-          title: "Title 2",
-          body: "Journal Entry body 2",
-          date: "November 13, 2019"
-        },
-        {
-          title: "Title 3",
-          body: "Journal Entry body 3",
-          date: "November 14, 2019"
-        }
-      ];
-      await AsyncStorage.setItem("journalEntries", testEntries);
+      const journalEntry = {
+        title: "Title 1",
+        body: "Journal Entry Body 1",
+        date: "November 12, 2019",
+        id: uuid.v4()
+      };
+      const existingEntries = await AsyncStorage.getItem("journalEntries");
+      let entries = JSON.parse(existingEntries);
+      if (!entries) {
+        entries = [];
+      }
+      entries.push(journalEntry);
+
+      await AsyncStorage.setItem("journalEntries", JSON.stringify(entries))
+        .then(() => {
+          console.log(entries);
+          this.setState({
+            journalEntries: entries
+          });
+          console.log("new journal entry saved to storage");
+        })
+        .catch(e => {
+          console.log(e);
+        });
     } catch (e) {
       // saving error
     }
   };
 
-  componentDidMount() {}
-
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        {_.map(this.state.journalEntries, entry => this.createEntryCard)}
+        <FlatList
+          data={this.state.journalEntries}
+          renderItem={({ item }) => (
+            <JournalEntry
+              id={item.id}
+              title={item.title}
+              body={item.body}
+              date={item.date}
+            />
+          )}
+          keyExtractor={item => item.id}
+        />
       </SafeAreaView>
     );
   }
