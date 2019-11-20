@@ -11,6 +11,8 @@ import {
 import { Card } from "react-native-elements";
 import _ from "lodash";
 import uuid from "uuid";
+import { Icon } from "react-native-elements";
+import NavigationService from "./NavigationService";
 
 function JournalEntry({ id, title, body, date }) {
   return (
@@ -102,6 +104,18 @@ class JournalEntries extends Component {
           )}
           keyExtractor={item => item.id}
         />
+        <View style={styles.button}>
+          <TouchableOpacity>
+            <Icon
+              raised
+              name="pencil"
+              type="material-community"
+              color="#44CADD"
+              reverse={true}
+              onPress={() => NavigationService.navigate("NewJournalEntry")}
+            />
+          </TouchableOpacity>
+        </View>
       </SafeAreaView>
     );
   }
@@ -111,14 +125,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1
   },
-  banner: {
-    flex: 2,
-    justifyContent: "center",
-    alignItems: "center"
-  },
-  image: {
-    width: "100%",
-    height: "28%"
+  button: {
+    elevation: 10,
+    alignSelf: "flex-end",
+    padding: 8
   }
 });
 

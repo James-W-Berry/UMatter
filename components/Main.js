@@ -6,18 +6,37 @@ import JournalEntries from "./JournalEntries";
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
+import NewJournalEntry from "./NewJournalEntry";
 
-const MainNavigator = createStackNavigator(
-  {
-    LandingPage: { screen: LandingPage },
-    Onboarding: { screen: OnboardingScreens },
-    Home: { screen: Home },
-    JournalEntries: { screen: JournalEntries }
+const MainNavigator = createStackNavigator({
+  LandingPage: {
+    screen: LandingPage,
+    navigationOptions: {
+      header: null
+    }
   },
-  {
-    headerMode: "none"
+  Onboarding: {
+    screen: OnboardingScreens,
+    navigationOptions: {
+      header: null
+    }
+  },
+  Home: {
+    screen: Home,
+    navigationOptions: {
+      header: null
+    }
+  },
+  JournalEntries: {
+    screen: JournalEntries,
+    navigationOptions: {
+      header: null
+    }
+  },
+  NewJournalEntry: {
+    screen: NewJournalEntry
   }
-);
+});
 
 const AppContainer = createAppContainer(MainNavigator);
 
