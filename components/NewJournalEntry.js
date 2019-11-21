@@ -1,29 +1,25 @@
-import { Image, View, StyleSheet, Text, TextInput } from "react-native";
+import { Image, View, StyleSheet, AsyncStorage, TextInput } from "react-native";
 import React, { Component } from "react";
 import { Button } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
+import uuid from "uuid";
 
 class NewJournalEntry extends Component {
   constructor(props) {
     super(props);
   }
 
-  static navigationOptions = {
-    headerTitle: "New Journal Entry"
-  };
-
   state = {
-    image: "../assets/icon.png",
-    entry: "",
-    title: ""
+    image: "../assets/journal.png",
+    entry: null,
+    title: null
   };
 
   componentDidMount() {
     this.getPermissionAsync();
-    console.log("hi");
   }
 
   getPermissionAsync = async () => {
@@ -35,7 +31,7 @@ class NewJournalEntry extends Component {
     }
   };
 
-  _pickImage = async () => {
+  pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
@@ -46,7 +42,43 @@ class NewJournalEntry extends Component {
     console.log(result);
 
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      //this.setState({ image: result.uri });
+    }
+  };
+
+  storeData = async () => {
+    if (this.state.entry !== null) {
+      try {
+        console.log("trying to save new journal entry to local storage");
+        const journalEntry = {
+          title: this.state.title,
+          body: this.state.entry,
+          image: this.state.image,
+          date: new Date(),
+          id: uuid.v4()
+        };
+        const existingEntries = await AsyncStorage.getItem("journalEntries");
+        let entries = JSON.parse(existingEntries);
+        if (!entries) {
+          entries = [];
+        }
+        entries.push(journalEntry);
+
+        await AsyncStorage.setItem("journalEntries", JSON.stringify(entries))
+          .then(() => {
+            console.log(entries);
+            console.log("new journal entry saved to storage");
+            this.props.navigation.goBack(null);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      } catch (e) {
+        // saving error
+        console.log(e.message);
+      }
+    } else {
+      alert("please enter a reflection");
     }
   };
 
@@ -56,8 +88,13 @@ class NewJournalEntry extends Component {
     return (
       <View style={styles.container}>
         <View style={styles.banner}>
-          <TouchableOpacity onPress={this._pickImage}>
-            {image && <Image source={{ uri: image }} style={styles.image} />}
+          <TouchableOpacity onPress={this.pickImage}>
+            {image && (
+              <Image
+                source={require("../assets/journal.png")}
+                style={styles.image}
+              />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -84,13 +121,13 @@ class NewJournalEntry extends Component {
           <Button
             buttonStyle={styles.cancelButton}
             title={"Cancel"}
-            onPress={() => console.log("cancelled entry")}
+            onPress={() => this.props.navigation.goBack(null)}
           />
 
           <Button
             buttonStyle={styles.saveButton}
             title={"Save"}
-            onPress={() => console.log("saved entry")}
+            onPress={this.storeData}
           />
         </View>
       </View>
@@ -104,11 +141,14 @@ const styles = StyleSheet.create({
     flexDirection: "column"
   },
   banner: {
-    flex: 4
+    backgroundColor: "#a5a5a5",
+    flex: 4,
+    justifyContent: "center"
   },
   image: {
-    width: "100%",
-    height: "100%"
+    alignSelf: "center",
+    width: 150,
+    height: 150
   },
   buttonContainer: {
     backgroundColor: "#123543",

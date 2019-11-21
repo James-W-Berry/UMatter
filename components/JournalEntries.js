@@ -6,15 +6,17 @@ import {
   StyleSheet,
   SafeAreaView,
   TouchableOpacity,
-  FlatList
+  FlatList,
+  ScrollView,
+  RefreshControl
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
-import uuid from "uuid";
 import { Icon } from "react-native-elements";
 import NavigationService from "./NavigationService";
 
-function JournalEntry({ id, title, body, date }) {
+function JournalEntry({ id, title, body, image, date }) {
+  console.log(`creating card for entry ${id}`);
   return (
     <View key={id}>
       <TouchableOpacity onPress={() => onSelect(id)}>
@@ -34,76 +36,77 @@ function onSelect(id) {
 class JournalEntries extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      journalEntries: this.getFromLocalStorage("journalEntries")
+      journalEntries: null,
+      isLoading: false
     };
   }
 
-  componentWillMount() {
-    this.clearLocalStorage();
-    this.storeData();
+  componentDidMount() {
+    //AsyncStorage.clear();
+    this.retrieveJournalEntries();
   }
 
-  clearLocalStorage() {
-    AsyncStorage.removeItem("journalEntries");
-  }
+  retrieveJournalEntries() {
+    this.setState({ isLoading: true });
 
-  getFromLocalStorage(key) {
-    let value = {};
     try {
-      value = AsyncStorage.getItem(key) || {};
-    } catch (e) {
-      console.log(e);
-    }
-    return value;
-  }
-
-  storeData = async () => {
-    try {
-      const journalEntry = {
-        title: "Title 1",
-        body: "Journal Entry Body 1",
-        date: "November 12, 2019",
-        id: uuid.v4()
-      };
-      const existingEntries = await AsyncStorage.getItem("journalEntries");
-      let entries = JSON.parse(existingEntries);
-      if (!entries) {
-        entries = [];
-      }
-      entries.push(journalEntry);
-
-      await AsyncStorage.setItem("journalEntries", JSON.stringify(entries))
-        .then(() => {
-          console.log(entries);
-          this.setState({
-            journalEntries: entries
-          });
-          console.log("new journal entry saved to storage");
+      AsyncStorage.getItem("journalEntries")
+        .then(response => {
+          if (response !== null) {
+            return response;
+          } else {
+            console.log("no journal entries found");
+          }
         })
-        .catch(e => {
-          console.log(e);
+        .then(entries => {
+          this.setState({ journalEntries: entries });
+          this.setState({ isLoading: false });
         });
     } catch (e) {
-      // saving error
+      this.setState({
+        isLoading: false
+      });
+      console.log(e.message);
     }
-  };
+  }
 
   render() {
+    console.log(this.state.journalEntries);
     return (
       <SafeAreaView style={styles.container}>
-        <FlatList
-          data={this.state.journalEntries}
-          renderItem={({ item }) => (
-            <JournalEntry
-              id={item.id}
-              title={item.title}
-              body={item.body}
-              date={item.date}
+        <ScrollView
+          contentContainerStyle={{
+            flexDirection: "row",
+            alignSelf: "flex-end",
+            flexGrow: 1
+          }}
+          refreshControl={
+            <RefreshControl
+              refreshing={this.state.isLoading}
+              onRefresh={() => this.retrieveJournalEntries()}
+            />
+          }
+        >
+          {this.state.journalEntries !== undefined && (
+            <FlatList
+              data={JSON.parse(this.state.journalEntries)}
+              renderItem={({ item }) => (
+                <JournalEntry
+                  id={item.id}
+                  title={item.title}
+                  body={item.body}
+                  date={item.date}
+                  image={item.image}
+                />
+              )}
+              keyExtractor={item => item.id}
+              inverted={true}
             />
           )}
-          keyExtractor={item => item.id}
-        />
+        </ScrollView>
+
         <View style={styles.button}>
           <TouchableOpacity>
             <Icon
