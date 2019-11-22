@@ -7,6 +7,7 @@ import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
+import JournalEntry from "./JournalEntry";
 
 const MainNavigator = createStackNavigator({
   LandingPage: {
@@ -35,6 +36,9 @@ const MainNavigator = createStackNavigator({
   },
   NewJournalEntry: {
     screen: NewJournalEntry
+  },
+  JournalEntry: {
+    screen: JournalEntry
   }
 });
 

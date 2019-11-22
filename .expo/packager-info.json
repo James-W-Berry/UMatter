@@ -3,7 +3,7 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": null,
-  "packagerNgrokUrl": null,
-  "ngrokPid": null
+  "expoServerNgrokUrl": "https://db-evb.james-berry.umatter.exp.direct",
+  "packagerNgrokUrl": "https://packager.db-evb.james-berry.umatter.exp.direct",
+  "ngrokPid": 86105
 }

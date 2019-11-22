@@ -19,7 +19,7 @@ function JournalEntry({ id, title, body, image, date }) {
   console.log(`creating card for entry ${id}`);
   return (
     <View key={id}>
-      <TouchableOpacity onPress={() => onSelect(id)}>
+      <TouchableOpacity onPress={() => onSelect(id, title, body, image, date)}>
         <Card title={title} image={require("../assets/umatter_banner.png")}>
           <Text style={{ marginBottom: 10 }}>{body}</Text>
           <Text style={{ marginBottom: 10 }}>{date}</Text>
@@ -29,8 +29,8 @@ function JournalEntry({ id, title, body, image, date }) {
   );
 }
 
-function onSelect(id) {
-  console.log(`journal entry ${id}`);
+function onSelect(id, title, body, image, date) {
+  NavigationService.navigate("JournalEntry", { id, title, body, image, date });
 }
 
 class JournalEntries extends Component {
