@@ -5,7 +5,6 @@ import * as ImagePicker from "expo-image-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
-import uuid from "uuid";
 
 class JournalEntry extends Component {
   constructor(props) {
@@ -14,11 +13,10 @@ class JournalEntry extends Component {
     let { params } = props.navigation.state;
 
     this.state = {
-      title: params.title,
-      body: params.body,
-      date: params.date,
-      image: params.image,
-      id: params.id,
+      key: params.key,
+      title: params.data.title,
+      body: params.data.body,
+      date: params.data.date,
 
       isLoading: false
     };
@@ -26,31 +24,16 @@ class JournalEntry extends Component {
 
   componentDidMount() {
     this.getPermissionAsync();
-    // this.retrieveJournalEntry(this.props.id);
   }
 
   deleteEntry = async () => {
     try {
-      AsyncStorage.getItem("journalEntries")
-        .then(response => {
-          if (response !== null) {
-            return JSON.parse(response);
-          } else {
-            console.log("no journal entries found");
-          }
-        })
-        .then(entries => {
-          entries.forEach(function(entry) {
-            if (entry.id == this.state.id) {
-              try {
-                delete entries[entry];
-              } catch (e) {
-                console.log(e.message);
-              }
-            }
-          });
-          this.props.navigation.goBack(null);
-        });
+      console.log(`deleting entry ${this.state.key}`);
+      AsyncStorage.removeItem(this.state.key).then(response => {
+        console.log(response);
+        this.props.navigation.state.params.onGoBack();
+        this.props.navigation.goBack(null);
+      });
     } catch (e) {
       console.log(e.message);
     }
@@ -82,35 +65,28 @@ class JournalEntry extends Component {
 
   storeData = async () => {
     if (this.state.body !== null) {
-      try {
-        console.log("trying to save new journal entry to local storage");
-        const journalEntry = {
-          title: this.state.title,
-          body: this.state.body,
-          image: this.state.image,
-          date: new Date(),
-          id: this.state.id
-        };
-        const existingEntries = await AsyncStorage.getItem("journalEntries");
-        let entries = JSON.parse(existingEntries);
-        if (!entries) {
-          entries = [];
-        }
-        entries.push(journalEntry);
+      console.log("trying to save new journal entry to local storage");
 
-        await AsyncStorage.setItem("journalEntries", JSON.stringify(entries))
-          .then(() => {
-            console.log(entries);
-            console.log("new journal entry saved to storage");
-            this.props.navigation.goBack(null);
-          })
-          .catch(e => {
-            console.log(e);
-          });
-      } catch (e) {
-        // saving error
-        console.log(e.message);
-      }
+      const journalEntry = {
+        title: this.state.title,
+        body: this.state.body,
+        image: this.state.image,
+        date: new Date()
+      };
+
+      //this.deleteEntry()
+
+      await AsyncStorage.setItem(this.state.key, JSON.stringify(journalEntry))
+        .then(() => {
+          console.log(
+            `updated journal entry ${this.state.key} saved to storage`
+          );
+          this.props.navigation.state.params.onGoBack();
+          this.props.navigation.goBack(null);
+        })
+        .catch(e => {
+          console.log(e);
+        });
     } else {
       alert("please enter a reflection");
     }
@@ -118,8 +94,6 @@ class JournalEntry extends Component {
 
   render() {
     let { image } = this.state;
-    console.log(this.state);
-
     return (
       <View style={styles.container}>
         <View style={styles.banner}>

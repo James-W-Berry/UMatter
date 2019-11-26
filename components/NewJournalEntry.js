@@ -50,31 +50,26 @@ class NewJournalEntry extends Component {
     if (this.state.entry !== null) {
       try {
         console.log("trying to save new journal entry to local storage");
+
+        const entryId = uuid.v4();
+
         const journalEntry = {
           title: this.state.title,
           body: this.state.entry,
           image: this.state.image,
-          date: new Date(),
-          id: uuid.v4()
+          date: new Date()
         };
-        const existingEntries = await AsyncStorage.getItem("journalEntries");
-        let entries = JSON.parse(existingEntries);
-        if (!entries) {
-          entries = [];
-        }
-        entries.push(journalEntry);
 
-        await AsyncStorage.setItem("journalEntries", JSON.stringify(entries))
+        await AsyncStorage.setItem(entryId, JSON.stringify(journalEntry))
           .then(() => {
-            console.log(entries);
-            console.log("new journal entry saved to storage");
+            console.log(`new journal entry ${entryId} saved to storage`);
+            this.props.navigation.state.params.onGoBack();
             this.props.navigation.goBack(null);
           })
           .catch(e => {
             console.log(e);
           });
       } catch (e) {
-        // saving error
         console.log(e.message);
       }
     } else {
@@ -121,7 +116,10 @@ class NewJournalEntry extends Component {
           <Button
             buttonStyle={styles.cancelButton}
             title={"Cancel"}
-            onPress={() => this.props.navigation.goBack(null)}
+            onPress={() => {
+              this.props.navigation.state.params.onGoBack();
+              this.props.navigation.goBack(null);
+            }}
           />
 
           <Button

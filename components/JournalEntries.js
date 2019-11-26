@@ -15,31 +15,13 @@ import _ from "lodash";
 import { Icon } from "react-native-elements";
 import NavigationService from "./NavigationService";
 
-function JournalEntry({ id, title, body, image, date }) {
-  console.log(`creating card for entry ${id}`);
-  return (
-    <View key={id}>
-      <TouchableOpacity onPress={() => onSelect(id, title, body, image, date)}>
-        <Card title={title} image={require("../assets/umatter_banner.png")}>
-          <Text style={{ marginBottom: 10 }}>{body}</Text>
-          <Text style={{ marginBottom: 10 }}>{date}</Text>
-        </Card>
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-function onSelect(id, title, body, image, date) {
-  NavigationService.navigate("JournalEntry", { id, title, body, image, date });
-}
-
 class JournalEntries extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      journalEntries: null,
-      isLoading: false
+      isLoading: false,
+      journalEntries: []
     };
   }
 
@@ -48,22 +30,51 @@ class JournalEntries extends Component {
     this.retrieveJournalEntries();
   }
 
+  createJournalEntry(item) {
+    if (item !== undefined) {
+      const key = item[0];
+      const data = JSON.parse(item[1]);
+
+      return (
+        <View key={key}>
+          <TouchableOpacity onPress={() => this.onSelect(item)}>
+            <Card
+              title={data.title}
+              image={require("../assets/umatter_banner.png")}
+            >
+              <Text style={{ marginBottom: 10 }}>{data.body}</Text>
+              <Text style={{ marginBottom: 10 }}>{data.date}</Text>
+            </Card>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  }
+
+  onSelect(item) {
+    const key = item[0];
+    const data = JSON.parse(item[1]);
+    NavigationService.navigate("JournalEntry", {
+      key,
+      data,
+      onGoBack: () => {
+        this.retrieveJournalEntries();
+      }
+    });
+  }
+
   retrieveJournalEntries() {
     this.setState({ isLoading: true });
 
     try {
-      AsyncStorage.getItem("journalEntries")
-        .then(response => {
-          if (response !== null) {
-            return response;
-          } else {
-            console.log("no journal entries found");
-          }
-        })
-        .then(entries => {
-          this.setState({ journalEntries: entries });
-          this.setState({ isLoading: false });
+      AsyncStorage.getAllKeys().then(async keys => {
+        await AsyncStorage.multiGet(keys).then(result => {
+          this.setState({ journalEntries: result });
         });
+      });
+
+      this.setState({ isLoading: false });
     } catch (e) {
       this.setState({
         isLoading: false
@@ -73,7 +84,6 @@ class JournalEntries extends Component {
   }
 
   render() {
-    console.log(this.state.journalEntries);
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView
@@ -89,22 +99,11 @@ class JournalEntries extends Component {
             />
           }
         >
-          {this.state.journalEntries !== undefined && (
-            <FlatList
-              data={JSON.parse(this.state.journalEntries)}
-              renderItem={({ item }) => (
-                <JournalEntry
-                  id={item.id}
-                  title={item.title}
-                  body={item.body}
-                  date={item.date}
-                  image={item.image}
-                />
-              )}
-              keyExtractor={item => item.id}
-              inverted={true}
-            />
-          )}
+          <FlatList
+            data={this.state.journalEntries}
+            renderItem={({ item }) => this.createJournalEntry(item)}
+            keyExtractor={index => index.toString()}
+          />
         </ScrollView>
 
         <View style={styles.button}>
@@ -115,7 +114,13 @@ class JournalEntries extends Component {
               type="material-community"
               color="#44CADD"
               reverse={true}
-              onPress={() => NavigationService.navigate("NewJournalEntry")}
+              onPress={() =>
+                NavigationService.navigate("NewJournalEntry", {
+                  onGoBack: () => {
+                    this.retrieveJournalEntries();
+                  }
+                })
+              }
             />
           </TouchableOpacity>
         </View>
