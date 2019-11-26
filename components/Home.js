@@ -24,7 +24,12 @@ class Home extends Component {
         color: "#44CADD"
       },
       { key: "moments", title: "Moments", icon: "clock", color: "#44CADD" },
-      { key: "gold", title: "Gold", icon: "treasure-chest", color: "#44CADD" },
+      {
+        key: "gold",
+        title: "Smile File",
+        icon: "treasure-chest",
+        color: "#44CADD"
+      },
       { key: "badges", title: "Badges", icon: "trophy-award", color: "#44CADD" }
     ]
   };
