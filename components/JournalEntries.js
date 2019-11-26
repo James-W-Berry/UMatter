@@ -8,7 +8,8 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
-  RefreshControl
+  RefreshControl,
+  Platform
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
@@ -131,7 +132,8 @@ class JournalEntries extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    paddingTop: Platform.OS === "android" ? 25 : 0
   },
   button: {
     elevation: 10,

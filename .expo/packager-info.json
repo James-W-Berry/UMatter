@@ -1,9 +1,9 @@
 {
   "devToolsPort": 19002,
-  "expoServerPort": null,
-  "packagerPort": null,
-  "packagerPid": null,
+  "expoServerPort": 19000,
+  "packagerPort": 19001,
+  "packagerPid": 63398,
   "expoServerNgrokUrl": "https://db-evb.james-berry.umatter.exp.direct",
   "packagerNgrokUrl": "https://packager.db-evb.james-berry.umatter.exp.direct",
-  "ngrokPid": 50178
+  "ngrokPid": 63411
 }

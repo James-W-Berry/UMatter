@@ -1,14 +1,17 @@
 import React, { Component } from "react";
 import { BottomNavigation, Text } from "react-native-paper";
 import JournalEntries from "./JournalEntries";
+import Moments from "./Moments";
+import SmileFile from "./SmileFile";
+import Badges from "./Badges";
 
 const JournalEntriesRoute = () => <JournalEntries />;
 
-const MomentsRoute = () => <Text>Moments</Text>;
+const MomentsRoute = () => <Moments />;
 
-const GoldRoute = () => <Text>Gold</Text>;
+const GoldRoute = () => <SmileFile />;
 
-const BadgesRoute = () => <Text>Badges</Text>;
+const BadgesRoute = () => <Badges />;
 
 class Home extends Component {
   state = {
