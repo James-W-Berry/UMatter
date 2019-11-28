@@ -27,7 +27,6 @@ class JournalEntries extends Component {
   }
 
   componentDidMount() {
-    //AsyncStorage.clear();
     this.retrieveJournalEntries();
   }
 
@@ -39,12 +38,18 @@ class JournalEntries extends Component {
       return (
         <View key={key}>
           <TouchableOpacity onPress={() => this.onSelect(item)}>
-            <Card
-              title={data.title}
-              image={require("../assets/umatter_banner.png")}
-            >
-              <Text style={{ marginBottom: 10 }}>{data.body}</Text>
-              <Text style={{ marginBottom: 10 }}>{data.date}</Text>
+            <Card image={{ uri: data.image }}>
+              <Text style={styles.title}>{data.title}</Text>
+              <Text
+                style={styles.caption}
+                numberOfLines={2}
+                style={{
+                  marginBottom: 10
+                }}
+              >
+                {data.body}
+              </Text>
+              <Text style={styles.date}>{data.date}</Text>
             </Card>
           </TouchableOpacity>
         </View>
@@ -139,6 +144,15 @@ const styles = StyleSheet.create({
     elevation: 10,
     alignSelf: "flex-end",
     padding: 8
+  },
+  title: {
+    fontSize: 20
+  },
+  caption: {
+    fontSize: 8
+  },
+  date: {
+    fontSize: 12
   }
 });
 

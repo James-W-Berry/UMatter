@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { BottomNavigation, Text } from "react-native-paper";
+import { BottomNavigation } from "react-native-paper";
 import JournalEntries from "./JournalEntries";
 import Moments from "./Moments";
 import SmileFile from "./SmileFile";

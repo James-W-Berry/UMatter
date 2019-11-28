@@ -1,6 +1,13 @@
-import { Image, View, StyleSheet, AsyncStorage, TextInput } from "react-native";
+import {
+  Image,
+  Text,
+  Button,
+  View,
+  StyleSheet,
+  AsyncStorage,
+  TextInput
+} from "react-native";
 import React, { Component } from "react";
-import { Button } from "react-native-elements";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from "expo-constants";
@@ -17,13 +24,35 @@ class JournalEntry extends Component {
       title: params.data.title,
       body: params.data.body,
       date: params.data.date,
-
+      image: params.data.image,
       isLoading: false
     };
   }
 
+  static navigationOptions = ({ navigation }) => {
+    const { state } = navigation;
+    return {
+      headerRight: (
+        <View style={styles.headerRightContainer}>
+          <Text
+            style={styles.delete}
+            onPress={() => state.params.handleDelete()}
+          >
+            Delete
+          </Text>
+
+          <Text style={styles.save} onPress={() => state.params.handleSave()}>
+            Save
+          </Text>
+        </View>
+      )
+    };
+  };
+
   componentDidMount() {
     this.getPermissionAsync();
+    this.props.navigation.setParams({ handleSave: this.storeData });
+    this.props.navigation.setParams({ handleDelete: this.deleteEntry });
   }
 
   deleteEntry = async () => {
@@ -59,7 +88,7 @@ class JournalEntry extends Component {
     console.log(result);
 
     if (!result.cancelled) {
-      //this.setState({ image: result.uri });
+      this.setState({ image: result.uri });
     }
   };
 
@@ -71,11 +100,8 @@ class JournalEntry extends Component {
         title: this.state.title,
         body: this.state.body,
         image: this.state.image,
-        date: new Date()
+        date: this.state.date
       };
-
-      //this.deleteEntry()
-
       await AsyncStorage.setItem(this.state.key, JSON.stringify(journalEntry))
         .then(() => {
           console.log(
@@ -94,55 +120,67 @@ class JournalEntry extends Component {
 
   render() {
     let { image } = this.state;
-    return (
-      <View style={styles.container}>
-        <View style={styles.banner}>
-          <TouchableOpacity onPress={this.pickImage}>
+
+    if (image == null) {
+      return (
+        <View style={styles.container}>
+          <View style={styles.banner}>
+            <Button title="Pick an image" onPress={this.pickImage} />
+          </View>
+
+          <View style={styles.headingContainer}>
+            <TextInput
+              style={styles.headingInput}
+              onChangeText={text => this.setState({ title: text })}
+              value={this.state.title}
+              numberOfLines={1}
+            />
+          </View>
+
+          <View style={styles.entryContainer}>
+            <TextInput
+              style={styles.entryInput}
+              onChangeText={text => this.setState({ body: text })}
+              value={this.state.body}
+              multiline={true}
+            />
+          </View>
+        </View>
+      );
+    } else {
+      return (
+        <View style={styles.container}>
+          <View style={styles.banner}>
             {image && (
-              <Image
-                source={require("../assets/journal.png")}
-                style={styles.image}
-              />
+              <TouchableOpacity
+                style={styles.imageContainer}
+                onPress={this.pickImage}
+              >
+                <Image source={{ uri: image }} style={styles.image} />
+              </TouchableOpacity>
             )}
-          </TouchableOpacity>
-        </View>
+          </View>
 
-        <View style={styles.heading}>
-          <TextInput
-            onChangeText={text => this.setState({ title: text })}
-            value={this.state.title}
-            numberOfLines={1}
-          />
-        </View>
+          <View style={styles.headingContainer}>
+            <TextInput
+              style={styles.headingInput}
+              onChangeText={text => this.setState({ title: text })}
+              value={this.state.title}
+              numberOfLines={1}
+            />
+          </View>
 
-        <View style={styles.entry}>
-          <TextInput
-            onChangeText={text => this.setState({ body: text })}
-            value={this.state.body}
-            multiline={true}
-          />
+          <View style={styles.entryContainer}>
+            <TextInput
+              style={styles.entryInput}
+              onChangeText={text => this.setState({ body: text })}
+              value={this.state.body}
+              multiline={true}
+            />
+          </View>
         </View>
-
-        <View style={styles.buttonContainer}>
-          <Button
-            buttonStyle={styles.deleteButton}
-            title={"Delete"}
-            onPress={this.deleteEntry}
-          />
-          <Button
-            buttonStyle={styles.cancelButton}
-            title={"Cancel"}
-            onPress={() => this.props.navigation.goBack(null)}
-          />
-
-          <Button
-            buttonStyle={styles.saveButton}
-            title={"Save"}
-            onPress={this.storeData}
-          />
-        </View>
-      </View>
-    );
+      );
+    }
   }
 }
 
@@ -152,44 +190,56 @@ const styles = StyleSheet.create({
     flexDirection: "column"
   },
   banner: {
-    backgroundColor: "#a5a5a5",
     flex: 4,
     justifyContent: "center"
   },
+  imageContainer: {
+    height: "100%",
+    width: "100%"
+  },
   image: {
-    alignSelf: "center",
-    width: 150,
-    height: 150
+    flex: 1,
+    width: "100%",
+    height: "100%"
   },
-  buttonContainer: {
-    backgroundColor: "#123543",
-    flex: 2,
-    flexDirection: "row"
+  headerRightContainer: {
+    flex: 1,
+    flexDirection: "row",
+    padding: 8
   },
-  saveButton: {
+  save: {
+    color: "rgba(0, 122, 255,1.0)",
+    fontSize: 18,
     marginRight: 8,
-    backgroundColor: "#44CADD"
+    backgroundColor: "rgba(0, 0, 0, 0.0)"
   },
-  cancelButton: {
-    marginRight: 8,
-    backgroundColor: "#fff4"
+  delete: {
+    color: "red",
+    fontSize: 18,
+    marginRight: 20,
+    backgroundColor: "rgba(0, 0, 0, 0.0)"
   },
-  deleteButton: {
-    alignSelf: "flex-start",
-    marginLeft: 8,
-    backgroundColor: "#fff4"
-  },
-  heading: {
+  headingContainer: {
     backgroundColor: "#f7f7f8",
     flex: 1,
+    paddingHorizontal: 8,
     fontSize: 30
   },
-  entry: {
+  headingInput: {
+    flex: 1,
+    fontSize: 24
+  },
+  entryContainer: {
     backgroundColor: "#ededed",
     flex: 8,
     fontSize: 16,
     borderColor: "gray",
-    borderWidth: 1
+    borderWidth: 1,
+    paddingHorizontal: 8
+  },
+  entryInput: {
+    flex: 1,
+    fontSize: 16
   }
 });
 
