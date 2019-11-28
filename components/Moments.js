@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import { Text, StyleSheet, SafeAreaView, View } from "react-native";
 import { Calendar } from "react-native-calendars";
+import { Button } from "react-native-elements";
 
 export default class Moments extends Component {
   constructor(props) {
@@ -25,8 +26,9 @@ export default class Moments extends Component {
           }}
         />
         <Text style={styles.text}>Your Moments</Text>
+
         <View style={styles.moment}>
-          <Text>Details Here</Text>
+          <Button style={styles.startButton} title="Start"></Button>
         </View>
       </SafeAreaView>
     );
@@ -57,7 +59,12 @@ const styles = StyleSheet.create({
     flex: 1
   },
   moment: {
-    backgroundColor: "#bababa",
-    flex: 1
+    flex: 1,
+    justifyContent: "center"
+  },
+  startButton: {
+    alignSelf: "center",
+    width: "70%",
+    backgroundColor: "#00A9A5"
   }
 });

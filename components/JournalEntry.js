@@ -125,12 +125,18 @@ class JournalEntry extends Component {
       return (
         <View style={styles.container}>
           <View style={styles.banner}>
-            <Button title="Pick an image" onPress={this.pickImage} />
+            <TouchableOpacity
+              style={styles.imageContainer}
+              onPress={this.pickImage}
+            >
+              <Text style={styles.pickImageText}> Pick an image</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.headingContainer}>
             <TextInput
               style={styles.headingInput}
+              placeholder="Title"
               onChangeText={text => this.setState({ title: text })}
               value={this.state.title}
               numberOfLines={1}
@@ -140,6 +146,7 @@ class JournalEntry extends Component {
           <View style={styles.entryContainer}>
             <TextInput
               style={styles.entryInput}
+              placeholder="Your entry"
               onChangeText={text => this.setState({ body: text })}
               value={this.state.body}
               multiline={true}
@@ -164,6 +171,7 @@ class JournalEntry extends Component {
           <View style={styles.headingContainer}>
             <TextInput
               style={styles.headingInput}
+              placeholder="Title"
               onChangeText={text => this.setState({ title: text })}
               value={this.state.title}
               numberOfLines={1}
@@ -173,6 +181,7 @@ class JournalEntry extends Component {
           <View style={styles.entryContainer}>
             <TextInput
               style={styles.entryInput}
+              placeholder="Your entry"
               onChangeText={text => this.setState({ body: text })}
               value={this.state.body}
               multiline={true}
@@ -191,11 +200,18 @@ const styles = StyleSheet.create({
   },
   banner: {
     flex: 4,
-    justifyContent: "center"
+    justifyContent: "center",
+    backgroundColor: "#d1d1d1"
+  },
+  pickImageText: {
+    fontSize: 16,
+    color: "rgba(0, 122, 255,1.0)",
+    alignSelf: "center"
   },
   imageContainer: {
     height: "100%",
-    width: "100%"
+    width: "100%",
+    justifyContent: "center"
   },
   image: {
     flex: 1,

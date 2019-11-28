@@ -3,7 +3,7 @@
   "expoServerPort": null,
   "packagerPort": null,
   "packagerPid": null,
-  "expoServerNgrokUrl": "https://db-evb.friendship-circle.umatter.exp.direct",
-  "packagerNgrokUrl": "https://packager.db-evb.friendship-circle.umatter.exp.direct",
-  "ngrokPid": 27067
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null
 }

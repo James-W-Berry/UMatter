@@ -13,7 +13,6 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import uuid from "uuid";
-import Icon from "react-native-vector-icons/FontAwesome";
 
 class NewJournalEntry extends Component {
   constructor(props) {
@@ -23,7 +22,6 @@ class NewJournalEntry extends Component {
   static navigationOptions = ({ navigation }) => {
     const { state } = navigation;
     return {
-      headerTitle: "New Entry",
       headerRight: (
         <Text style={styles.save} onPress={() => state.params.handleSave()}>
           Save
@@ -107,14 +105,18 @@ class NewJournalEntry extends Component {
       return (
         <View style={styles.container}>
           <View style={styles.banner}>
-            <Button title="Pick an image" onPress={this.pickImage} />
+            <TouchableOpacity
+              style={styles.imageContainer}
+              onPress={this.pickImage}
+            >
+              <Text style={styles.pickImageText}> Pick an image</Text>
+            </TouchableOpacity>
           </View>
 
           <View style={styles.headingContainer}>
             <TextInput
               style={styles.headingInput}
-              autoFocus={true}
-              placeholder="Journal Entry Title"
+              placeholder="Title"
               onChangeText={text => this.setState({ title: text })}
               value={this.state.title}
               numberOfLines={1}
@@ -124,7 +126,7 @@ class NewJournalEntry extends Component {
           <View style={styles.entryContainer}>
             <TextInput
               style={styles.entryInput}
-              placeholder="Your entry..."
+              placeholder="Your entry"
               onChangeText={text => this.setState({ entry: text })}
               value={this.state.entry}
               multiline={true}
@@ -149,8 +151,7 @@ class NewJournalEntry extends Component {
           <View style={styles.headingContainer}>
             <TextInput
               style={styles.headingInput}
-              autoFocus={true}
-              placeholder="Journal Entry Title"
+              placeholder="Title"
               onChangeText={text => this.setState({ title: text })}
               value={this.state.title}
               numberOfLines={1}
@@ -160,7 +161,7 @@ class NewJournalEntry extends Component {
           <View style={styles.entryContainer}>
             <TextInput
               style={styles.entryInput}
-              placeholder="Your entry..."
+              placeholder="Your entry"
               onChangeText={text => this.setState({ entry: text })}
               value={this.state.entry}
               multiline={true}
@@ -182,13 +183,15 @@ const styles = StyleSheet.create({
     flex: 4,
     justifyContent: "center"
   },
-  imageButton: {
-    flex: 1,
+  pickImageText: {
+    fontSize: 16,
+    color: "rgba(0, 122, 255,1.0)",
     alignSelf: "center"
   },
   imageContainer: {
     height: "100%",
-    width: "100%"
+    width: "100%",
+    justifyContent: "center"
   },
   image: {
     flex: 1,
@@ -212,7 +215,8 @@ const styles = StyleSheet.create({
   },
   headingInput: {
     flex: 1,
-    fontSize: 24
+    fontSize: 24,
+    margin: 8
   },
   entryContainer: {
     backgroundColor: "#ededed",
@@ -223,7 +227,8 @@ const styles = StyleSheet.create({
   },
   entryInput: {
     flex: 1,
-    fontSize: 16
+    fontSize: 16,
+    margin: 8
   }
 });
 

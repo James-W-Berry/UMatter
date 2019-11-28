@@ -42,7 +42,7 @@ class JournalEntries extends Component {
               <Text style={styles.title}>{data.title}</Text>
               <Text
                 style={styles.caption}
-                numberOfLines={2}
+                numberOfLines={1}
                 style={{
                   marginBottom: 10
                 }}
@@ -142,8 +142,10 @@ const styles = StyleSheet.create({
   },
   button: {
     elevation: 10,
+    position: "absolute",
     alignSelf: "flex-end",
-    padding: 8
+    padding: 20,
+    bottom: 0
   },
   title: {
     fontSize: 20
