@@ -3,6 +3,6 @@
   "lanType": "ip",
   "dev": true,
   "minify": false,
-  "urlRandomness": "db-evb",
+  "urlRandomness": "wb-tf6",
   "https": false
 }

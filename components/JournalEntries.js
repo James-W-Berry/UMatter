@@ -22,7 +22,8 @@ class JournalEntries extends Component {
 
     this.state = {
       isLoading: false,
-      journalEntries: []
+      journalEntries: [],
+      debugMode: true
     };
   }
 
@@ -75,7 +76,16 @@ class JournalEntries extends Component {
 
     try {
       AsyncStorage.getAllKeys().then(async keys => {
-        await AsyncStorage.multiGet(keys).then(result => {
+        let journalEntryKeys = [];
+
+        for (const key in keys) {
+          console.log(`${key}: ${keys[key]}`);
+          if (keys[key].includes("journal")) {
+            journalEntryKeys.push(keys[key]);
+          }
+        }
+
+        await AsyncStorage.multiGet(journalEntryKeys).then(result => {
           this.setState({ journalEntries: result });
         });
       });
@@ -89,9 +99,23 @@ class JournalEntries extends Component {
     }
   }
 
+  clearStorage() {
+    AsyncStorage.clear();
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        {this.state.debugMode && (
+          <TouchableOpacity
+            style={styles.clearButton}
+            title="Clear Storage"
+            onPress={this.clearStorage}
+          >
+            <Text> Clear Storage</Text>
+          </TouchableOpacity>
+        )}
+
         <ScrollView
           contentContainerStyle={{
             flexDirection: "row",
@@ -155,6 +179,11 @@ const styles = StyleSheet.create({
   },
   date: {
     fontSize: 12
+  },
+  clearButton: {
+    alignSelf: "center",
+    width: "30%",
+    backgroundColor: "#00A9A5"
   }
 });
 

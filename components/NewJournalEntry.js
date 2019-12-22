@@ -70,9 +70,10 @@ class NewJournalEntry extends Component {
       try {
         console.log("trying to save new journal entry to local storage");
 
-        const entryId = uuid.v4();
         var options = { year: "numeric", month: "long", day: "numeric" };
         date = new Date().toLocaleDateString("en-US", options);
+
+        const entryId = `journal_${date}_${uuid.v4()}`;
 
         const journalEntry = {
           title: this.state.title,
