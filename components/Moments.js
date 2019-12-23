@@ -126,6 +126,7 @@ export default class Moments extends Component {
             deleteMoment={this.deleteMoment}
             retrieveMoments={this.retrieveMoments}
             updateMoment={this.updateMoment}
+            selectedDate={this.state.selected}
           />
         </View>
       );
@@ -156,11 +157,6 @@ export default class Moments extends Component {
             <View style={styles.container}>
               <View style={styles.momentSummary}>
                 <ScrollView
-                  contentContainerStyle={{
-                    flexDirection: "row",
-                    alignSelf: "flex-end",
-                    flexGrow: 1
-                  }}
                   refreshControl={
                     <RefreshControl
                       refreshing={this.state.isLoading}
@@ -261,8 +257,8 @@ const styles = StyleSheet.create({
     flex: 1,
     borderTopWidth: 1,
     borderBottomWidth: 1,
-    borderColor: "#eee"
-    //height: 350
+    borderColor: "#eee",
+    height: 350
   },
   text: {
     textAlign: "center",
@@ -274,8 +270,7 @@ const styles = StyleSheet.create({
   },
   momentSummary: {
     flex: 3,
-    justifyContent: "center",
-    backgroundColor: "#bbb"
+    alignItems: "center"
   },
   momentScheduler: {
     flex: 1,
@@ -312,8 +307,7 @@ const styles = StyleSheet.create({
   momentWidget: {
     flexDirection: "row",
     alignSelf: "center",
-    width: "100%",
-    backgroundColor: "#bbb"
+    width: "100%"
   },
   deleteMomentButton: {
     position: "absolute",

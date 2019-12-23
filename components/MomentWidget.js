@@ -1,12 +1,20 @@
 import React, { Component } from "react";
-import { Text, StyleSheet, View, TouchableOpacity } from "react-native";
+import {
+  Text,
+  TextInput,
+  StyleSheet,
+  View,
+  TouchableOpacity
+} from "react-native";
 import DateTimePicker from "react-native-modal-datetime-picker";
+import { Icon } from "react-native-elements";
 
 export default class MomentWidget extends Component {
   constructor(props) {
     super(props);
     this.state = {
       moment: this.props.moment,
+      title: this.props.moment.title,
       isDateTimePickerVisible: false,
       time: "7am"
     };
@@ -29,57 +37,50 @@ export default class MomentWidget extends Component {
   };
   render() {
     return (
-      <View style={styles.momentWidget}>
-        <Text>{this.state.moment.title} @ </Text>
-        <TouchableOpacity
-          onPress={this.showDateTimePicker}
-          title="Show datetime picker!"
-        >
-          <Text>{this.state.time}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.deleteMomentButton}
-          title="Delete"
-          onPress={() => this.props.deleteMoment(this.state.moment.id)}
-        >
-          <Text>Delete</Text>
-        </TouchableOpacity>
+      <View style={{ justifyContent: "center", flexGrow: 1, width: "100%" }}>
+        <View style={styles.momentWidget}>
+          <View style={{ flexDirection: "column" }}>
+            <TouchableOpacity
+              onPress={this.showDateTimePicker}
+              title="Show datetime picker!"
+            >
+              <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+            </TouchableOpacity>
 
-        <DateTimePicker
-          isVisible={this.state.isDateTimePickerVisible}
-          onConfirm={this.handleDatePicked}
-          onCancel={this.hideDateTimePicker}
-          mode="time"
-        />
+            <TextInput
+              style={styles.entryInput}
+              placeholder="Your entry"
+              onChangeText={text => this.setState({ title: text })}
+              value={this.state.title}
+            />
+          </View>
+
+          <DateTimePicker
+            isVisible={this.state.isDateTimePickerVisible}
+            onConfirm={this.handleDatePicked}
+            onCancel={this.hideDateTimePicker}
+            mode="time"
+          />
+
+          <View style={styles.deleteMomentButton}>
+            <TouchableOpacity
+              title="Delete"
+              onPress={() => this.props.deleteMoment(this.state.moment.id)}
+            >
+              <Icon name="delete" type="material-community" color="#efefef" />
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  calendar: {
-    flex: 1,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#eee"
-    //height: 350
-  },
   text: {
     textAlign: "center",
     borderColor: "#bbb",
     padding: 10
-  },
-  container: {
-    flex: 1
-  },
-  momentSummary: {
-    flex: 3,
-    justifyContent: "center",
-    backgroundColor: "#bbb"
-  },
-  momentScheduler: {
-    flex: 1,
-    justifyContent: "center"
   },
   newMoment: {
     backgroundColor: "#f7f7f8",
@@ -89,47 +90,21 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 8
   },
-  startButton: {
-    alignSelf: "center",
-    width: "70%",
-    backgroundColor: "#00A9A5"
-  },
-  saveButton: {
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    width: "30%",
-    backgroundColor: "#00A9A5"
-  },
-  cancelButton: {
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    top: 15,
-    width: "30%",
-    backgroundColor: "#00A9A5"
-  },
   momentWidget: {
     flexDirection: "row",
+    width: "75%",
     alignSelf: "center",
-    width: "100%",
-    backgroundColor: "#bbb"
+    backgroundColor: "#bbb",
+    padding: 15,
+    marginBottom: 5,
+    borderRadius: 10
   },
   deleteMomentButton: {
+    display: "flex",
+    justifyContent: "flex-end",
     position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    width: "30%",
-    backgroundColor: "#afaf"
-  },
-  unscheduledMoment: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#bbb"
-  },
-  actionButtonIcon: {
-    fontSize: 20,
-    height: 22,
-    color: "white"
+    right: 15,
+    alignSelf: "center",
+    width: "10%"
   }
 });
