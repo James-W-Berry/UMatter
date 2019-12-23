@@ -1,11 +1,12 @@
 import {
   Image,
   Text,
-  Button,
   View,
   StyleSheet,
   AsyncStorage,
-  TextInput
+  TextInput,
+  SafeAreaView,
+  KeyboardAvoidingView
 } from "react-native";
 import React, { Component } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -123,71 +124,83 @@ class JournalEntry extends Component {
 
     if (image == null) {
       return (
-        <View style={styles.container}>
-          <View style={styles.banner}>
-            <TouchableOpacity
-              style={styles.imageContainer}
-              onPress={this.pickImage}
-            >
-              <Text style={styles.pickImageText}> Pick an image</Text>
-            </TouchableOpacity>
-          </View>
-
-          <View style={styles.headingContainer}>
-            <TextInput
-              style={styles.headingInput}
-              placeholder="Title"
-              onChangeText={text => this.setState({ title: text })}
-              value={this.state.title}
-              numberOfLines={1}
-            />
-          </View>
-
-          <View style={styles.entryContainer}>
-            <TextInput
-              style={styles.entryInput}
-              placeholder="Your entry"
-              onChangeText={text => this.setState({ body: text })}
-              value={this.state.body}
-              multiline={true}
-            />
-          </View>
-        </View>
-      );
-    } else {
-      return (
-        <View style={styles.container}>
-          <View style={styles.banner}>
-            {image && (
+        <SafeAreaView style={styles.container}>
+          <KeyboardAvoidingView
+            style={styles.container}
+            behavior="padding"
+            enabled
+          >
+            <View style={styles.banner}>
               <TouchableOpacity
                 style={styles.imageContainer}
                 onPress={this.pickImage}
               >
-                <Image source={{ uri: image }} style={styles.image} />
+                <Text style={styles.pickImageText}> Pick an image</Text>
               </TouchableOpacity>
-            )}
-          </View>
+            </View>
 
-          <View style={styles.headingContainer}>
-            <TextInput
-              style={styles.headingInput}
-              placeholder="Title"
-              onChangeText={text => this.setState({ title: text })}
-              value={this.state.title}
-              numberOfLines={1}
-            />
-          </View>
+            <View style={styles.headingContainer}>
+              <TextInput
+                style={styles.headingInput}
+                placeholder="Title"
+                onChangeText={text => this.setState({ title: text })}
+                value={this.state.title}
+                numberOfLines={1}
+              />
+            </View>
 
-          <View style={styles.entryContainer}>
-            <TextInput
-              style={styles.entryInput}
-              placeholder="Your entry"
-              onChangeText={text => this.setState({ body: text })}
-              value={this.state.body}
-              multiline={true}
-            />
-          </View>
-        </View>
+            <View style={styles.entryContainer}>
+              <TextInput
+                style={styles.entryInput}
+                placeholder="Your entry"
+                onChangeText={text => this.setState({ body: text })}
+                value={this.state.body}
+                multiline={true}
+              />
+            </View>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
+      );
+    } else {
+      return (
+        <SafeAreaView style={styles.container}>
+          <KeyboardAvoidingView
+            style={styles.container}
+            behavior="padding"
+            enabled
+          >
+            <View style={styles.banner}>
+              {image && (
+                <TouchableOpacity
+                  style={styles.imageContainer}
+                  onPress={this.pickImage}
+                >
+                  <Image source={{ uri: image }} style={styles.image} />
+                </TouchableOpacity>
+              )}
+            </View>
+
+            <View style={styles.headingContainer}>
+              <TextInput
+                style={styles.headingInput}
+                placeholder="Title"
+                onChangeText={text => this.setState({ title: text })}
+                value={this.state.title}
+                numberOfLines={1}
+              />
+            </View>
+
+            <View style={styles.entryContainer}>
+              <TextInput
+                style={styles.entryInput}
+                placeholder="Your entry"
+                onChangeText={text => this.setState({ body: text })}
+                value={this.state.body}
+                multiline={true}
+              />
+            </View>
+          </KeyboardAvoidingView>
+        </SafeAreaView>
       );
     }
   }

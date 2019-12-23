@@ -79,7 +79,6 @@ class JournalEntries extends Component {
         let journalEntryKeys = [];
 
         for (const key in keys) {
-          console.log(`${key}: ${keys[key]}`);
           if (keys[key].includes("journal")) {
             journalEntryKeys.push(keys[key]);
           }
@@ -165,6 +164,7 @@ const styles = StyleSheet.create({
     paddingTop: Platform.OS === "android" ? 25 : 0
   },
   button: {
+    color: "white",
     elevation: 10,
     position: "absolute",
     alignSelf: "flex-end",

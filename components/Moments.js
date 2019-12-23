@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import {
   Text,
   TextInput,
+  Button,
   StyleSheet,
   SafeAreaView,
   View,
@@ -9,18 +10,40 @@ import {
   RefreshControl,
   FlatList,
   AsyncStorage,
-  TouchableOpacity
+  TouchableOpacity,
+  KeyboardAvoidingView
 } from "react-native";
 import { Calendar } from "react-native-calendars";
-import { Button } from "react-native-elements";
 import uuid from "uuid";
+import { Icon } from "react-native-elements";
+import ActionButton from "react-native-action-button";
+import DateTimePicker from "react-native-modal-datetime-picker";
+import MomentWidget from "./MomentWidget";
 
 export default class Moments extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      moments: [],
+      isDateTimePickerVisible: false
+    };
+
     this.onDayPress = this.onDayPress.bind(this);
   }
+  showDateTimePicker = () => {
+    console.log(this.state.isDateTimePickerVisible);
+    this.setState({ isDateTimePickerVisible: true });
+    console.log(this.state.isDateTimePickerVisible);
+  };
+
+  hideDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: false });
+  };
+
+  handleDatePicked = date => {
+    console.log("A date has been picked: ", date);
+    this.hideDateTimePicker();
+  };
 
   saveNewMoment = async () => {
     try {
@@ -38,10 +61,24 @@ export default class Moments extends Component {
       await AsyncStorage.setItem(momentId, JSON.stringify(newMoment))
         .then(() => {
           console.log(`new scheduled moment ${momentId} saved to storage`);
+          this.setState({ showScheduler: false });
+          this.retrieveMoments(this.state.selected);
         })
         .catch(e => {
           console.log(e);
         });
+    } catch (e) {
+      console.log(e.message);
+    }
+  };
+
+  deleteMoment = async key => {
+    try {
+      console.log(`deleting moment ${key}`);
+      AsyncStorage.removeItem(key).then(response => {
+        console.log(response);
+        this.retrieveMoments(this.state.selected);
+      });
     } catch (e) {
       console.log(e.message);
     }
@@ -74,34 +111,22 @@ export default class Moments extends Component {
     }
   }
 
-  deleteMoment = async key => {
-    try {
-      console.log(`deleting moment ${key}`);
-      AsyncStorage.removeItem(key).then(response => {
-        console.log(response);
-        this.retrieveMoments(this.state.selected);
-      });
-    } catch (e) {
-      console.log(e.message);
-    }
+  updateMoment = async key => {
+    //TODO: update saved moment with new time/title
   };
 
   createMomentWidget(item) {
     if (item !== undefined) {
       const key = item[0];
       const data = JSON.parse(item[1]);
-      console.log(data);
       return (
         <View key={key} style={styles.momentWidget}>
-          <Text>{data.title} @ </Text>
-          <Text>{data.time}</Text>
-          <TouchableOpacity
-            style={styles.deleteMomentButton}
-            title="Delete"
-            onPress={() => this.deleteMoment(data.id)}
-          >
-            <Text>Delete</Text>
-          </TouchableOpacity>
+          <MomentWidget
+            moment={data}
+            deleteMoment={this.deleteMoment}
+            retrieveMoments={this.retrieveMoments}
+            updateMoment={this.updateMoment}
+          />
         </View>
       );
     }
@@ -111,66 +136,114 @@ export default class Moments extends Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
-        <Calendar
-          onDayPress={this.onDayPress}
-          style={styles.calendar}
-          hideExtraDays
-          markedDates={{
-            [this.state.selected]: {
-              selected: true,
-              disableTouchEvent: true
-            }
-          }}
-        />
-        {this.state.selected && (
-          <View style={styles.container}>
-            <View style={styles.momentSummary}>
-              <ScrollView
-                contentContainerStyle={{
-                  flexDirection: "row",
-                  alignSelf: "flex-end",
-                  flexGrow: 1
-                }}
-                refreshControl={
-                  <RefreshControl
-                    refreshing={this.state.isLoading}
-                    onRefresh={() => this.retrieveMoments(this.state.selected)}
-                  />
-                }
-              >
-                <FlatList
-                  data={this.state.moments}
-                  renderItem={({ item }) => this.createMomentWidget(item)}
-                  keyExtractor={index => index.toString()}
-                />
-              </ScrollView>
-            </View>
-
-            <View style={styles.momentScheduler}>
-              <View style={styles.newMoment}>
-                <TextInput
-                  style={styles.newMomentTitle}
-                  placeholder="Title"
-                  onChangeText={text => this.setState({ newMomentTitle: text })}
-                  value={this.state.title}
-                  numberOfLines={1}
-                />
-
-                <TouchableOpacity
-                  style={styles.saveButton}
-                  title="Save"
-                  onPress={this.saveNewMoment}
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior="padding"
+          enabled
+        >
+          <Calendar
+            onDayPress={this.onDayPress}
+            style={styles.calendar}
+            hideExtraDays
+            markedDates={{
+              [this.state.selected]: {
+                selected: true,
+                disableTouchEvent: true
+              }
+            }}
+          />
+          {this.state.selected && (
+            <View style={styles.container}>
+              <View style={styles.momentSummary}>
+                <ScrollView
+                  contentContainerStyle={{
+                    flexDirection: "row",
+                    alignSelf: "flex-end",
+                    flexGrow: 1
+                  }}
+                  refreshControl={
+                    <RefreshControl
+                      refreshing={this.state.isLoading}
+                      onRefresh={() =>
+                        this.retrieveMoments(this.state.selected)
+                      }
+                    />
+                  }
                 >
-                  <Text>Save</Text>
-                </TouchableOpacity>
+                  <FlatList
+                    data={this.state.moments}
+                    renderItem={({ item }) => this.createMomentWidget(item)}
+                    keyExtractor={index => index.toString()}
+                  />
+                </ScrollView>
+              </View>
+              {this.state.showScheduler && (
+                <View style={styles.momentScheduler}>
+                  <View style={styles.newMoment}>
+                    <TextInput
+                      style={styles.newMomentTitle}
+                      placeholder="Moment title"
+                      autoFocus={true}
+                      onChangeText={text =>
+                        this.setState({ newMomentTitle: text })
+                      }
+                      value={this.state.title}
+                      numberOfLines={1}
+                    />
+
+                    <TouchableOpacity
+                      style={styles.saveButton}
+                      title="Save"
+                      onPress={this.saveNewMoment}
+                    >
+                      <Text>Save</Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.cancelButton}
+                      title="Cancel"
+                      onPress={() => this.setState({ showScheduler: false })}
+                    >
+                      <Text>Cancel</Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              <View style={{ flex: 1, backgroundColor: "#f3f3f3" }}>
+                {/* Rest of the app comes ABOVE the action button component !*/}
+                <ActionButton buttonColor="#44CADD">
+                  <ActionButton.Item
+                    buttonColor="#44CADD"
+                    title="Schedule Moment"
+                    onPress={() => this.setState({ showScheduler: true })}
+                  >
+                    <Icon
+                      style={styles.actionButtonIcon}
+                      name="plus"
+                      type="material-community"
+                      color="#44CADD"
+                      reverse={true}
+                    />
+                  </ActionButton.Item>
+                  <ActionButton.Item
+                    buttonColor="#44CADD"
+                    title="Start Moment Now"
+                    onPress={() => {}}
+                  >
+                    <Icon
+                      style={styles.actionButtonIcon}
+                      name="plus"
+                      type="material-community"
+                      color="#44CADD"
+                      reverse={true}
+                    />
+                  </ActionButton.Item>
+                </ActionButton>
               </View>
             </View>
-
-            <View style={styles.unscheduledMoment}>
-              <Button style={styles.startButton} title="Start"></Button>
-            </View>
-          </View>
-        )}
+          )}
+        </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
@@ -185,11 +258,11 @@ export default class Moments extends Component {
 
 const styles = StyleSheet.create({
   calendar: {
+    flex: 1,
     borderTopWidth: 1,
-    paddingTop: 5,
     borderBottomWidth: 1,
-    borderColor: "#eee",
-    height: 350
+    borderColor: "#eee"
+    //height: 350
   },
   text: {
     textAlign: "center",
@@ -200,7 +273,7 @@ const styles = StyleSheet.create({
     flex: 1
   },
   momentSummary: {
-    flex: 1,
+    flex: 3,
     justifyContent: "center",
     backgroundColor: "#bbb"
   },
@@ -228,6 +301,14 @@ const styles = StyleSheet.create({
     width: "30%",
     backgroundColor: "#00A9A5"
   },
+  cancelButton: {
+    position: "absolute",
+    alignSelf: "flex-end",
+    right: 0,
+    top: 15,
+    width: "30%",
+    backgroundColor: "#00A9A5"
+  },
   momentWidget: {
     flexDirection: "row",
     alignSelf: "center",
@@ -245,5 +326,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     backgroundColor: "#bbb"
+  },
+  actionButtonIcon: {
+    fontSize: 20,
+    height: 22,
+    color: "white"
   }
 });
