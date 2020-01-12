@@ -4,7 +4,8 @@ import {
   TextInput,
   StyleSheet,
   View,
-  TouchableOpacity
+  TouchableOpacity,
+  AsyncStorage
 } from "react-native";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { Icon } from "react-native-elements";
@@ -15,8 +16,10 @@ export default class MomentWidget extends Component {
     this.state = {
       moment: this.props.moment,
       title: this.props.moment.title,
+      time: this.props.moment.time,
+      id: this.props.id,
       isDateTimePickerVisible: false,
-      time: "7am"
+      showMomentEditor: false
     };
   }
 
@@ -35,26 +38,58 @@ export default class MomentWidget extends Component {
     this.setState({ time: time.split(" ")[4] });
     this.hideDateTimePicker();
   };
+
+  editMoment = () => {
+    if (this.state.showMomentEditor) {
+      this.storeData();
+    }
+    this.setState({
+      showMomentEditor: !this.state.showMomentEditor
+    });
+  };
+
+  storeData = async () => {
+    if (this.state.time !== null) {
+      console.log("trying to update moment entry to local storage: ");
+
+      const updatedMoment = {
+        title: this.state.title,
+        time: this.state.time,
+        id: this.state.id
+      };
+
+      console.log(updatedMoment);
+
+      if (this.state.id !== undefined) {
+        await AsyncStorage.setItem(this.state.id, JSON.stringify(updatedMoment))
+          .then(() => {
+            console.log(`updated moment ${this.state.id} saved to storage`);
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
+    } else {
+      alert("please enter a time for your reflection");
+    }
+  };
+
   render() {
+    console.log(this.state.time);
     return (
-      <View style={{ justifyContent: "center", flexGrow: 1, width: "100%" }}>
-        <View style={styles.momentWidget}>
+      <View
+        style={{
+          justifyContent: "center",
+          width: "100%"
+        }}
+      >
+        <TouchableOpacity style={styles.momentWidget} onPress={this.editMoment}>
           <View style={{ flexDirection: "column" }}>
-            <TouchableOpacity
-              onPress={this.showDateTimePicker}
-              title="Show datetime picker!"
-            >
-              <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
-            </TouchableOpacity>
-
-            <TextInput
-              style={styles.entryInput}
-              placeholder="Your entry"
-              onChangeText={text => this.setState({ title: text })}
-              value={this.state.title}
-            />
+            <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+            <Text style={{ fontSize: 16 }} placeholder="Your entry">
+              {this.state.title}
+            </Text>
           </View>
-
           <DateTimePicker
             isVisible={this.state.isDateTimePickerVisible}
             onConfirm={this.handleDatePicked}
@@ -67,10 +102,47 @@ export default class MomentWidget extends Component {
               title="Delete"
               onPress={() => this.props.deleteMoment(this.state.moment.id)}
             >
-              <Icon name="delete" type="material-community" color="#efefef" />
+              <Icon name="delete" type="material-community" color="#bbb" />
             </TouchableOpacity>
           </View>
-        </View>
+
+          <View style={styles.expandMomentButton}>
+            <TouchableOpacity title="Edit" onPress={this.editMoment}>
+              {this.state.showMomentEditor && (
+                <Icon
+                  name="chevron-up"
+                  type="material-community"
+                  color="#bbb"
+                />
+              )}
+              {!this.state.showMomentEditor && (
+                <Icon
+                  name="chevron-down"
+                  type="material-community"
+                  color="#bbb"
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+
+        {this.state.showMomentEditor && (
+          <View style={styles.editMomentWidget}>
+            <TouchableOpacity
+              onPress={this.showDateTimePicker}
+              title="Show datetime picker"
+            >
+              <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+            </TouchableOpacity>
+
+            <TextInput
+              style={styles.entryInput}
+              placeholder="Your entry"
+              onChangeText={text => this.setState({ title: text })}
+              value={this.state.title}
+            />
+          </View>
+        )}
       </View>
     );
   }
@@ -82,10 +154,6 @@ const styles = StyleSheet.create({
     borderColor: "#bbb",
     padding: 10
   },
-  newMoment: {
-    backgroundColor: "#f7f7f8",
-    flex: 1
-  },
   newMomentTitle: {
     flex: 1,
     margin: 8
@@ -94,16 +162,31 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     width: "75%",
     alignSelf: "center",
-    backgroundColor: "#bbb",
+    backgroundColor: "#efefef",
     padding: 15,
-    marginBottom: 5,
+    marginTop: 5,
     borderRadius: 10
+  },
+  editMomentWidget: {
+    flexDirection: "column",
+    width: "75%",
+    alignSelf: "center",
+    backgroundColor: "#efefef",
+    padding: 15
   },
   deleteMomentButton: {
     display: "flex",
     justifyContent: "flex-end",
     position: "absolute",
     right: 15,
+    alignSelf: "center",
+    width: "10%"
+  },
+  expandMomentButton: {
+    display: "flex",
+    justifyContent: "flex-end",
+    position: "absolute",
+    right: "20%",
     alignSelf: "center",
     width: "10%"
   }

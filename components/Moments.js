@@ -17,7 +17,6 @@ import { Calendar } from "react-native-calendars";
 import uuid from "uuid";
 import { Icon } from "react-native-elements";
 import ActionButton from "react-native-action-button";
-import DateTimePicker from "react-native-modal-datetime-picker";
 import MomentWidget from "./MomentWidget";
 
 export default class Moments extends Component {
@@ -25,7 +24,8 @@ export default class Moments extends Component {
     super(props);
     this.state = {
       moments: [],
-      isDateTimePickerVisible: false
+      isDateTimePickerVisible: false,
+      showActionButton: true
     };
 
     this.onDayPress = this.onDayPress.bind(this);
@@ -53,14 +53,15 @@ export default class Moments extends Component {
       const newMoment = {
         title: this.state.newMomentTitle,
         date: this.state.selected,
-        time: "09:00",
+        time: "08:00 am",
         series: "",
         id: momentId
       };
 
       await AsyncStorage.setItem(momentId, JSON.stringify(newMoment))
         .then(() => {
-          console.log(`new scheduled moment ${momentId} saved to storage`);
+          console.log(`new scheduled moment saved to storage: `);
+          console.log(newMoment);
           this.setState({ showScheduler: false });
           this.retrieveMoments(this.state.selected);
         })
@@ -70,6 +71,7 @@ export default class Moments extends Component {
     } catch (e) {
       console.log(e.message);
     }
+    this.setState({ showActionButton: true });
   };
 
   deleteMoment = async key => {
@@ -111,21 +113,18 @@ export default class Moments extends Component {
     }
   }
 
-  updateMoment = async key => {
-    //TODO: update saved moment with new time/title
-  };
-
   createMomentWidget(item) {
     if (item !== undefined) {
       const key = item[0];
       const data = JSON.parse(item[1]);
+      console.log(data);
       return (
         <View key={key} style={styles.momentWidget}>
           <MomentWidget
+            id={key}
             moment={data}
             deleteMoment={this.deleteMoment}
             retrieveMoments={this.retrieveMoments}
-            updateMoment={this.updateMoment}
             selectedDate={this.state.selected}
           />
         </View>
@@ -188,55 +187,76 @@ export default class Moments extends Component {
                     />
 
                     <TouchableOpacity
-                      style={styles.saveButton}
                       title="Save"
                       onPress={this.saveNewMoment}
+                      style={styles.saveButton}
                     >
-                      <Text>Save</Text>
+                      <Icon
+                        name="check"
+                        type="material-community"
+                        color="#02D351"
+                        height="90%"
+                      />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                      style={styles.cancelButton}
                       title="Cancel"
-                      onPress={() => this.setState({ showScheduler: false })}
+                      onPress={() =>
+                        this.setState({
+                          showScheduler: false,
+                          showActionButton: true
+                        })
+                      }
+                      style={styles.cancelButton}
                     >
-                      <Text>Cancel</Text>
+                      <Icon
+                        name="cancel"
+                        type="material-community"
+                        color="#F12E17"
+                        height="90%"
+                      />
                     </TouchableOpacity>
                   </View>
                 </View>
               )}
 
-              <View style={{ flex: 1, backgroundColor: "#f3f3f3" }}>
-                {/* Rest of the app comes ABOVE the action button component !*/}
-                <ActionButton buttonColor="#44CADD">
-                  <ActionButton.Item
-                    buttonColor="#44CADD"
-                    title="Schedule Moment"
-                    onPress={() => this.setState({ showScheduler: true })}
-                  >
-                    <Icon
-                      style={styles.actionButtonIcon}
-                      name="plus"
-                      type="material-community"
-                      color="#44CADD"
-                      reverse={true}
-                    />
-                  </ActionButton.Item>
-                  <ActionButton.Item
-                    buttonColor="#44CADD"
-                    title="Start Moment Now"
-                    onPress={() => {}}
-                  >
-                    <Icon
-                      style={styles.actionButtonIcon}
-                      name="plus"
-                      type="material-community"
-                      color="#44CADD"
-                      reverse={true}
-                    />
-                  </ActionButton.Item>
-                </ActionButton>
-              </View>
+              {this.state.showActionButton && (
+                <View style={{ flex: 1 }}>
+                  <ActionButton buttonColor="#44CADD">
+                    <ActionButton.Item
+                      buttonColor="#44CADD"
+                      title="Schedule Moment"
+                      onPress={() =>
+                        this.setState({
+                          showScheduler: true,
+                          showActionButton: false
+                        })
+                      }
+                    >
+                      <Icon
+                        style={styles.actionButtonIcon}
+                        name="plus"
+                        type="material-community"
+                        color="#44CADD"
+                        reverse={true}
+                      />
+                    </ActionButton.Item>
+                    <ActionButton.Item
+                      buttonColor="#44CADD"
+                      title="Start Moment Now"
+                      onPress={() => {}}
+                    >
+                      <Icon
+                        style={styles.actionButtonIcon}
+                        name="plus"
+                        type="material-community"
+                        color="#44CADD"
+                        reverse={true}
+                      />
+                    </ActionButton.Item>
+                  </ActionButton>
+                </View>
+              )}
             </View>
           )}
         </KeyboardAvoidingView>
@@ -273,12 +293,13 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   momentScheduler: {
-    flex: 1,
-    justifyContent: "center"
+    flex: 2,
+    justifyContent: "center",
+    backgroundColor: "#efefef"
   },
   newMoment: {
-    backgroundColor: "#f7f7f8",
-    flex: 1
+    flex: 1,
+    flexDirection: "row"
   },
   newMomentTitle: {
     flex: 1,
@@ -290,19 +311,22 @@ const styles = StyleSheet.create({
     backgroundColor: "#00A9A5"
   },
   saveButton: {
+    display: "flex",
+    justifyContent: "flex-end",
     position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    width: "30%",
-    backgroundColor: "#00A9A5"
+    right: "25%",
+    alignSelf: "center",
+    width: "20%",
+    height: "90%"
   },
   cancelButton: {
+    display: "flex",
+    justifyContent: "flex-end",
     position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    top: 15,
-    width: "30%",
-    backgroundColor: "#00A9A5"
+    right: "5%",
+    alignSelf: "center",
+    width: "20%",
+    height: "90%"
   },
   momentWidget: {
     flexDirection: "row",

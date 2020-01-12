@@ -8,6 +8,7 @@
     "eject": "expo eject"
   },
   "dependencies": {
+    "@material-ui/core": "^4.8.3",
     "@react-native-community/datetimepicker": "^2.1.0",
     "expo": "^35.0.0",
     "expo-image-picker": "~7.0.0",
