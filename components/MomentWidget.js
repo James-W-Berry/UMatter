@@ -9,6 +9,9 @@ import {
 } from "react-native";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { Icon } from "react-native-elements";
+import { Notifications } from "expo";
+import * as Permissions from "expo-permissions";
+import Constants from "expo-constants";
 
 export default class MomentWidget extends Component {
   constructor(props) {
@@ -22,6 +25,40 @@ export default class MomentWidget extends Component {
       showMomentEditor: false
     };
   }
+
+  scheduleMomentNotification = () => {
+    const localnotification = {
+      title: "UMatter",
+      body: "Start your moment now!",
+      data: {
+        message: this.state.title
+      },
+      android: {
+        sound: true
+      },
+      ios: {
+        sound: true
+      }
+    };
+
+    var nowInSecs = new Date();
+    let nowDayInSecs = Math.floor(nowInSecs / 8.64e7) * 8.64e7;
+    console.log(`current day in ms: ${nowDayInSecs}`);
+    let momentTime = this.state.time.split(":");
+    let momentMs = momentTime[0] * 60 * 60 * 1000 + momentTime[1] * 60 * 1000;
+    console.log(`moment time from day in ms: ${momentMs}`);
+
+    let momentTimeInEpochSecs = nowDayInSecs + momentMs + 5 * 60 * 60 * 1000;
+    console.log(`moment time epoch: ${momentTimeInEpochSecs}`);
+
+    const schedulingOptions = {
+      time: momentTimeInEpochSecs
+    };
+    Notifications.scheduleLocalNotificationAsync(
+      localnotification,
+      schedulingOptions
+    );
+  };
 
   showDateTimePicker = () => {
     console.log(this.state.isDateTimePickerVisible);
@@ -42,6 +79,7 @@ export default class MomentWidget extends Component {
   editMoment = () => {
     if (this.state.showMomentEditor) {
       this.storeData();
+      this.scheduleMomentNotification();
     }
     this.setState({
       showMomentEditor: !this.state.showMomentEditor
@@ -75,7 +113,6 @@ export default class MomentWidget extends Component {
   };
 
   render() {
-    console.log(this.state.time);
     return (
       <View
         style={{

@@ -1,8 +1,6 @@
 import React, { Component } from "react";
 import {
-  Text,
   TextInput,
-  Button,
   StyleSheet,
   SafeAreaView,
   View,
@@ -11,13 +9,17 @@ import {
   FlatList,
   AsyncStorage,
   TouchableOpacity,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Alert
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import uuid from "uuid";
 import { Icon } from "react-native-elements";
 import ActionButton from "react-native-action-button";
 import MomentWidget from "./MomentWidget";
+import { Notifications } from "expo";
+import Constants from "expo-constants";
+import * as Permissions from "expo-permissions";
 
 export default class Moments extends Component {
   constructor(props) {
@@ -30,6 +32,34 @@ export default class Moments extends Component {
 
     this.onDayPress = this.onDayPress.bind(this);
   }
+
+  componentDidMount() {
+    this.getPermissionAsync();
+    this.listenForNotifications();
+  }
+
+  getPermissionAsync = async () => {
+    if (Constants.platform.ios) {
+      let { status } = await Permissions.askAsync(
+        Permissions.USER_FACING_NOTIFICATIONS
+      );
+      console.log(status);
+      if (status !== "granted") {
+        alert("Sorry, we need notification permissions to make this work!");
+      }
+    }
+  };
+
+  listenForNotifications = () => {
+    Notifications.addListener(this._handleNotification);
+  };
+
+  _handleNotification = ({ origin, data, remote }) => {
+    message = data.message;
+    let info = `Start your moment!`;
+    Alert.alert(`UMatter - ${message}`, info);
+  };
+
   showDateTimePicker = () => {
     console.log(this.state.isDateTimePickerVisible);
     this.setState({ isDateTimePickerVisible: true });
