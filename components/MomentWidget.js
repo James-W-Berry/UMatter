@@ -5,13 +5,13 @@ import {
   StyleSheet,
   View,
   TouchableOpacity,
-  AsyncStorage
+  AsyncStorage,
+  KeyboardAvoidingView,
+  SafeAreaView
 } from "react-native";
 import DateTimePicker from "react-native-modal-datetime-picker";
 import { Icon } from "react-native-elements";
 import { Notifications } from "expo";
-import * as Permissions from "expo-permissions";
-import Constants from "expo-constants";
 
 export default class MomentWidget extends Component {
   constructor(props) {
@@ -114,73 +114,96 @@ export default class MomentWidget extends Component {
 
   render() {
     return (
-      <View
+      <SafeAreaView
         style={{
           justifyContent: "center",
           width: "100%"
         }}
       >
-        <TouchableOpacity style={styles.momentWidget} onPress={this.editMoment}>
-          <View style={{ flexDirection: "column" }}>
-            <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
-            <Text style={{ fontSize: 16 }} placeholder="Your entry">
-              {this.state.title}
-            </Text>
-          </View>
-          <DateTimePicker
-            isVisible={this.state.isDateTimePickerVisible}
-            onConfirm={this.handleDatePicked}
-            onCancel={this.hideDateTimePicker}
-            mode="time"
-          />
-
-          <View style={styles.deleteMomentButton}>
+        <KeyboardAvoidingView
+          behavior="padding"
+          enabled
+          style={{
+            justifyContent: "center",
+            width: "100%"
+          }}
+          style={{
+            justifyContent: "center",
+            width: "100%"
+          }}
+        >
+          <View
+            style={{
+              justifyContent: "center",
+              width: "100%"
+            }}
+          >
             <TouchableOpacity
-              title="Delete"
-              onPress={() => this.props.deleteMoment(this.state.moment.id)}
+              style={styles.momentWidget}
+              onPress={this.editMoment}
             >
-              <Icon name="delete" type="material-community" color="#bbb" />
-            </TouchableOpacity>
-          </View>
+              <View style={{ flexDirection: "column" }}>
+                <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+                <Text style={{ fontSize: 16 }} placeholder="Your entry">
+                  {this.state.title}
+                </Text>
+              </View>
+              <DateTimePicker
+                isVisible={this.state.isDateTimePickerVisible}
+                onConfirm={this.handleDatePicked}
+                onCancel={this.hideDateTimePicker}
+                mode="time"
+              />
 
-          <View style={styles.expandMomentButton}>
-            <TouchableOpacity title="Edit" onPress={this.editMoment}>
-              {this.state.showMomentEditor && (
-                <Icon
-                  name="chevron-up"
-                  type="material-community"
-                  color="#bbb"
+              <View style={styles.deleteMomentButton}>
+                <TouchableOpacity
+                  title="Delete"
+                  onPress={() => this.props.deleteMoment(this.state.moment.id)}
+                >
+                  <Icon name="delete" type="material-community" color="#bbb" />
+                </TouchableOpacity>
+              </View>
+
+              <View style={styles.expandMomentButton}>
+                <TouchableOpacity title="Edit" onPress={this.editMoment}>
+                  {this.state.showMomentEditor && (
+                    <Icon
+                      name="chevron-up"
+                      type="material-community"
+                      color="#bbb"
+                    />
+                  )}
+                  {!this.state.showMomentEditor && (
+                    <Icon
+                      name="chevron-down"
+                      type="material-community"
+                      color="#bbb"
+                    />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+
+            {this.state.showMomentEditor && (
+              <View style={styles.editMomentWidget}>
+                <TouchableOpacity
+                  onPress={this.showDateTimePicker}
+                  title="Show datetime picker"
+                >
+                  <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+                </TouchableOpacity>
+
+                <TextInput
+                  style={styles.entryInput}
+                  placeholder="Your entry"
+                  onChangeText={text => this.setState({ title: text })}
+                  value={this.state.title}
                 />
-              )}
-              {!this.state.showMomentEditor && (
-                <Icon
-                  name="chevron-down"
-                  type="material-community"
-                  color="#bbb"
-                />
-              )}
-            </TouchableOpacity>
+              </View>
+            )}
           </View>
-        </TouchableOpacity>
-
-        {this.state.showMomentEditor && (
-          <View style={styles.editMomentWidget}>
-            <TouchableOpacity
-              onPress={this.showDateTimePicker}
-              title="Show datetime picker"
-            >
-              <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
-            </TouchableOpacity>
-
-            <TextInput
-              style={styles.entryInput}
-              placeholder="Your entry"
-              onChangeText={text => this.setState({ title: text })}
-              value={this.state.title}
-            />
-          </View>
-        )}
-      </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
     );
   }
 }

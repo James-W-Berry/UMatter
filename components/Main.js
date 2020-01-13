@@ -8,6 +8,7 @@ import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
+import MomentVisualization from "./MomentVisualization";
 
 const MainNavigator = createStackNavigator({
   LandingPage: {
@@ -39,6 +40,9 @@ const MainNavigator = createStackNavigator({
   },
   JournalEntry: {
     screen: JournalEntry
+  },
+  MomentVisualization: {
+    screen: MomentVisualization
   }
 });
 

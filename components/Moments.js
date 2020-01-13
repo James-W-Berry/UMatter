@@ -20,6 +20,7 @@ import MomentWidget from "./MomentWidget";
 import { Notifications } from "expo";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
+import NavigationService from "./NavigationService";
 
 export default class Moments extends Component {
   constructor(props) {
@@ -57,7 +58,22 @@ export default class Moments extends Component {
   _handleNotification = ({ origin, data, remote }) => {
     message = data.message;
     let info = `Start your moment!`;
-    Alert.alert(`UMatter - ${message}`, info);
+    Alert.alert(
+      `UMatter - ${message}`,
+      info,
+      [
+        {
+          text: "Begin",
+          onPress: () => NavigationService.navigate("MomentVisualization")
+        },
+        {
+          text: "Cancel",
+          onPress: () => console.log("Cancel Pressed"),
+          style: "cancel"
+        }
+      ],
+      { cancelable: false }
+    );
   };
 
   showDateTimePicker = () => {
@@ -274,7 +290,11 @@ export default class Moments extends Component {
                     <ActionButton.Item
                       buttonColor="#44CADD"
                       title="Start Moment Now"
-                      onPress={() => {}}
+                      onPress={() =>
+                        NavigationService.navigate("MomentVisualization", {
+                          onGoBack: () => {}
+                        })
+                      }
                     >
                       <Icon
                         style={styles.actionButtonIcon}
