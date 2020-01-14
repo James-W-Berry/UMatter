@@ -40,15 +40,15 @@ export default class Moments extends Component {
   }
 
   getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
-      let { status } = await Permissions.askAsync(
-        Permissions.USER_FACING_NOTIFICATIONS
-      );
-      console.log(status);
-      if (status !== "granted") {
-        alert("Sorry, we need notification permissions to make this work!");
-      }
+    // if (Constants.platform.ios) {
+    let { status } = await Permissions.askAsync(
+      Permissions.USER_FACING_NOTIFICATIONS
+    );
+    console.log(status);
+    if (status !== "granted") {
+      alert("Sorry, we need notification permissions to make this work!");
     }
+    // }
   };
 
   listenForNotifications = () => {
@@ -64,7 +64,10 @@ export default class Moments extends Component {
       [
         {
           text: "Begin",
-          onPress: () => NavigationService.navigate("MomentVisualization")
+          onPress: () => {
+            console.log("starting moment");
+            NavigationService.navigate("MomentVisualization");
+          }
         },
         {
           text: "Cancel",
@@ -267,45 +270,42 @@ export default class Moments extends Component {
               )}
 
               {this.state.showActionButton && (
-                <View style={{ flex: 1 }}>
-                  <ActionButton buttonColor="#44CADD">
-                    <ActionButton.Item
-                      buttonColor="#44CADD"
-                      title="Schedule Moment"
-                      onPress={() =>
-                        this.setState({
-                          showScheduler: true,
-                          showActionButton: false
-                        })
-                      }
-                    >
-                      <Icon
-                        style={styles.actionButtonIcon}
-                        name="plus"
-                        type="material-community"
-                        color="#44CADD"
-                        reverse={true}
-                      />
-                    </ActionButton.Item>
-                    <ActionButton.Item
-                      buttonColor="#44CADD"
-                      title="Start Moment Now"
-                      onPress={() =>
-                        NavigationService.navigate("MomentVisualization", {
-                          onGoBack: () => {}
-                        })
-                      }
-                    >
-                      <Icon
-                        style={styles.actionButtonIcon}
-                        name="plus"
-                        type="material-community"
-                        color="#44CADD"
-                        reverse={true}
-                      />
-                    </ActionButton.Item>
-                  </ActionButton>
-                </View>
+                <ActionButton buttonColor="#44CADD">
+                  <ActionButton.Item
+                    buttonColor="#44CADD"
+                    title="Schedule Moment"
+                    onPress={() =>
+                      this.setState({
+                        showScheduler: true,
+                        showActionButton: false
+                      })
+                    }
+                  >
+                    <Icon
+                      style={styles.actionButtonIcon}
+                      name="plus"
+                      type="material-community"
+                      color="#44CADD"
+                      reverse={true}
+                    />
+                  </ActionButton.Item>
+                  <ActionButton.Item
+                    buttonColor="#44CADD"
+                    title="Start Moment Now"
+                    onPress={() => {
+                      console.log("starting moment");
+                      NavigationService.navigate("MomentVisualization");
+                    }}
+                  >
+                    <Icon
+                      style={styles.actionButtonIcon}
+                      name="plus"
+                      type="material-community"
+                      color="#44CADD"
+                      reverse={true}
+                    />
+                  </ActionButton.Item>
+                </ActionButton>
               )}
             </View>
           )}
