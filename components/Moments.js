@@ -2,7 +2,6 @@ import React, { Component } from "react";
 import {
   TextInput,
   StyleSheet,
-  SafeAreaView,
   View,
   ScrollView,
   RefreshControl,
@@ -18,9 +17,9 @@ import { Icon } from "react-native-elements";
 import ActionButton from "react-native-action-button";
 import MomentWidget from "./MomentWidget";
 import { Notifications } from "expo";
-import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default class Moments extends Component {
   constructor(props) {
@@ -40,7 +39,6 @@ export default class Moments extends Component {
   }
 
   getPermissionAsync = async () => {
-    // if (Constants.platform.ios) {
     let { status } = await Permissions.askAsync(
       Permissions.USER_FACING_NOTIFICATIONS
     );
@@ -48,7 +46,6 @@ export default class Moments extends Component {
     if (status !== "granted") {
       alert("Sorry, we need notification permissions to make this work!");
     }
-    // }
   };
 
   listenForNotifications = () => {

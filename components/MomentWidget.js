@@ -41,18 +41,12 @@ export default class MomentWidget extends Component {
       }
     };
 
-    var nowInSecs = new Date();
-    let nowDayInSecs = Math.floor(nowInSecs / 8.64e7) * 8.64e7;
-    console.log(`current day in ms: ${nowDayInSecs}`);
-    let momentTime = this.state.time.split(":");
-    let momentMs = momentTime[0] * 60 * 60 * 1000 + momentTime[1] * 60 * 1000;
-    console.log(`moment time from day in ms: ${momentMs}`);
-
-    let momentTimeInEpochSecs = nowDayInSecs + momentMs + 5 * 60 * 60 * 1000;
-    console.log(`moment time epoch: ${momentTimeInEpochSecs}`);
+    var coeff = 1000 * 60 * 1;
+    var momentTime = new Date(Math.floor(this.state.time / coeff) * coeff);
+    console.log(`floored time: ${momentTime}`);
 
     const schedulingOptions = {
-      time: momentTimeInEpochSecs
+      time: momentTime
     };
     Notifications.scheduleLocalNotificationAsync(
       localnotification,
@@ -71,8 +65,7 @@ export default class MomentWidget extends Component {
   };
 
   handleDatePicked = date => {
-    let time = date.toString();
-    this.setState({ time: time.split(" ")[4] });
+    this.setState({ time: date });
     this.hideDateTimePicker();
   };
 
@@ -113,6 +106,13 @@ export default class MomentWidget extends Component {
   };
 
   render() {
+    let date = new Date(this.state.time);
+    let amOrPm = date.getHours() >= 12 ? "pm" : "am";
+    let hours = date.getHours() % 12 || 12;
+    let minutes =
+      date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes();
+    let formattedDate = hours + ":" + minutes + " " + amOrPm;
+
     return (
       <SafeAreaView
         style={{
@@ -143,7 +143,7 @@ export default class MomentWidget extends Component {
               onPress={this.editMoment}
             >
               <View style={{ flexDirection: "column" }}>
-                <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+                <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
                 <Text style={{ fontSize: 16 }} placeholder="Your entry">
                   {this.state.title}
                 </Text>
@@ -190,7 +190,7 @@ export default class MomentWidget extends Component {
                   onPress={this.showDateTimePicker}
                   title="Show datetime picker"
                 >
-                  <Text style={{ fontSize: 20 }}>{this.state.time}</Text>
+                  <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
                 </TouchableOpacity>
 
                 <TextInput

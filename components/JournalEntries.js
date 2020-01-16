@@ -4,17 +4,16 @@ import {
   Text,
   View,
   StyleSheet,
-  SafeAreaView,
   TouchableOpacity,
   FlatList,
   ScrollView,
-  RefreshControl,
-  Platform
+  RefreshControl
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
 import { Icon } from "react-native-elements";
 import NavigationService from "./NavigationService";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 class JournalEntries extends Component {
   constructor(props) {
@@ -23,7 +22,7 @@ class JournalEntries extends Component {
     this.state = {
       isLoading: false,
       journalEntries: [],
-      debugMode: true
+      debugMode: false
     };
   }
 
@@ -160,8 +159,7 @@ class JournalEntries extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
-    paddingTop: Platform.OS === "android" ? 25 : 0
+    flex: 1
   },
   button: {
     color: "white",
