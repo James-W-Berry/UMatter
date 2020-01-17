@@ -182,6 +182,7 @@ export default class MomentWidget extends Component {
                 onConfirm={this.handleDatePicked}
                 onCancel={this.hideDateTimePicker}
                 mode="time"
+                isDarkModeEnabled={true}
               />
 
               <View style={styles.deleteMomentButton}>

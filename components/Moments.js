@@ -7,7 +7,8 @@ import {
   FlatList,
   AsyncStorage,
   KeyboardAvoidingView,
-  Alert
+  Alert,
+  Text
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import uuid from "uuid";
@@ -76,9 +77,7 @@ export default class Moments extends Component {
   };
 
   showDateTimePicker = () => {
-    console.log(this.state.isDateTimePickerVisible);
     this.setState({ isDateTimePickerVisible: true });
-    console.log(this.state.isDateTimePickerVisible);
   };
 
   hideDateTimePicker = () => {
@@ -266,11 +265,18 @@ export default class Moments extends Component {
               )}
 
               <DateTimePicker
+                sty
                 isVisible={this.state.isDateTimePickerVisible}
                 onConfirm={this.handleDatePicked}
                 onCancel={this.hideDateTimePicker}
                 mode="time"
+                isDarkModeEnabled={true}
               />
+            </View>
+          )}
+          {!this.state.selected && (
+            <View style={styles.selectPrompt}>
+              <Text>Select a date</Text>
             </View>
           )}
         </KeyboardAvoidingView>
@@ -287,6 +293,12 @@ export default class Moments extends Component {
 }
 
 const styles = StyleSheet.create({
+  selectPrompt: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 32
+  },
   calendar: {
     flex: 1,
     borderTopWidth: 1,

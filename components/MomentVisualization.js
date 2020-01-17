@@ -67,7 +67,10 @@ export default class MomentVisualization extends Component {
           <TouchableOpacity
             style={styles.finishMoment}
             onPress={() => {
-              NavigationService.navigate("NewJournalEntry");
+              NavigationService.navigate("NewJournalEntry", {
+                onGoBack: () => {},
+                parent: "MomentVisualization"
+              });
             }}
           >
             <Text style={{ fontSize: 20 }} placeholder="Done">

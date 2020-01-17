@@ -15,6 +15,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import uuid from "uuid";
+import NavigationService from "./NavigationService";
 
 class NewJournalEntry extends Component {
   constructor(props) {
@@ -87,8 +88,17 @@ class NewJournalEntry extends Component {
         await AsyncStorage.setItem(entryId, JSON.stringify(journalEntry))
           .then(() => {
             console.log(`new journal entry ${entryId} saved to storage`);
-            this.props.navigation.state.params.onGoBack();
-            this.props.navigation.goBack(null);
+            if (
+              this.props.navigation.state.params.parent ===
+              "MomentVisualization"
+                ? true
+                : false
+            ) {
+              NavigationService.navigate("Home");
+            } else {
+              this.props.navigation.state.params.onGoBack();
+              this.props.navigation.goBack(null);
+            }
           })
           .catch(e => {
             console.log(e);
