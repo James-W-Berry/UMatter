@@ -41,7 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: "column"
   },
   banner: {
-    flex: 3,
+    flex: 4,
     justifyContent: "center",
     alignItems: "center"
   },
