@@ -27,7 +27,7 @@ const Done = () => (
   <Button
     title={"Done"}
     onPress={() => NavigationService.navigate("Home")}
-    buttonStyle={{}}
+    buttonStyle={{ backgroundColor: "#44CADD" }}
     containerViewStyle={{
       marginVertical: 10,
       width: 70
@@ -37,9 +37,10 @@ const Done = () => (
   />
 );
 
-const Skip = ({ skipLabel, ...props }) => (
+const Skip = () => (
   <Button
     title={"Skip"}
+    onPress={() => NavigationService.navigate("Home")}
     buttonStyle={{
       backgroundColor: "#44CADD"
     }}
@@ -48,10 +49,7 @@ const Skip = ({ skipLabel, ...props }) => (
       width: 70
     }}
     textStyle={{ color: "#fff" }}
-    {...props}
-  >
-    {skipLabel}
-  </Button>
+  />
 );
 
 const Next = ({ ...props }) => (

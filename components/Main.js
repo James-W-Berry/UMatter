@@ -9,6 +9,8 @@ import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
 import MomentVisualization from "./MomentVisualization";
+import AsyncStorage from "react-native";
+import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
 
 const MainNavigator = createStackNavigator({
   LandingPage: {
@@ -51,32 +53,39 @@ const AppContainer = createAppContainer(MainNavigator);
 class Main extends Component {
   constructor(props) {
     super(props);
-
     this.state = {
-      firstTimeCheck: false
+      isFirstLaunch: false,
+      hasCheckedAsyncStorage: false
     };
   }
 
+  async componentWillMount() {
+    const isFirstLaunch = await checkIfFirstLaunch();
+    this.setState({ isFirstLaunch, hasCheckedAsyncStorage: true });
+  }
+
   render() {
-    if (this.state.firstTimeCheck) {
-      return (
-        <AppContainer
-          ref={navigatorRef => {
-            NavigationService.setTopLevelNavigator(navigatorRef);
-            NavigationService.navigate("LandingPage");
-          }}
-        />
-      );
-    } else {
-      return (
-        <AppContainer
-          ref={navigatorRef => {
-            NavigationService.setTopLevelNavigator(navigatorRef);
-            NavigationService.navigate("Home");
-          }}
-        />
-      );
+    console.log(this.state);
+    const { hasCheckedAsyncStorage, isFirstLaunch } = this.state;
+    if (!hasCheckedAsyncStorage) {
+      return null;
     }
+
+    return isFirstLaunch ? (
+      <AppContainer
+        ref={navigatorRef => {
+          NavigationService.setTopLevelNavigator(navigatorRef);
+          NavigationService.navigate("LandingPage");
+        }}
+      />
+    ) : (
+      <AppContainer
+        ref={navigatorRef => {
+          NavigationService.setTopLevelNavigator(navigatorRef);
+          NavigationService.navigate("Home");
+        }}
+      />
+    );
   }
 }
 
