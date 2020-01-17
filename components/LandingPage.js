@@ -1,4 +1,4 @@
-import { Image, View, StyleSheet, ImageBackground } from "react-native";
+import { Image, Text, View, StyleSheet, ImageBackground } from "react-native";
 import React, { Component } from "react";
 import { Button } from "react-native-elements";
 import NavigationService from "./NavigationService";
@@ -24,6 +24,11 @@ class LandingPage extends Component {
               onPress={() => NavigationService.navigate("Onboarding")}
             />
           </View>
+
+          <View style={styles.buildInfo}>
+            <Text>Build Version 0.0.3</Text>
+            <Text>January 17, 2020</Text>
+          </View>
         </ImageBackground>
       </View>
     );
@@ -36,7 +41,7 @@ const styles = StyleSheet.create({
     flexDirection: "column"
   },
   banner: {
-    flex: 2,
+    flex: 3,
     justifyContent: "center",
     alignItems: "center"
   },
@@ -47,6 +52,11 @@ const styles = StyleSheet.create({
   bottom: {
     flex: 1,
     justifyContent: "center"
+  },
+  buildInfo: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
   },
   button: {
     alignSelf: "center",

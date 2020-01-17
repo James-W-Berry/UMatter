@@ -9,7 +9,6 @@ import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
 import MomentVisualization from "./MomentVisualization";
-import AsyncStorage from "react-native";
 import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
 
 const MainNavigator = createStackNavigator({
