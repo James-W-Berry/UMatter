@@ -26,6 +26,10 @@ export default class MomentWidget extends Component {
     };
   }
 
+  componentDidMount() {
+    this.scheduleMomentNotification();
+  }
+
   scheduleMomentNotification = () => {
     const localnotification = {
       title: "UMatter",
@@ -42,22 +46,40 @@ export default class MomentWidget extends Component {
     };
 
     var coeff = 1000 * 60 * 1;
-    var momentTime = new Date(Math.floor(this.state.time / coeff) * coeff);
-    console.log(`floored time: ${momentTime}`);
+
+    let momentDate = new Date(this.state.time);
+    let momentTime = new Date(Math.floor(momentDate.getTime() / coeff) * coeff);
 
     const schedulingOptions = {
       time: momentTime
     };
+
+    this.cancelScheduledNotification();
+
     Notifications.scheduleLocalNotificationAsync(
       localnotification,
       schedulingOptions
-    );
+    ).then(notificationId => {
+      this.setState({ notificationId: notificationId });
+      console.log(`scheduled moment notification ${notificationId}`);
+    });
+  };
+
+  cancelScheduledNotification = () => {
+    if (this.state.notificationId !== undefined) {
+      console.log(
+        `cancelling moment notification ${this.state.notificationId}`
+      );
+      Notifications.cancelScheduledNotificationAsync(
+        this.state.notificationId
+      ).catch(error => {
+        console.log(error);
+      });
+    }
   };
 
   showDateTimePicker = () => {
-    console.log(this.state.isDateTimePickerVisible);
     this.setState({ isDateTimePickerVisible: true });
-    console.log(this.state.isDateTimePickerVisible);
   };
 
   hideDateTimePicker = () => {
@@ -65,7 +87,11 @@ export default class MomentWidget extends Component {
   };
 
   handleDatePicked = date => {
-    this.setState({ time: date });
+    this.setState({ time: date }, () => {
+      this.storeData();
+      this.scheduleMomentNotification();
+    });
+
     this.hideDateTimePicker();
   };
 
@@ -81,15 +107,11 @@ export default class MomentWidget extends Component {
 
   storeData = async () => {
     if (this.state.time !== null) {
-      console.log("trying to update moment entry to local storage: ");
-
       const updatedMoment = {
         title: this.state.title,
         time: this.state.time,
         id: this.state.id
       };
-
-      console.log(updatedMoment);
 
       if (this.state.id !== undefined) {
         await AsyncStorage.setItem(this.state.id, JSON.stringify(updatedMoment))
@@ -143,10 +165,17 @@ export default class MomentWidget extends Component {
               onPress={this.editMoment}
             >
               <View style={{ flexDirection: "column" }}>
-                <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
-                <Text style={{ fontSize: 16 }} placeholder="Your entry">
-                  {this.state.title}
-                </Text>
+                <TouchableOpacity
+                  onPress={this.showDateTimePicker}
+                  title="Show datetime picker"
+                >
+                  <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
+                </TouchableOpacity>
+                {!this.state.showMomentEditor && (
+                  <Text style={{ fontSize: 16 }} placeholder="Label">
+                    {this.state.title}
+                  </Text>
+                )}
               </View>
               <DateTimePicker
                 isVisible={this.state.isDateTimePickerVisible}
@@ -158,7 +187,10 @@ export default class MomentWidget extends Component {
               <View style={styles.deleteMomentButton}>
                 <TouchableOpacity
                   title="Delete"
-                  onPress={() => this.props.deleteMoment(this.state.moment.id)}
+                  onPress={() => {
+                    this.props.deleteMoment(this.state.moment.id);
+                    this.cancelScheduledNotification();
+                  }}
                 >
                   <Icon name="delete" type="material-community" color="#bbb" />
                 </TouchableOpacity>
@@ -186,16 +218,9 @@ export default class MomentWidget extends Component {
 
             {this.state.showMomentEditor && (
               <View style={styles.editMomentWidget}>
-                <TouchableOpacity
-                  onPress={this.showDateTimePicker}
-                  title="Show datetime picker"
-                >
-                  <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
-                </TouchableOpacity>
-
                 <TextInput
                   style={styles.entryInput}
-                  placeholder="Your entry"
+                  placeholder="Label"
                   onChangeText={text => this.setState({ title: text })}
                   value={this.state.title}
                 />
@@ -224,8 +249,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#efefef",
     padding: 15,
-    marginTop: 5,
-    borderRadius: 10
+    marginTop: 5
+    // borderRadius: 10
   },
   editMomentWidget: {
     flexDirection: "column",

@@ -1,13 +1,11 @@
 import React, { Component } from "react";
 import {
-  TextInput,
   StyleSheet,
   View,
   ScrollView,
   RefreshControl,
   FlatList,
   AsyncStorage,
-  TouchableOpacity,
   KeyboardAvoidingView,
   Alert
 } from "react-native";
@@ -20,6 +18,7 @@ import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
 import { SafeAreaView } from "react-native-safe-area-context";
+import DateTimePicker from "react-native-modal-datetime-picker";
 
 export default class Moments extends Component {
   constructor(props) {
@@ -91,15 +90,14 @@ export default class Moments extends Component {
     this.hideDateTimePicker();
   };
 
-  saveNewMoment = async () => {
+  saveNewMoment = async date => {
     try {
-      console.log("trying to save new scheduled moment to local storage");
       const momentId = `moment_${this.state.selected}_${uuid.v4()}`;
 
       const newMoment = {
-        title: this.state.newMomentTitle,
+        title: "",
         date: this.state.selected,
-        time: "08:00 am",
+        time: date,
         series: "",
         id: momentId
       };
@@ -158,6 +156,15 @@ export default class Moments extends Component {
       console.log(e.message);
     }
   }
+
+  hideDateTimePicker = () => {
+    this.setState({ isDateTimePickerVisible: false });
+  };
+
+  handleDatePicked = date => {
+    this.hideDateTimePicker();
+    this.saveNewMoment(date);
+  };
 
   createMomentWidget(item) {
     if (item !== undefined) {
@@ -218,53 +225,6 @@ export default class Moments extends Component {
                   />
                 </ScrollView>
               </View>
-              {this.state.showScheduler && (
-                <View style={styles.momentScheduler}>
-                  <View style={styles.newMoment}>
-                    <TextInput
-                      style={styles.newMomentTitle}
-                      placeholder="Moment title"
-                      autoFocus={true}
-                      onChangeText={text =>
-                        this.setState({ newMomentTitle: text })
-                      }
-                      value={this.state.title}
-                      numberOfLines={1}
-                    />
-
-                    <TouchableOpacity
-                      title="Save"
-                      onPress={this.saveNewMoment}
-                      style={styles.saveButton}
-                    >
-                      <Icon
-                        name="check"
-                        type="material-community"
-                        color="#02D351"
-                        height="90%"
-                      />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      title="Cancel"
-                      onPress={() =>
-                        this.setState({
-                          showScheduler: false,
-                          showActionButton: true
-                        })
-                      }
-                      style={styles.cancelButton}
-                    >
-                      <Icon
-                        name="cancel"
-                        type="material-community"
-                        color="#F12E17"
-                        height="90%"
-                      />
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
 
               {this.state.showActionButton && (
                 <ActionButton buttonColor="#44CADD">
@@ -273,8 +233,8 @@ export default class Moments extends Component {
                     title="Schedule Moment"
                     onPress={() =>
                       this.setState({
-                        showScheduler: true,
-                        showActionButton: false
+                        showActionButton: false,
+                        isDateTimePickerVisible: true
                       })
                     }
                   >
@@ -304,6 +264,13 @@ export default class Moments extends Component {
                   </ActionButton.Item>
                 </ActionButton>
               )}
+
+              <DateTimePicker
+                isVisible={this.state.isDateTimePickerVisible}
+                onConfirm={this.handleDatePicked}
+                onCancel={this.hideDateTimePicker}
+                mode="time"
+              />
             </View>
           )}
         </KeyboardAvoidingView>
