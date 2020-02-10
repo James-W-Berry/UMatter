@@ -138,7 +138,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#2C239A"
   },
   header: {
-    flex: 1,
+    flex: 2,
+    marginTop: "15%",
     display: "flex",
     justifyContent: "center",
     alignItems: "center"
