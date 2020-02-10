@@ -9,7 +9,6 @@ import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
 import MomentVisualization from "./MomentVisualization";
-import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
 import * as firebase from "firebase";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
@@ -22,7 +21,12 @@ const MainNavigator = createStackNavigator({
     }
   },
   SignUpPage: {
-    screen: SignUpPage
+    screen: SignUpPage,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96"
+    }
   },
   LandingPage: {
     screen: LandingPage,
@@ -72,23 +76,7 @@ class Main extends Component {
     };
   }
 
-  async componentWillMount() {
-    const isFirstLaunch = await checkIfFirstLaunch();
-    this.setState({ isFirstLaunch, hasCheckedAsyncStorage: true });
-    let _this = this;
-
-    firebase.auth().onAuthStateChanged(function(user) {
-      if (user) {
-        _this.setState({ isLoggedIn: true });
-        _this.setState({ isLoading: false });
-        NavigationService.navigate("Home");
-      } else {
-        _this.setState({ isLoggedIn: false });
-        _this.setState({ isLoading: false });
-        NavigationService.navigate("SignInPage");
-      }
-    });
-  }
+  async componentWillMount() {}
 
   render() {
     return (

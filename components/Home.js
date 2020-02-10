@@ -24,22 +24,22 @@ class Home extends Component {
         key: "journalEntries",
         title: "Journal",
         icon: "notebook",
-        color: "#44CADD"
+        color: "#160C21"
       },
-      { key: "moments", title: "Moments", icon: "clock", color: "#44CADD" },
+      { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
       {
         key: "gold",
         title: "Smile File",
         icon: "treasure-chest",
-        color: "#44CADD"
+        color: "#160C21"
       },
       {
         key: "badges",
         title: "Badges",
         icon: "trophy-award",
-        color: "#44CADD"
+        color: "#160C21"
       },
-      { key: "profile", title: "Profile", icon: "account", color: "#44CADD" }
+      { key: "profile", title: "Profile", icon: "account", color: "#160C21" }
     ]
   };
 

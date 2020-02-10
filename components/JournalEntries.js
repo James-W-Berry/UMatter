@@ -11,9 +11,10 @@ import {
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
-import { Icon } from "react-native-elements";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { StatusBar } from "react-native";
 
 class JournalEntries extends Component {
   constructor(props) {
@@ -113,6 +114,12 @@ class JournalEntries extends Component {
             <Text> Clear Storage</Text>
           </TouchableOpacity>
         )}
+        <StatusBar
+          backgroundColor="#191919"
+          barStyle={"dark-content"}
+          translucent={true}
+        />
+        <Text style={styles.pageTitle}>Journal</Text>
 
         <ScrollView
           contentContainerStyle={{
@@ -134,24 +141,22 @@ class JournalEntries extends Component {
           />
         </ScrollView>
 
-        <View style={styles.button}>
-          <TouchableOpacity>
-            <Icon
-              raised
-              name="pencil"
-              type="material-community"
-              color="#44CADD"
-              reverse={true}
-              onPress={() =>
-                NavigationService.navigate("NewJournalEntry", {
-                  onGoBack: () => {
-                    this.retrieveJournalEntries();
-                  }
-                })
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            NavigationService.navigate("NewJournalEntry", {
+              onGoBack: () => {
+                this.retrieveJournalEntries();
               }
-            />
-          </TouchableOpacity>
-        </View>
+            })
+          }
+        >
+          <MaterialCommunityIcons
+            name="plus-circle"
+            size={50}
+            color="#509C96"
+          />
+        </TouchableOpacity>
       </SafeAreaView>
     );
   }
@@ -159,24 +164,39 @@ class JournalEntries extends Component {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    flexDirection: "column",
+    backgroundColor: "#FFFFFF"
+  },
+  pageTitle: {
+    fontSize: 24,
+    color: "#191919",
+    alignSelf: "center",
+    fontFamily: "montserrat-regular"
   },
   button: {
-    color: "white",
     elevation: 10,
     position: "absolute",
+    bottom: 0,
+    width: "26%",
+    height: "10%",
     alignSelf: "flex-end",
-    padding: 20,
-    bottom: 0
+    alignItems: "center",
+    justifyContent: "center"
   },
   title: {
-    fontSize: 20
+    fontSize: 20,
+    fontFamily: "montserrat-medium"
   },
   caption: {
-    fontSize: 8
+    fontSize: 8,
+    fontFamily: "montserrat-regular"
   },
   date: {
-    fontSize: 12
+    fontSize: 12,
+    fontFamily: "montserrat-regular"
   },
   clearButton: {
     alignSelf: "center",

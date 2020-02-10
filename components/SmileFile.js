@@ -4,7 +4,8 @@ import {
   View,
   AsyncStorage,
   ScrollView,
-  FlatList
+  FlatList,
+  StatusBar
 } from "react-native";
 import LottieView from "lottie-react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -58,6 +59,7 @@ export default class SmileFile extends Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        <StatusBar barStyle={"light-content"} translucent={true} />
         <View style={styles.fileViewer}>
           {this.state.showFiles && (
             <ScrollView

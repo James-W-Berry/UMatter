@@ -243,7 +243,8 @@ const styles = StyleSheet.create({
   headingInput: {
     flex: 1,
     fontSize: 24,
-    margin: 8
+    margin: 8,
+    fontFamily: "montserrat-regular"
   },
   entryContainer: {
     backgroundColor: "#ededed",
@@ -255,7 +256,8 @@ const styles = StyleSheet.create({
   entryInput: {
     flex: 1,
     fontSize: 16,
-    margin: 8
+    margin: 8,
+    fontFamily: "montserrat-regular"
   }
 });
 

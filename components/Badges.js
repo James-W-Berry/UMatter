@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, StyleSheet, SafeAreaView } from "react-native";
+import { Text, StyleSheet, SafeAreaView, StatusBar } from "react-native";
 
 export default class Badges extends Component {
   constructor(props) {
@@ -10,6 +10,8 @@ export default class Badges extends Component {
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        <StatusBar barStyle={"dark-content"} translucent={true} />
+
         <Text>Your Badges</Text>
       </SafeAreaView>
     );
