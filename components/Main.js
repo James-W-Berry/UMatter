@@ -11,10 +11,19 @@ import JournalEntry from "./JournalEntry";
 import MomentVisualization from "./MomentVisualization";
 import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
 import * as firebase from "firebase";
-import { Text, View } from "react-native";
-import { Button, TextInput } from "react-native-paper";
+import SignUpPage from "./SignUpPage";
+import SignInPage from "./SignInPage";
 
 const MainNavigator = createStackNavigator({
+  SignInPage: {
+    screen: SignInPage,
+    navigationOptions: {
+      header: null
+    }
+  },
+  SignUpPage: {
+    screen: SignUpPage
+  },
   LandingPage: {
     screen: LandingPage,
     navigationOptions: {
@@ -72,62 +81,22 @@ class Main extends Component {
       if (user) {
         _this.setState({ isLoggedIn: true });
         _this.setState({ isLoading: false });
+        NavigationService.navigate("Home");
       } else {
         _this.setState({ isLoggedIn: false });
         _this.setState({ isLoading: false });
+        NavigationService.navigate("SignInPage");
       }
     });
   }
 
-  createNewUser(email, password) {
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(email, password)
-      .catch(function(error) {
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        console.log(`${errorCode}: ${errorMessage}`);
-      });
-  }
-
   render() {
-    const { hasCheckedAsyncStorage, isFirstLaunch } = this.state;
-
-    return this.state.isLoading ? (
-      <Text>Loading</Text>
-    ) : !hasCheckedAsyncStorage ? null : isFirstLaunch ? (
+    return (
       <AppContainer
         ref={navigatorRef => {
           NavigationService.setTopLevelNavigator(navigatorRef);
-          NavigationService.navigate("LandingPage");
         }}
       />
-    ) : this.state.isLoggedIn ? (
-      <AppContainer
-        ref={navigatorRef => {
-          NavigationService.setTopLevelNavigator(navigatorRef);
-          NavigationService.navigate("Home");
-        }}
-      />
-    ) : (
-      <View>
-        <TextInput
-          label="Email"
-          onChangeText={text => this.setState({ email: text })}
-        ></TextInput>
-        <TextInput
-          label="Password"
-          onChangeText={text => this.setState({ password: text })}
-        ></TextInput>
-
-        <Button
-          onPress={() =>
-            this.createNewUser(this.state.email, this.state.password)
-          }
-        >
-          Create New Account
-        </Button>
-      </View>
     );
   }
 }

@@ -4,6 +4,7 @@ import JournalEntries from "./JournalEntries";
 import Moments from "./Moments";
 import SmileFile from "./SmileFile";
 import Badges from "./Badges";
+import Profile from "./Profile";
 
 const JournalEntriesRoute = () => <JournalEntries />;
 
@@ -12,6 +13,8 @@ const MomentsRoute = () => <Moments />;
 const GoldRoute = () => <SmileFile />;
 
 const BadgesRoute = () => <Badges />;
+
+const ProfileRoute = () => <Profile />;
 
 class Home extends Component {
   state = {
@@ -30,7 +33,13 @@ class Home extends Component {
         icon: "treasure-chest",
         color: "#44CADD"
       },
-      { key: "badges", title: "Badges", icon: "trophy-award", color: "#44CADD" }
+      {
+        key: "badges",
+        title: "Badges",
+        icon: "trophy-award",
+        color: "#44CADD"
+      },
+      { key: "profile", title: "Profile", icon: "account", color: "#44CADD" }
     ]
   };
 
@@ -40,7 +49,8 @@ class Home extends Component {
     journalEntries: JournalEntriesRoute,
     moments: MomentsRoute,
     gold: GoldRoute,
-    badges: BadgesRoute
+    badges: BadgesRoute,
+    profile: ProfileRoute
   });
 
   render() {
