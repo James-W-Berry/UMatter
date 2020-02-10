@@ -109,6 +109,7 @@ class SignInPage extends Component {
               fontFamily: "montserrat-regular"
             }}
             placeholder="Password"
+            secureTextEntry={true}
             placeholderTextColor="#ededed80"
             onChangeText={text => this.setState({ password: text })}
             underlineColorAndroid="transparent"
