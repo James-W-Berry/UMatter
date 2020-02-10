@@ -36,6 +36,20 @@ class SignInPage extends Component {
       });
   }
 
+  resetPassword(email) {
+    firebase
+      .auth()
+      .sendPasswordResetEmail(email)
+      .then(function() {
+        Alert.alert("Check your email to reset your password.");
+      })
+      .catch(function(error) {
+        Alert.alert(
+          "Could not send email, please check the entered email address and try again."
+        );
+      });
+  }
+
   render() {
     return (
       <View style={styles.container}>
@@ -105,10 +119,26 @@ class SignInPage extends Component {
         <View style={styles.signInButton}>
           <Button
             title={"Sign In"}
-            titleStyle={{ fontFamily: "montserrat-regular" }}
+            titleStyle={{
+              fontFamily: "montserrat-regular",
+              justifyContent: "center"
+            }}
             buttonStyle={styles.button}
             onPress={() => this.signIn(this.state.email, this.state.password)}
           />
+        </View>
+
+        <View style={styles.forgotPassword}>
+          <Text
+            style={{
+              color: "#509C96",
+              fontWeight: "bold",
+              fontFamily: "montserrat-medium"
+            }}
+            onPress={() => this.resetPassword(this.state.email)}
+          >
+            Forgot your password?
+          </Text>
         </View>
 
         <View style={styles.signUp}>
@@ -145,7 +175,7 @@ const styles = StyleSheet.create({
     alignItems: "center"
   },
   banner: {
-    flex: 2,
+    flex: 3,
     justifyContent: "center"
   },
   image: {
@@ -158,9 +188,9 @@ const styles = StyleSheet.create({
   },
   signInButton: {
     flex: 3,
-    width: "100%",
-    justifyContent: "flex-end",
-    alignItems: "center"
+    width: "80%",
+    justifyContent: "center",
+    alignSelf: "center"
   },
   signUp: {
     flex: 2,
@@ -168,8 +198,14 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center"
   },
+  forgotPassword: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "center"
+  },
   button: {
     alignSelf: "center",
+    justifyContent: "center",
     width: "100%",
     padding: 20,
     backgroundColor: "#509C96",

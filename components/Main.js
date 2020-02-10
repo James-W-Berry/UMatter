@@ -9,7 +9,6 @@ import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
 import MomentVisualization from "./MomentVisualization";
-import * as firebase from "firebase";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 

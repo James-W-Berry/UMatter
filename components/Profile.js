@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Text, StyleSheet, SafeAreaView, Alert, Button } from "react-native";
+import { Text, StyleSheet, Alert, Button } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import * as firebase from "firebase";
 
 export default class Profile extends Component {

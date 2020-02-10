@@ -1,5 +1,6 @@
 import React, { Component } from "react";
-import { Text, StyleSheet, SafeAreaView, StatusBar } from "react-native";
+import { Text, StyleSheet, StatusBar } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default class Badges extends Component {
   constructor(props) {
