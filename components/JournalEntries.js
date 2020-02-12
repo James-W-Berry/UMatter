@@ -114,11 +114,7 @@ class JournalEntries extends Component {
             <Text> Clear Storage</Text>
           </TouchableOpacity>
         )}
-        <StatusBar
-          backgroundColor="#191919"
-          barStyle={"dark-content"}
-          translucent={true}
-        />
+        <StatusBar barStyle={"dark-content"} translucent={true} />
         <Text style={styles.pageTitle}>Journal</Text>
 
         <ScrollView

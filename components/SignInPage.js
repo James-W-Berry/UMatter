@@ -3,7 +3,6 @@ import {
   Text,
   View,
   StyleSheet,
-  ImageBackground,
   Alert,
   TextInput,
   StatusBar

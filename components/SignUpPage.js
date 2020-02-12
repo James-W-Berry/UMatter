@@ -3,7 +3,6 @@ import {
   Text,
   View,
   StyleSheet,
-  ImageBackground,
   Alert,
   TextInput,
   StatusBar
@@ -24,11 +23,28 @@ class SignUpPage extends Component {
     };
   }
 
-  createNewUser(email, password) {
+  createNewUser(username, email, password) {
+    const db = firebase.firestore();
+
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
       .then(function() {
+        var userId = firebase.auth().currentUser.uid;
+
+        db.collection("users")
+          .doc(userId)
+          .set({
+            username: username,
+            groups: { public: true }
+          })
+          .then(function() {
+            console.log("successfully joined the public group");
+          })
+          .catch(function(error) {
+            console.log(error);
+          });
+
         console.log("sign up successful, navigating to Home");
         NavigationService.navigate("Home");
       })
@@ -60,6 +76,27 @@ class SignUpPage extends Component {
           <Image
             source={require("../assets/umatter_banner.png")}
             style={styles.image}
+          />
+        </View>
+
+        <View style={styles.searchSection}>
+          <MaterialCommunityIcons name="email" size={32} color="white" />
+
+          <TextInput
+            style={{
+              borderBottomColor: "#EDEDED",
+              borderBottomWidth: 1,
+              width: "70%",
+              color: "#EDEDED",
+              margin: 10,
+              fontSize: 16,
+              fontFamily: "montserrat-regular"
+            }}
+            placeholder="Username"
+            placeholderTextColor="#ededed80"
+            onChangeText={text => this.setState({ username: text })}
+            underlineColorAndroid="transparent"
+            value={this.state.username}
           />
         </View>
 
@@ -109,10 +146,17 @@ class SignUpPage extends Component {
         <View style={styles.signUpButton}>
           <Button
             title={"Create New Account"}
+            titleStyle={{
+              fontFamily: "montserrat-regular",
+              justifyContent: "center"
+            }}
             buttonStyle={styles.button}
-            titleStyle={{ fontFamily: "montserrat-regular" }}
             onPress={() =>
-              this.createNewUser(this.state.email, this.state.password)
+              this.createNewUser(
+                this.state.username,
+                this.state.email,
+                this.state.password
+              )
             }
           />
         </View>
@@ -147,9 +191,9 @@ const styles = StyleSheet.create({
   },
   signUpButton: {
     flex: 3,
-    width: "100%",
+    width: "80%",
     justifyContent: "center",
-    alignItems: "center"
+    alignSelf: "center"
   },
   signUp: {
     flex: 2,
@@ -159,6 +203,7 @@ const styles = StyleSheet.create({
   },
   button: {
     alignSelf: "center",
+    justifyContent: "center",
     width: "100%",
     padding: 20,
     backgroundColor: "#509C96",

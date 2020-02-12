@@ -6,9 +6,8 @@ import getEnvVars from "./environment";
 import * as Font from "expo-font";
 import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
 import NavigationService from "./components/NavigationService";
-
 envVars = getEnvVars("dev");
-console.log(envVars);
+
 const firebaseConfig = {
   apiKey: envVars.API_KEY,
   authDomain: envVars.AUTH_DOMAIN,
