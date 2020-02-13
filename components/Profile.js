@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { Text, StyleSheet, Alert, Button, StatusBar } from "react-native";
+import { Text, StyleSheet, Alert, Button, StatusBar, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as firebase from "firebase";
 import "firebase/firestore";
@@ -26,14 +26,31 @@ export default class Profile extends Component {
       creationDate: creationDate
     });
     var userId = firebase.auth().currentUser.uid;
-    var docRef = db.collection("users").doc(userId);
+    var userDocRef = db.collection("users").doc(userId);
     const _this = this;
 
-    docRef
+    userDocRef
       .get()
       .then(function(doc) {
         if (doc.exists) {
           _this.setState({ userData: doc.data() });
+
+          Object.keys(doc.data().groups).map(function(key) {
+            db.collection("groups")
+              .doc(key)
+              .get()
+              .then(function(doc) {
+                if (doc.exists) {
+                  let groupData = {
+                    [key]: {
+                      numberOfMembers: Object.keys(doc.data().members).length,
+                      name: doc.data().name
+                    }
+                  };
+                  _this.setState({ groupData: groupData });
+                }
+              });
+          });
         } else {
           console.log("No such document!");
         }
@@ -83,7 +100,7 @@ export default class Profile extends Component {
   }
 
   render() {
-    const { userData, lastSignInTime, creationDate } = this.state;
+    const { userData, groupData, lastSignInTime, creationDate } = this.state;
     return (
       <SafeAreaView style={styles.container}>
         <StatusBar barStyle={"light-content"} translucent={true} />
@@ -121,19 +138,35 @@ export default class Profile extends Component {
         >
           Your Groups:
         </Text>
-        {userData.groups
+        {userData.groups && groupData
           ? Object.keys(userData.groups).map(function(key) {
               return (
-                <Text
-                  style={{
-                    color: "#EDEDED",
-                    fontSize: 16,
-                    fontFamily: "montserrat-regular"
-                  }}
-                  key={key}
+                <View
+                  key={`${key}View`}
+                  style={{ display: "flex", flexDirection: "row" }}
                 >
-                  {key}
-                </Text>
+                  <Text
+                    style={{
+                      color: "#EDEDED",
+                      fontSize: 16,
+                      fontFamily: "montserrat-regular"
+                    }}
+                    key={key}
+                  >
+                    {`${groupData[key].name} - `}
+                  </Text>
+
+                  <Text
+                    style={{
+                      color: "#EDEDED",
+                      fontSize: 16,
+                      fontFamily: "montserrat-regular"
+                    }}
+                    key={`${key}UsersNumber`}
+                  >
+                    {`${groupData[key].numberOfMembers} Member(s)`}
+                  </Text>
+                </View>
               );
             })
           : null}

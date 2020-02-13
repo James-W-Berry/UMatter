@@ -5,17 +5,61 @@ import { LinearGradient } from "expo-linear-gradient";
 import ReactStopwatch from "react-stopwatch";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import NavigationService from "./NavigationService";
+import * as firebase from "firebase";
 
 export default class MomentVisualization extends Component {
   constructor(props) {
     super(props);
+
+    const db = firebase.firestore();
+    var userId = firebase.auth().currentUser.uid;
+
     this.state = {
-      count: 0
+      count: 0,
+      firestore: db,
+      userId: userId
     };
   }
   componentDidMount() {
+    var userDocRef = this.state.firestore
+      .collection("users")
+      .doc(this.state.userId);
+    userDocRef
+      .set(
+        {
+          status: "inMoment"
+        },
+        { merge: true }
+      )
+      .then(function() {
+        console.log("successfully updated user status to inMoment");
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+
     this.animation.play();
   }
+
+  componentWillUnmount() {
+    var userDocRef = this.state.firestore
+      .collection("users")
+      .doc(this.state.userId);
+    userDocRef
+      .set(
+        {
+          status: "active"
+        },
+        { merge: true }
+      )
+      .then(function() {
+        console.log("successfully updated user status to inMoment");
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  }
+
   increment() {
     this.setState({
       count: this.state.count + 1

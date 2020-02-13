@@ -45,6 +45,17 @@ class SignUpPage extends Component {
             console.log(error);
           });
 
+        db.collection("groups")
+          .doc("public")
+          .set(
+            {
+              members: {
+                [userId]: true
+              }
+            },
+            { merge: true }
+          );
+
         console.log("sign up successful, navigating to Home");
         NavigationService.navigate("Home");
       })
