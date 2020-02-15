@@ -8,7 +8,8 @@ import {
   AsyncStorage,
   KeyboardAvoidingView,
   Alert,
-  Text
+  Text,
+  StatusBar
 } from "react-native";
 import { Calendar } from "react-native-calendars";
 import uuid from "uuid";
@@ -185,18 +186,50 @@ export default class Moments extends Component {
     return null;
   }
 
+  onDayPress(day) {
+    this.setState({
+      selected: day.dateString
+    });
+    this.retrieveMoments(day.dateString);
+  }
+
   render() {
     return (
       <SafeAreaView style={styles.container}>
+        <StatusBar barStyle={"light-content"} translucent={true} />
         <KeyboardAvoidingView
           style={styles.container}
           behavior="padding"
           enabled
         >
           <Calendar
-            onDayPress={this.onDayPress}
             style={styles.calendar}
+            onDayPress={this.onDayPress}
+            theme={{
+              backgroundColor: "#ffffff",
+              calendarBackground: "#2C239A",
+              textSectionTitleColor: "#b6c1cd",
+              selectedDayBackgroundColor: "#ffffff",
+              selectedDayTextColor: "#3E31B1",
+              todayTextColor: "#509C96",
+              dayTextColor: "#ffffff",
+              textDisabledColor: "#d9e1e8",
+              arrowColor: "#509C96",
+              disabledArrowColor: "#d9e1e8",
+              monthTextColor: "#ffffff",
+              indicatorColor: "blue",
+              textDayFontFamily: "montserrat-regular",
+              textMonthFontFamily: "montserrat-regular",
+              textDayHeaderFontFamily: "montserrat-regular",
+              textDayFontWeight: "300",
+              textMonthFontWeight: "bold",
+              textDayHeaderFontWeight: "300",
+              textDayFontSize: 16,
+              textMonthFontSize: 24,
+              textDayHeaderFontSize: 16
+            }}
             hideExtraDays
+            hideDayNames
             markedDates={{
               [this.state.selected]: {
                 selected: true,
@@ -205,7 +238,14 @@ export default class Moments extends Component {
             }}
           />
           {this.state.selected && (
-            <View style={styles.container}>
+            <View style={styles.dayView}>
+              <DateTimePicker
+                isVisible={this.state.isDateTimePickerVisible}
+                onConfirm={this.handleDatePicked}
+                onCancel={this.hideDateTimePicker}
+                mode="time"
+                isDarkModeEnabled={true}
+              />
               <View style={styles.momentSummary}>
                 <ScrollView
                   refreshControl={
@@ -226,9 +266,9 @@ export default class Moments extends Component {
               </View>
 
               {this.state.showActionButton && (
-                <ActionButton buttonColor="#44CADD">
+                <ActionButton buttonColor="#509C96">
                   <ActionButton.Item
-                    buttonColor="#44CADD"
+                    buttonColor="#509C96"
                     title="Schedule Moment"
                     onPress={() =>
                       this.setState({
@@ -241,12 +281,12 @@ export default class Moments extends Component {
                       style={styles.actionButtonIcon}
                       name="plus"
                       type="material-community"
-                      color="#44CADD"
+                      color="#509C96"
                       reverse={true}
                     />
                   </ActionButton.Item>
                   <ActionButton.Item
-                    buttonColor="#44CADD"
+                    buttonColor="#509C96"
                     title="Start Moment Now"
                     onPress={() => {
                       console.log("starting moment");
@@ -257,119 +297,66 @@ export default class Moments extends Component {
                       style={styles.actionButtonIcon}
                       name="plus"
                       type="material-community"
-                      color="#44CADD"
+                      color="#509C96"
                       reverse={true}
                     />
                   </ActionButton.Item>
                 </ActionButton>
               )}
-
-              <DateTimePicker
-                sty
-                isVisible={this.state.isDateTimePickerVisible}
-                onConfirm={this.handleDatePicked}
-                onCancel={this.hideDateTimePicker}
-                mode="time"
-                isDarkModeEnabled={true}
-              />
             </View>
           )}
           {!this.state.selected && (
             <View style={styles.selectPrompt}>
-              <Text>Select a date</Text>
+              <Text
+                style={{
+                  fontSize: 16,
+                  color: "#EDEDED",
+                  fontFamily: "montserrat-regular"
+                }}
+              >
+                Select a date
+              </Text>
             </View>
           )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
   }
-
-  onDayPress(day) {
-    this.setState({
-      selected: day.dateString
-    });
-    this.retrieveMoments(day.dateString);
-  }
 }
 
 const styles = StyleSheet.create({
+  container: {
+    display: "flex",
+    flex: 1,
+    paddingBottom: 0,
+    flexDirection: "column",
+    backgroundColor: "#2C239A"
+  },
+  calendar: {
+    flex: 1
+  },
+  dayView: {
+    flex: 1
+  },
+  momentSummary: {
+    flex: 1,
+    borderTopLeftRadius: 120,
+    backgroundColor: "#EFEFEF",
+    shadowOffset: { width: 0, height: -15 },
+    shadowOpacity: 1.0,
+    shadowRadius: 0,
+    shadowColor: "#3E31B1"
+  },
   selectPrompt: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
     fontSize: 32
   },
-  calendar: {
-    flex: 1,
-    borderTopWidth: 1,
-    borderBottomWidth: 1,
-    borderColor: "#eee",
-    height: 350
-  },
-  text: {
-    textAlign: "center",
-    borderColor: "#bbb",
-    padding: 10
-  },
-  container: {
-    flex: 1
-  },
-  momentSummary: {
-    flex: 3,
-    alignItems: "center"
-  },
-  momentScheduler: {
-    flex: 2,
-    justifyContent: "center",
-    backgroundColor: "#efefef"
-  },
-  newMoment: {
-    flex: 1,
-    flexDirection: "row"
-  },
-  newMomentTitle: {
-    flex: 1,
-    margin: 8
-  },
-  startButton: {
-    alignSelf: "center",
-    width: "70%",
-    backgroundColor: "#00A9A5"
-  },
-  saveButton: {
-    display: "flex",
-    justifyContent: "flex-end",
-    position: "absolute",
-    right: "25%",
-    alignSelf: "center",
-    width: "20%",
-    height: "90%"
-  },
-  cancelButton: {
-    display: "flex",
-    justifyContent: "flex-end",
-    position: "absolute",
-    right: "5%",
-    alignSelf: "center",
-    width: "20%",
-    height: "90%"
-  },
   momentWidget: {
     flexDirection: "row",
     alignSelf: "center",
     width: "100%"
-  },
-  deleteMomentButton: {
-    position: "absolute",
-    alignSelf: "flex-end",
-    right: 0,
-    width: "30%",
-    backgroundColor: "#afaf"
-  },
-  unscheduledMoment: {
-    flex: 1,
-    justifyContent: "center",
-    backgroundColor: "#bbb"
   },
   actionButtonIcon: {
     fontSize: 20,

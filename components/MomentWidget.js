@@ -169,10 +169,21 @@ export default class MomentWidget extends Component {
                   onPress={this.showDateTimePicker}
                   title="Show datetime picker"
                 >
-                  <Text style={{ fontSize: 20 }}>{formattedDate}</Text>
+                  <Text
+                    style={{
+                      fontSize: 20,
+                      color: "#EFEFEF",
+                      fontFamily: "montserrat-regular"
+                    }}
+                  >
+                    {formattedDate}
+                  </Text>
                 </TouchableOpacity>
                 {!this.state.showMomentEditor && (
-                  <Text style={{ fontSize: 16 }} placeholder="Label">
+                  <Text
+                    style={{ fontSize: 16, color: "#EFEFEF" }}
+                    placeholder="Label"
+                  >
                     {this.state.title}
                   </Text>
                 )}
@@ -193,7 +204,11 @@ export default class MomentWidget extends Component {
                     this.cancelScheduledNotification();
                   }}
                 >
-                  <Icon name="delete" type="material-community" color="#bbb" />
+                  <Icon
+                    name="delete"
+                    type="material-community"
+                    color="#EFEFEF"
+                  />
                 </TouchableOpacity>
               </View>
 
@@ -203,14 +218,14 @@ export default class MomentWidget extends Component {
                     <Icon
                       name="chevron-up"
                       type="material-community"
-                      color="#bbb"
+                      color="#EFEFEF"
                     />
                   )}
                   {!this.state.showMomentEditor && (
                     <Icon
                       name="chevron-down"
                       type="material-community"
-                      color="#bbb"
+                      color="#EFEFEF"
                     />
                   )}
                 </TouchableOpacity>
@@ -222,6 +237,7 @@ export default class MomentWidget extends Component {
                 <TextInput
                   style={styles.entryInput}
                   placeholder="Label"
+                  placeholderTextColor="#EFEFEF"
                   onChangeText={text => this.setState({ title: text })}
                   value={this.state.title}
                 />
@@ -235,30 +251,25 @@ export default class MomentWidget extends Component {
 }
 
 const styles = StyleSheet.create({
-  text: {
-    textAlign: "center",
-    borderColor: "#bbb",
-    padding: 10
-  },
-  newMomentTitle: {
-    flex: 1,
-    margin: 8
-  },
   momentWidget: {
     flexDirection: "row",
     width: "75%",
     alignSelf: "center",
-    backgroundColor: "#efefef",
+    backgroundColor: "#509C96",
     padding: 15,
-    marginTop: 5
-    // borderRadius: 10
+    marginTop: 15,
+    borderRadius: 20
   },
   editMomentWidget: {
     flexDirection: "column",
     width: "75%",
     alignSelf: "center",
-    backgroundColor: "#efefef",
+    backgroundColor: "#509C96",
     padding: 15
+  },
+  entryInput: {
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular"
   },
   deleteMomentButton: {
     display: "flex",
