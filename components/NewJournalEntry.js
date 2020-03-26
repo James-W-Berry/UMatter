@@ -82,13 +82,15 @@ class NewJournalEntry extends Component {
 
     const options = { year: "numeric", month: "long", day: "numeric" };
     let now = new Date().toLocaleDateString("en-US", options);
+    let nowTimestamp = new Date().getTime();
 
     return docRef
       .set(
         {
           title: title,
           body: body,
-          creationDate: now
+          creationDate: now,
+          creationTimestamp: nowTimestamp
         },
         { merge: true }
       )

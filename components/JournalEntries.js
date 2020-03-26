@@ -21,19 +21,35 @@ function createJournalEntry(entry) {
     return (
       <View key={entry.id}>
         <TouchableOpacity onPress={() => onSelect(entry)}>
-          <Card image={{ uri: entry.image }}>
-            <Text style={styles.title}>{entry.title}</Text>
-            <Text
-              style={styles.caption}
-              numberOfLines={1}
-              style={{
-                marginBottom: 10
-              }}
-            >
-              {entry.body}
-            </Text>
-            <Text style={styles.date}>{entry.creationDate}</Text>
-          </Card>
+          {entry.image ? (
+            <Card image={{ uri: entry.image }}>
+              <Text style={styles.title}>{entry.title}</Text>
+              <Text
+                style={styles.caption}
+                numberOfLines={1}
+                style={{
+                  marginBottom: 10
+                }}
+              >
+                {entry.body}
+              </Text>
+              <Text style={styles.date}>{entry.creationDate}</Text>
+            </Card>
+          ) : (
+            <Card>
+              <Text style={styles.title}>{entry.title}</Text>
+              <Text
+                style={styles.caption}
+                numberOfLines={1}
+                style={{
+                  marginBottom: 10
+                }}
+              >
+                {entry.body}
+              </Text>
+              <Text style={styles.date}>{entry.creationDate}</Text>
+            </Card>
+          )}
         </TouchableOpacity>
       </View>
     );
@@ -62,6 +78,7 @@ function useJournalEntries() {
       .collection("users")
       .doc(userId)
       .collection("journalEntries")
+      .orderBy("creationTimestamp", "desc")
       .onSnapshot(snapshot => {
         const retrievedEntries = snapshot.docs.map(doc => ({
           id: doc.id,

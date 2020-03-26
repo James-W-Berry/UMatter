@@ -76,21 +76,26 @@ class JournalEntry extends Component {
         console.log(error);
       });
 
-    const storageRef = firebase
-      .storage()
-      .ref()
-      .child(`journalPictures/${userId}/${id}`);
+    if (this.state.image) {
+      const storageRef = firebase
+        .storage()
+        .ref()
+        .child(`journalPictures/${userId}/${id}`);
 
-    return storageRef
-      .delete()
-      .then(() => {
-        console.log("successfully deleted journal entry image");
-        _this.props.navigation.state.params.onGoBack();
-        _this.props.navigation.goBack(null);
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
+      return storageRef
+        .delete()
+        .then(() => {
+          console.log("successfully deleted journal entry image");
+          _this.props.navigation.state.params.onGoBack();
+          _this.props.navigation.goBack(null);
+        })
+        .catch(function(error) {
+          console.log(error);
+        });
+    } else {
+      _this.props.navigation.state.params.onGoBack();
+      _this.props.navigation.goBack(null);
+    }
   };
 
   getPermissionAsync = async () => {
