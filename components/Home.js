@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState } from "react";
 import { BottomNavigation } from "react-native-paper";
 import JournalEntries from "./JournalEntries";
 import Moments from "./Moments";
@@ -16,36 +16,34 @@ const BadgesRoute = () => <Badges />;
 
 const ProfileRoute = () => <Profile />;
 
-class Home extends Component {
-  state = {
-    index: 0,
-    routes: [
-      {
-        key: "journalEntries",
-        title: "Journal",
-        icon: "notebook",
-        color: "#160C21"
-      },
-      { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
-      {
-        key: "gold",
-        title: "Smile File",
-        icon: "treasure-chest",
-        color: "#160C21"
-      },
-      {
-        key: "badges",
-        title: "Badges",
-        icon: "trophy-award",
-        color: "#160C21"
-      },
-      { key: "profile", title: "Profile", icon: "account", color: "#160C21" }
-    ]
-  };
+export default function Home() {
+  const [index, setIndex] = useState(0);
+  const routes = [
+    {
+      key: "journalEntries",
+      title: "Journal",
+      icon: "notebook",
+      color: "#160C21"
+    },
+    { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
+    {
+      key: "gold",
+      title: "Smile File",
+      icon: "treasure-chest",
+      color: "#160C21"
+    },
+    {
+      key: "badges",
+      title: "Badges",
+      icon: "trophy-award",
+      color: "#160C21"
+    },
+    { key: "profile", title: "Profile", icon: "account", color: "#160C21" }
+  ];
 
-  _handleIndexChange = index => this.setState({ index });
+  const handleIndexChange = index => setIndex(index);
 
-  _renderScene = BottomNavigation.SceneMap({
+  const renderScene = BottomNavigation.SceneMap({
     journalEntries: JournalEntriesRoute,
     moments: MomentsRoute,
     gold: GoldRoute,
@@ -53,15 +51,11 @@ class Home extends Component {
     profile: ProfileRoute
   });
 
-  render() {
-    return (
-      <BottomNavigation
-        navigationState={this.state}
-        onIndexChange={this._handleIndexChange}
-        renderScene={this._renderScene}
-      />
-    );
-  }
+  return (
+    <BottomNavigation
+      navigationState={{ index: index, routes: routes }}
+      onIndexChange={handleIndexChange}
+      renderScene={renderScene}
+    />
+  );
 }
-
-export default Home;

@@ -19,7 +19,6 @@ import MomentWidget from "./MomentWidget";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
-import { SafeAreaView } from "react-native-safe-area-context";
 import DateTimePicker from "react-native-modal-datetime-picker";
 
 export default class Moments extends Component {
@@ -195,7 +194,7 @@ export default class Moments extends Component {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <StatusBar barStyle={"light-content"} translucent={true} />
         <KeyboardAvoidingView
           style={styles.container}
@@ -319,7 +318,7 @@ export default class Moments extends Component {
             </View>
           )}
         </KeyboardAvoidingView>
-      </SafeAreaView>
+      </View>
     );
   }
 }
@@ -354,9 +353,11 @@ const styles = StyleSheet.create({
     fontSize: 32
   },
   momentWidget: {
+    display: "flex",
+    flex: 1,
     flexDirection: "row",
-    alignSelf: "center",
-    width: "100%"
+    justifyContent: "center",
+    alignSelf: "center"
   },
   actionButtonIcon: {
     fontSize: 20,

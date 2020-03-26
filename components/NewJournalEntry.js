@@ -16,6 +16,7 @@ import Constants from "expo-constants";
 import * as Permissions from "expo-permissions";
 import uuid from "uuid";
 import NavigationService from "./NavigationService";
+import firebase from "../firebase";
 
 class NewJournalEntry extends Component {
   constructor(props) {
@@ -26,22 +27,24 @@ class NewJournalEntry extends Component {
     const { state } = navigation;
     return {
       headerRight: (
-        <Text style={styles.save} onPress={() => state.params.handleSave()}>
-          Save
-        </Text>
+        <View style={styles.headerRightContainer}>
+          <Text style={styles.save} onPress={() => state.params.handleSave()}>
+            Save
+          </Text>
+        </View>
       )
     };
   };
 
   state = {
     image: null,
-    entry: null,
-    title: null
+    title: null,
+    body: null
   };
 
   componentDidMount() {
     this.getPermissionAsync();
-    this.props.navigation.setParams({ handleSave: this.storeData });
+    this.props.navigation.setParams({ handleSave: this.saveNewJournalEntry });
   }
 
   getPermissionAsync = async () => {
@@ -61,117 +64,154 @@ class NewJournalEntry extends Component {
       quality: 1
     });
 
-    console.log(result);
-
     if (!result.cancelled) {
       this.setState({ image: result.uri });
     }
   };
 
-  storeData = async () => {
-    if (this.state.entry !== null) {
-      try {
-        console.log("trying to save new journal entry to local storage");
+  saveNewJournalEntry = async () => {
+    let { title, body, image } = this.state;
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc();
 
-        var options = { year: "numeric", month: "long", day: "numeric" };
-        date = new Date().toLocaleDateString("en-US", options);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    let now = new Date().toLocaleDateString("en-US", options);
 
-        const entryId = `journal_${date}_${uuid.v4()}`;
+    return docRef
+      .set(
+        {
+          title: title,
+          body: body,
+          creationDate: now
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log(docRef.id);
+        console.log(`successfully created journal entry ${docRef.id}`);
+        _this.uploadJournalEntryPicture(image, docRef.id);
+      })
 
-        const journalEntry = {
-          title: this.state.title,
-          body: this.state.entry,
-          image: this.state.image,
-          date: date
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  uploadJournalEntryPicture = async (picture, id) => {
+    let _this = this;
+    if (picture !== null) {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          resolve(xhr.response);
         };
+        xhr.onerror = function(e) {
+          console.log(e);
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", picture, true);
+        xhr.send(null);
+      });
 
-        await AsyncStorage.setItem(entryId, JSON.stringify(journalEntry))
-          .then(() => {
-            console.log(`new journal entry ${entryId} saved to storage`);
-            if (
-              this.props.navigation.state.params.parent ===
-              "MomentVisualization"
-                ? true
-                : false
-            ) {
-              NavigationService.navigate("Home");
-            } else {
-              this.props.navigation.state.params.onGoBack();
-              this.props.navigation.goBack(null);
-            }
-          })
-          .catch(e => {
-            console.log(e);
-          });
-      } catch (e) {
-        console.log(e.message);
-      }
+      const userId = firebase.auth().currentUser.uid;
+      var storageRef = firebase.storage().ref();
+      var journalEntryPictureRef = storageRef.child(
+        `journalPictures/${userId}/${id}`
+      );
+      let uploadJournalEntryPictureTask = journalEntryPictureRef.put(blob);
+
+      uploadJournalEntryPictureTask.on(
+        "state_changed",
+        function(snapshot) {
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED:
+              console.log("Upload is paused");
+              break;
+            case firebase.storage.TaskState.RUNNING:
+              console.log("Upload is running");
+              break;
+            default:
+              break;
+          }
+        },
+        function(error) {
+          console.log(error);
+          blob.close();
+        },
+        function() {
+          blob.close();
+          uploadJournalEntryPictureTask.snapshot.ref
+            .getDownloadURL()
+            .then(function(downloadURL) {
+              console.log("File available at", downloadURL);
+              _this.registerJournalEntryPictureUrl(downloadURL, id);
+            });
+        }
+      );
     } else {
-      alert("please enter a reflection");
+      _this.props.navigation.state.params.onGoBack();
+      _this.props.navigation.goBack(null);
     }
+  };
+
+  registerJournalEntryPictureUrl = async (downloadUrl, id) => {
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc(id);
+
+    return docRef
+      .set(
+        {
+          image: downloadUrl
+        },
+        { merge: true }
+      )
+      .then(function() {
+        console.log(
+          "successfully updated journal entry with picture reference"
+        );
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
   };
 
   render() {
     let { image } = this.state;
 
-    if (image == null) {
-      return (
-        <SafeAreaView style={styles.container}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior="padding"
-            enabled
-          >
-            <View style={styles.container}>
-              <View style={styles.banner}>
-                <TouchableOpacity
-                  style={styles.imageContainer}
-                  onPress={this.pickImage}
-                >
-                  <Text style={styles.pickImageText}> Pick an image</Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.headingContainer}>
-                <TextInput
-                  style={styles.headingInput}
-                  placeholder="Title"
-                  onChangeText={text => this.setState({ title: text })}
-                  value={this.state.title}
-                  numberOfLines={1}
-                />
-              </View>
-
-              <View style={styles.entryContainer}>
-                <TextInput
-                  style={styles.entryInput}
-                  placeholder="Your entry"
-                  onChangeText={text => this.setState({ entry: text })}
-                  value={this.state.entry}
-                  multiline={true}
-                />
-              </View>
-            </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      );
-    } else {
-      return (
-        <SafeAreaView style={styles.container}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior="padding"
-            enabled
-          >
+    return (
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior="padding"
+          enabled
+        >
+          <View style={styles.container}>
             <View style={styles.banner}>
-              {image && (
-                <TouchableOpacity
-                  style={styles.imageContainer}
-                  onPress={this.pickImage}
-                >
+              <TouchableOpacity
+                style={styles.imageContainer}
+                onPress={this.pickImage}
+              >
+                {image ? (
                   <Image source={{ uri: image }} style={styles.image} />
-                </TouchableOpacity>
-              )}
+                ) : (
+                  <Text style={styles.pickImageText}> Pick an image</Text>
+                )}
+              </TouchableOpacity>
             </View>
 
             <View style={styles.headingContainer}>
@@ -188,15 +228,15 @@ class NewJournalEntry extends Component {
               <TextInput
                 style={styles.entryInput}
                 placeholder="Your entry"
-                onChangeText={text => this.setState({ entry: text })}
-                value={this.state.entry}
+                onChangeText={text => this.setState({ body: text })}
+                value={this.state.body}
                 multiline={true}
               />
             </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      );
-    }
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
   }
 }
 
@@ -225,11 +265,17 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%"
   },
+  headerRightContainer: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center"
+  },
   save: {
     color: "rgba(0, 122, 255,1.0)",
     fontSize: 18,
-    marginRight: 8,
-    backgroundColor: "rgba(0, 0, 0, 0.0)"
+    padding: 15,
+    marginRight: 10
   },
   cancelButton: {
     marginRight: 8,

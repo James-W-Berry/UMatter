@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React from "react";
 import OnboardingScreens from "./Onboarding";
 import LandingPage from "./LandingPage";
 import Home from "./Home";
@@ -64,28 +64,14 @@ const MainNavigator = createStackNavigator({
 
 const AppContainer = createAppContainer(MainNavigator);
 
-class Main extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      isFirstLaunch: false,
-      hasCheckedAsyncStorage: false,
-      isLoggedIn: false,
-      isLoading: true
-    };
-  }
-
-  async componentWillMount() {}
-
-  render() {
-    return (
-      <AppContainer
-        ref={navigatorRef => {
-          NavigationService.setTopLevelNavigator(navigatorRef);
-        }}
-      />
-    );
-  }
+function Main() {
+  return (
+    <AppContainer
+      ref={navigatorRef => {
+        NavigationService.setTopLevelNavigator(navigatorRef);
+      }}
+    />
+  );
 }
 
 export default Main;

@@ -58,7 +58,7 @@ export default class SmileFile extends Component {
 
   render() {
     return (
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <StatusBar barStyle={"light-content"} translucent={true} />
         <View style={styles.fileViewer}>
           {this.state.showFiles && (
@@ -105,7 +105,7 @@ export default class SmileFile extends Component {
             />
           </TouchableOpacity>
         </View>
-      </SafeAreaView>
+      </View>
     );
   }
 }

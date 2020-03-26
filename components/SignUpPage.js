@@ -1,29 +1,27 @@
 import {
   Image,
-  Text,
-  View,
-  StyleSheet,
   Alert,
   TextInput,
-  StatusBar
+  StatusBar,
+  ActivityIndicator,
+  StyleSheet,
+  Text,
+  View
 } from "react-native";
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-native-elements";
 import NavigationService from "./NavigationService";
 import * as firebase from "firebase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-class SignUpPage extends Component {
-  constructor(props) {
-    super(props);
+export default function SignUpPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-    this.state = {
-      email: "",
-      password: ""
-    };
-  }
-
-  createNewUser(username, email, password) {
+  function onSignUp(username, email, password) {
+    setIsLoading(true);
     const db = firebase.firestore();
 
     firebase
@@ -35,31 +33,17 @@ class SignUpPage extends Component {
         db.collection("users")
           .doc(userId)
           .set({
-            username: username,
-            groups: { public: true }
-          })
-          .then(function() {
-            console.log("successfully joined the public group");
+            username: username
           })
           .catch(function(error) {
+            setIsLoading(false);
             console.log(error);
           });
-
-        db.collection("groups")
-          .doc("public")
-          .set(
-            {
-              members: {
-                [userId]: true
-              }
-            },
-            { merge: true }
-          );
-
-        console.log("sign up successful, navigating to Home");
-        NavigationService.navigate("Home");
+        console.log("sign up successful");
+        NavigationService.navigate("Onboarding");
       })
       .catch(function(error) {
+        setIsLoading(false);
         var errorCode = error.code;
         var errorMessage = error.message;
         console.log(`${errorCode}: ${errorMessage}`);
@@ -67,93 +51,99 @@ class SignUpPage extends Component {
       });
   }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle={"light-content"} translucent={true} />
-        <View style={styles.header}>
-          <Text
-            style={{
-              fontSize: 24,
-              color: "#EDEDED",
-              fontFamily: "montserrat-regular"
-            }}
-          >
-            Sign Up
-          </Text>
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={"light-content"} translucent={true} />
+      <View style={styles.header}>
+        <Text
+          style={{
+            fontSize: 24,
+            color: "#EDEDED",
+            fontFamily: "montserrat-regular"
+          }}
+        >
+          Sign Up
+        </Text>
+      </View>
+
+      <View style={styles.banner}>
+        <Image
+          source={require("../assets/umatter_banner.png")}
+          style={styles.image}
+        />
+      </View>
+
+      <View style={styles.searchSection}>
+        <MaterialCommunityIcons name="account" size={32} color="white" />
+
+        <TextInput
+          style={{
+            borderBottomColor: "#EDEDED",
+            borderBottomWidth: 1,
+            width: "70%",
+            color: "#EDEDED",
+            margin: 10,
+            fontSize: 16,
+            fontFamily: "montserrat-regular"
+          }}
+          placeholder="Username"
+          placeholderTextColor="#ededed80"
+          onChangeText={text => setUsername(text)}
+          underlineColorAndroid="transparent"
+          value={username}
+        />
+      </View>
+
+      <View style={styles.searchSection}>
+        <MaterialCommunityIcons name="email" size={32} color="white" />
+
+        <TextInput
+          style={{
+            borderBottomColor: "#EDEDED",
+            borderBottomWidth: 1,
+            width: "70%",
+            color: "#EDEDED",
+            margin: 10,
+            fontSize: 16,
+            fontFamily: "montserrat-regular"
+          }}
+          placeholder="Email"
+          autoCompleteType="email"
+          placeholderTextColor="#ededed80"
+          onChangeText={text => setEmail(text)}
+          underlineColorAndroid="transparent"
+          value={email}
+        />
+      </View>
+
+      <View style={styles.searchSection}>
+        <MaterialCommunityIcons name="account-key" size={32} color="white" />
+
+        <TextInput
+          style={{
+            borderBottomColor: "#ededed",
+            borderBottomWidth: 1,
+            width: "70%",
+            color: "#EDEDED",
+            margin: 10,
+            fontSize: 16,
+            fontFamily: "montserrat-regular"
+          }}
+          placeholder="Password"
+          autoCompleteType="password"
+          secureTextEntry={true}
+          placeholderTextColor="#ededed80"
+          onChangeText={text => setPassword(text)}
+          underlineColorAndroid="transparent"
+          value={password}
+        />
+      </View>
+
+      {isLoading ? (
+        <View style={[styles.signUpSpinner, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#509C96" />
         </View>
-
-        <View style={styles.banner}>
-          <Image
-            source={require("../assets/umatter_banner.png")}
-            style={styles.image}
-          />
-        </View>
-
-        <View style={styles.searchSection}>
-          <MaterialCommunityIcons name="email" size={32} color="white" />
-
-          <TextInput
-            style={{
-              borderBottomColor: "#EDEDED",
-              borderBottomWidth: 1,
-              width: "70%",
-              color: "#EDEDED",
-              margin: 10,
-              fontSize: 16,
-              fontFamily: "montserrat-regular"
-            }}
-            placeholder="Username"
-            placeholderTextColor="#ededed80"
-            onChangeText={text => this.setState({ username: text })}
-            underlineColorAndroid="transparent"
-            value={this.state.username}
-          />
-        </View>
-
-        <View style={styles.searchSection}>
-          <MaterialCommunityIcons name="email" size={32} color="white" />
-
-          <TextInput
-            style={{
-              borderBottomColor: "#EDEDED",
-              borderBottomWidth: 1,
-              width: "70%",
-              color: "#EDEDED",
-              margin: 10,
-              fontSize: 16,
-              fontFamily: "montserrat-regular"
-            }}
-            placeholder="Email"
-            placeholderTextColor="#ededed80"
-            onChangeText={text => this.setState({ email: text })}
-            underlineColorAndroid="transparent"
-            value={this.state.email}
-          />
-        </View>
-
-        <View style={styles.searchSection}>
-          <MaterialCommunityIcons name="account-key" size={32} color="white" />
-
-          <TextInput
-            style={{
-              borderBottomColor: "#ededed",
-              borderBottomWidth: 1,
-              width: "70%",
-              color: "#EDEDED",
-              margin: 10,
-              fontSize: 16,
-              fontFamily: "montserrat-regular"
-            }}
-            placeholder="Password"
-            secureTextEntry={true}
-            placeholderTextColor="#ededed80"
-            onChangeText={text => this.setState({ password: text })}
-            underlineColorAndroid="transparent"
-            value={this.state.password}
-          />
-        </View>
-
+      ) : (
         <View style={styles.signUpButton}>
           <Button
             title={"Create New Account"}
@@ -162,18 +152,12 @@ class SignUpPage extends Component {
               justifyContent: "center"
             }}
             buttonStyle={styles.button}
-            onPress={() =>
-              this.createNewUser(
-                this.state.username,
-                this.state.email,
-                this.state.password
-              )
-            }
+            onPress={() => onSignUp(username, email, password)}
           />
         </View>
-      </View>
-    );
-  }
+      )}
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -181,6 +165,15 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     backgroundColor: "#2C239A"
+  },
+  signUpSpinner: {
+    flex: 3,
+    justifyContent: "center"
+  },
+  horizontal: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10
   },
   header: {
     flex: 1,
@@ -233,5 +226,3 @@ const styles = StyleSheet.create({
     color: "#EDEDED"
   }
 });
-
-export default SignUpPage;

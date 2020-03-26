@@ -40,7 +40,7 @@ const Done = () => (
 const Skip = () => (
   <Button
     title={"Skip"}
-    onPress={() => NavigationService.navigate("Home")}
+    // onPress={() => NavigationService.navigate("Home")}
     buttonStyle={{
       backgroundColor: "#44CADD"
     }}
@@ -67,7 +67,7 @@ const Next = ({ ...props }) => (
   />
 );
 
-class OnboardingScreens extends Component {
+export default class OnboardingScreens extends Component {
   render() {
     return (
       <Onboarding
@@ -115,5 +115,3 @@ class OnboardingScreens extends Component {
     );
   }
 }
-
-export default OnboardingScreens;

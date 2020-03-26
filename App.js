@@ -1,73 +1,65 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import Main from "./components/Main";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import * as firebase from "firebase";
-import getEnvVars from "./environment";
+import firebase from "./firebase";
+import "firebase/auth";
 import * as Font from "expo-font";
-import checkIfFirstLaunch from "./utils/checkIfFirstLaunch";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import NavigationService from "./components/NavigationService";
-envVars = getEnvVars("dev");
 
-const firebaseConfig = {
-  apiKey: envVars.API_KEY,
-  authDomain: envVars.AUTH_DOMAIN,
-  databaseURL: envVars.DATABASE_URL,
-  projectId: envVars.PROJECT_ID,
-  storageBucket: envVars.STORAGE_BUCKET,
-  messagingSenderId: envVars.MESSAGING_SENDER_ID,
-  appId: envVars.APP_ID,
-  measurementId: envVars.MEASUREMENT_ID
-};
+export default function App() {
+  const [user, setUser] = useState({ loggedIn: false, isLoaded: false });
+  const [fontIsLoaded, setFontIsLoaded] = useState(false);
 
-firebase.initializeApp(firebaseConfig);
-
-class App extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      fontLoaded: false,
-      isFirstLaunch: false,
-      hasCheckedAsyncStorage: false,
-      isLoggedIn: false,
-      isLoading: true
-    };
-  }
-
-  async componentDidMount() {
+  async function loadFont() {
     await Font.loadAsync({
       "montserrat-regular": require("./assets/fonts/Montserrat-Regular.ttf"),
       "montserrat-medium": require("./assets/fonts/Montserrat-Medium.ttf")
     });
 
-    this.setState({ fontLoaded: true });
+    setFontIsLoaded(true);
+  }
 
-    const isFirstLaunch = await checkIfFirstLaunch();
-    this.setState({ isFirstLaunch, hasCheckedAsyncStorage: true });
-
-    let _this = this;
+  useEffect(() => {
+    loadFont();
 
     firebase.auth().onAuthStateChanged(function(user) {
       if (user) {
-        _this.setState({ isLoggedIn: true });
-        _this.setState({ isLoading: false });
+        setUser({ loggedIn: true, isLoaded: true });
         NavigationService.navigate("Home");
       } else {
-        _this.setState({ isLoggedIn: false });
-        _this.setState({ isLoading: false });
+        setUser({ loggedIn: false, isLoaded: true });
         NavigationService.navigate("SignInPage");
       }
     });
-  }
+  }, []);
 
-  render() {
-    const { fontLoaded, hasCheckedAsyncStorage, isLoading } = this.state;
+  if (fontIsLoaded && user.isLoaded) {
     return (
       <SafeAreaProvider>
-        {fontLoaded && hasCheckedAsyncStorage && !isLoading ? <Main /> : null}
+        <Main />
       </SafeAreaProvider>
     );
   }
+
+  return (
+    <SafeAreaProvider>
+      <View style={[styles.container, styles.horizontal]}>
+        <ActivityIndicator size="large" color="#509C96" />
+      </View>
+    </SafeAreaProvider>
+  );
 }
 
-export default App;
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    backgroundColor: "#2C239A"
+  },
+  horizontal: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    padding: 10
+  }
+});

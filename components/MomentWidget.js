@@ -22,7 +22,8 @@ export default class MomentWidget extends Component {
       time: this.props.moment.time,
       id: this.props.id,
       isDateTimePickerVisible: false,
-      showMomentEditor: false
+      showMomentEditor: false,
+      widgetHeight: "100%"
     };
   }
 
@@ -99,6 +100,9 @@ export default class MomentWidget extends Component {
     if (this.state.showMomentEditor) {
       this.storeData();
       this.scheduleMomentNotification();
+      this.setState({ widgetHeight: "200%" });
+    } else {
+      this.setState({ widgetHeight: "100%" });
     }
     this.setState({
       showMomentEditor: !this.state.showMomentEditor
@@ -127,6 +131,20 @@ export default class MomentWidget extends Component {
     }
   };
 
+  widgetStyle = function() {
+    return {
+      justifyContent: "center",
+      flexDirection: "row",
+      width: "75%",
+      height: this.state.widgetHeight,
+      alignSelf: "center",
+      backgroundColor: "#509C96",
+      padding: 15,
+      marginTop: 15,
+      borderRadius: 20
+    };
+  };
+
   render() {
     let date = new Date(this.state.time);
     let amOrPm = date.getHours() >= 12 ? "pm" : "am";
@@ -136,130 +154,89 @@ export default class MomentWidget extends Component {
     let formattedDate = hours + ":" + minutes + " " + amOrPm;
 
     return (
-      <SafeAreaView
-        style={{
-          justifyContent: "center",
-          width: "100%"
-        }}
-      >
-        <KeyboardAvoidingView
-          behavior="padding"
-          enabled
-          style={{
-            justifyContent: "center",
-            width: "100%"
-          }}
-          style={{
-            justifyContent: "center",
-            width: "100%"
-          }}
-        >
-          <View
-            style={{
-              justifyContent: "center",
-              width: "100%"
-            }}
-          >
+      <View style={this.widgetStyle()}>
+        {/* <TouchableOpacity style={this.widgetStyle()} onPress={this.editMoment}>
+          <View style={{ flexDirection: "column" }}>
             <TouchableOpacity
-              style={styles.momentWidget}
-              onPress={this.editMoment}
+              onPress={this.showDateTimePicker}
+              title="Show datetime picker"
             >
-              <View style={{ flexDirection: "column" }}>
-                <TouchableOpacity
-                  onPress={this.showDateTimePicker}
-                  title="Show datetime picker"
-                >
-                  <Text
-                    style={{
-                      fontSize: 20,
-                      color: "#EFEFEF",
-                      fontFamily: "montserrat-regular"
-                    }}
-                  >
-                    {formattedDate}
-                  </Text>
-                </TouchableOpacity>
-                {!this.state.showMomentEditor && (
-                  <Text
-                    style={{ fontSize: 16, color: "#EFEFEF" }}
-                    placeholder="Label"
-                  >
-                    {this.state.title}
-                  </Text>
-                )}
-              </View>
-              <DateTimePicker
-                isVisible={this.state.isDateTimePickerVisible}
-                onConfirm={this.handleDatePicked}
-                onCancel={this.hideDateTimePicker}
-                mode="time"
-                isDarkModeEnabled={true}
-              />
-
-              <View style={styles.deleteMomentButton}>
-                <TouchableOpacity
-                  title="Delete"
-                  onPress={() => {
-                    this.props.deleteMoment(this.state.moment.id);
-                    this.cancelScheduledNotification();
-                  }}
-                >
-                  <Icon
-                    name="delete"
-                    type="material-community"
-                    color="#EFEFEF"
-                  />
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.expandMomentButton}>
-                <TouchableOpacity title="Edit" onPress={this.editMoment}>
-                  {this.state.showMomentEditor && (
-                    <Icon
-                      name="chevron-up"
-                      type="material-community"
-                      color="#EFEFEF"
-                    />
-                  )}
-                  {!this.state.showMomentEditor && (
-                    <Icon
-                      name="chevron-down"
-                      type="material-community"
-                      color="#EFEFEF"
-                    />
-                  )}
-                </TouchableOpacity>
-              </View>
+              <Text
+                style={{
+                  fontSize: 20,
+                  color: "#EFEFEF",
+                  fontFamily: "montserrat-regular"
+                }}
+              >
+                {formattedDate}
+              </Text>
             </TouchableOpacity>
-
-            {this.state.showMomentEditor && (
-              <View style={styles.editMomentWidget}>
-                <TextInput
-                  style={styles.entryInput}
-                  placeholder="Label"
-                  placeholderTextColor="#EFEFEF"
-                  onChangeText={text => this.setState({ title: text })}
-                  value={this.state.title}
-                />
-              </View>
+            {!this.state.showMomentEditor && (
+              <Text
+                style={{ fontSize: 16, color: "#EFEFEF" }}
+                placeholder="Label"
+              >
+                {this.state.title}
+              </Text>
             )}
           </View>
-        </KeyboardAvoidingView>
-      </SafeAreaView>
+          <DateTimePicker
+            isVisible={this.state.isDateTimePickerVisible}
+            onConfirm={this.handleDatePicked}
+            onCancel={this.hideDateTimePicker}
+            mode="time"
+            isDarkModeEnabled={true}
+          />
+
+          <View style={styles.deleteMomentButton}>
+            <TouchableOpacity
+              title="Delete"
+              onPress={() => {
+                this.props.deleteMoment(this.state.moment.id);
+                this.cancelScheduledNotification();
+              }}
+            >
+              <Icon name="delete" type="material-community" color="#EFEFEF" />
+            </TouchableOpacity>
+          </View>
+
+          <View style={styles.expandMomentButton}>
+            <TouchableOpacity title="Edit" onPress={this.editMoment}>
+              {this.state.showMomentEditor && (
+                <Icon
+                  name="chevron-up"
+                  type="material-community"
+                  color="#EFEFEF"
+                />
+              )}
+              {!this.state.showMomentEditor && (
+                <Icon
+                  name="chevron-down"
+                  type="material-community"
+                  color="#EFEFEF"
+                />
+              )}
+            </TouchableOpacity>
+          </View>
+        </TouchableOpacity>
+
+        {this.state.showMomentEditor && (
+          <View style={styles.editMomentWidget}>
+            <TextInput
+              style={styles.entryInput}
+              placeholder="Label"
+              placeholderTextColor="#EFEFEF"
+              onChangeText={text => this.setState({ title: text })}
+              value={this.state.title}
+            />
+          </View>
+        )} */}
+      </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  momentWidget: {
-    flexDirection: "row",
-    width: "75%",
-    alignSelf: "center",
-    backgroundColor: "#509C96",
-    padding: 15,
-    marginTop: 15,
-    borderRadius: 20
-  },
   editMomentWidget: {
     flexDirection: "column",
     width: "75%",

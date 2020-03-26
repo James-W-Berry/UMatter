@@ -5,25 +5,22 @@ import {
   StyleSheet,
   Alert,
   TextInput,
-  StatusBar
+  StatusBar,
+  ActivityIndicator
 } from "react-native";
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "react-native-elements";
 import NavigationService from "./NavigationService";
 import * as firebase from "firebase";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-class SignInPage extends Component {
-  constructor(props) {
-    super(props);
+export default function SignInPage() {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-    this.state = {
-      email: "",
-      password: ""
-    };
-  }
-
-  signIn(email, password) {
+  function signIn(email, password) {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
@@ -35,7 +32,7 @@ class SignInPage extends Component {
       });
   }
 
-  resetPassword(email) {
+  function resetPassword(email) {
     firebase
       .auth()
       .sendPasswordResetEmail(email)
@@ -49,73 +46,80 @@ class SignInPage extends Component {
       });
   }
 
-  render() {
-    return (
-      <View style={styles.container}>
-        <StatusBar barStyle={"light-content"} translucent={true} />
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={"light-content"} translucent={true} />
 
-        <View style={styles.header}>
-          <Text
-            style={{
-              fontSize: 24,
-              color: "#EDEDED",
-              fontFamily: "montserrat-regular"
-            }}
-          >
-            Sign In
-          </Text>
+      <View style={styles.header}>
+        <Text
+          style={{
+            fontSize: 24,
+            color: "#EDEDED",
+            fontFamily: "montserrat-regular"
+          }}
+        >
+          Sign In
+        </Text>
+      </View>
+
+      <View style={styles.banner}>
+        <Image
+          source={require("../assets/umatter_banner.png")}
+          style={styles.image}
+        />
+      </View>
+
+      <View style={styles.searchSection}>
+        <MaterialCommunityIcons name="email" size={32} color="white" />
+
+        <TextInput
+          style={{
+            borderBottomColor: "#EDEDED",
+            borderBottomWidth: 1,
+            width: "70%",
+            color: "#EDEDED",
+            margin: 10,
+            fontSize: 16,
+            fontFamily: "montserrat-regular"
+          }}
+          placeholder="Email"
+          autoCompleteType="email"
+          required
+          placeholderTextColor="#ededed80"
+          onChangeText={text => setEmail(text)}
+          underlineColorAndroid="transparent"
+          value={email}
+        />
+      </View>
+
+      <View style={styles.searchSection}>
+        <MaterialCommunityIcons name="account-key" size={32} color="white" />
+
+        <TextInput
+          style={{
+            borderBottomColor: "#ededed",
+            borderBottomWidth: 1,
+            width: "70%",
+            color: "#EDEDED",
+            margin: 10,
+            fontSize: 16,
+            fontFamily: "montserrat-regular"
+          }}
+          placeholder="Password"
+          autoCompleteType="password"
+          secureTextEntry={true}
+          placeholderTextColor="#ededed80"
+          onChangeText={text => setPassword(text)}
+          underlineColorAndroid="transparent"
+          value={password}
+        />
+      </View>
+
+      {isLoading ? (
+        <View style={[styles.signUpSpinner, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#509C96" />
         </View>
-
-        <View style={styles.banner}>
-          <Image
-            source={require("../assets/umatter_banner.png")}
-            style={styles.image}
-          />
-        </View>
-
-        <View style={styles.searchSection}>
-          <MaterialCommunityIcons name="email" size={32} color="white" />
-
-          <TextInput
-            style={{
-              borderBottomColor: "#EDEDED",
-              borderBottomWidth: 1,
-              width: "70%",
-              color: "#EDEDED",
-              margin: 10,
-              fontSize: 16,
-              fontFamily: "montserrat-regular"
-            }}
-            placeholder="Email"
-            placeholderTextColor="#ededed80"
-            onChangeText={text => this.setState({ email: text })}
-            underlineColorAndroid="transparent"
-            value={this.state.email}
-          />
-        </View>
-
-        <View style={styles.searchSection}>
-          <MaterialCommunityIcons name="account-key" size={32} color="white" />
-
-          <TextInput
-            style={{
-              borderBottomColor: "#ededed",
-              borderBottomWidth: 1,
-              width: "70%",
-              color: "#EDEDED",
-              margin: 10,
-              fontSize: 16,
-              fontFamily: "montserrat-regular"
-            }}
-            placeholder="Password"
-            secureTextEntry={true}
-            placeholderTextColor="#ededed80"
-            onChangeText={text => this.setState({ password: text })}
-            underlineColorAndroid="transparent"
-            value={this.state.password}
-          />
-        </View>
-
+      ) : (
         <View style={styles.signInButton}>
           <Button
             title={"Sign In"}
@@ -124,41 +128,41 @@ class SignInPage extends Component {
               justifyContent: "center"
             }}
             buttonStyle={styles.button}
-            onPress={() => this.signIn(this.state.email, this.state.password)}
+            onPress={() => signIn(email, password)}
           />
         </View>
+      )}
 
-        <View style={styles.forgotPassword}>
-          <Text
-            style={{
-              color: "#509C96",
-              fontWeight: "bold",
-              fontFamily: "montserrat-medium"
-            }}
-            onPress={() => this.resetPassword(this.state.email)}
-          >
-            Forgot your password?
-          </Text>
-        </View>
-
-        <View style={styles.signUp}>
-          <Text style={{ color: "#EDEDED", fontFamily: "montserrat-regular" }}>
-            Don't have an account?{" "}
-          </Text>
-          <Text
-            style={{
-              color: "#509C96",
-              fontWeight: "bold",
-              fontFamily: "montserrat-medium"
-            }}
-            onPress={() => NavigationService.navigate("SignUpPage")}
-          >
-            Sign Up
-          </Text>
-        </View>
+      <View style={styles.forgotPassword}>
+        <Text
+          style={{
+            color: "#509C96",
+            fontWeight: "bold",
+            fontFamily: "montserrat-medium"
+          }}
+          onPress={() => resetPassword(email)}
+        >
+          Forgot your password?
+        </Text>
       </View>
-    );
-  }
+
+      <View style={styles.signUp}>
+        <Text style={{ color: "#EDEDED", fontFamily: "montserrat-regular" }}>
+          Don't have an account?{" "}
+        </Text>
+        <Text
+          style={{
+            color: "#509C96",
+            fontWeight: "bold",
+            fontFamily: "montserrat-medium"
+          }}
+          onPress={() => NavigationService.navigate("SignUpPage")}
+        >
+          Sign Up
+        </Text>
+      </View>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
@@ -166,6 +170,10 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "column",
     backgroundColor: "#2C239A"
+  },
+  signUpSpinner: {
+    flex: 3,
+    justifyContent: "center"
   },
   header: {
     flex: 2,
@@ -224,5 +232,3 @@ const styles = StyleSheet.create({
     color: "#EDEDED"
   }
 });
-
-export default SignInPage;

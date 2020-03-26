@@ -12,19 +12,20 @@ import React, { Component } from "react";
 import * as ImagePicker from "expo-image-picker";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import * as Permissions from "expo-permissions";
+import firebase from "../firebase";
 
 class JournalEntry extends Component {
   constructor(props) {
     super(props);
 
-    let { params } = props.navigation.state;
+    let entry = props.navigation.state.params.entry;
 
     this.state = {
-      key: params.key,
-      title: params.data.title,
-      body: params.data.body,
-      date: params.data.date,
-      image: params.data.image,
+      key: entry.id,
+      title: entry.title,
+      body: entry.body,
+      date: entry.creationDate,
+      image: entry.image,
       isLoading: false
     };
   }
@@ -51,21 +52,45 @@ class JournalEntry extends Component {
 
   componentDidMount() {
     this.getPermissionAsync();
-    this.props.navigation.setParams({ handleSave: this.storeData });
+    this.props.navigation.setParams({ handleSave: this.updateEntry });
     this.props.navigation.setParams({ handleDelete: this.deleteEntry });
   }
 
   deleteEntry = async () => {
-    try {
-      console.log(`deleting entry ${this.state.key}`);
-      AsyncStorage.removeItem(this.state.key).then(response => {
-        console.log(response);
-        this.props.navigation.state.params.onGoBack();
-        this.props.navigation.goBack(null);
+    let id = this.state.key;
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc(this.state.key);
+
+    docRef
+      .delete()
+      .then(() => {
+        console.log(`successfully deleted journal entry ${docRef.id}`);
+      })
+      .catch(function(error) {
+        console.log(error);
       });
-    } catch (e) {
-      console.log(e.message);
-    }
+
+    const storageRef = firebase
+      .storage()
+      .ref()
+      .child(`journalPictures/${userId}/${id}`);
+
+    return storageRef
+      .delete()
+      .then(() => {
+        console.log("successfully deleted journal entry image");
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
   };
 
   getPermissionAsync = async () => {
@@ -86,34 +111,164 @@ class JournalEntry extends Component {
     console.log(result);
 
     if (!result.cancelled) {
-      this.setState({ image: result.uri });
+      this.setState({ newImage: result.uri, image: result.uri });
     }
   };
 
-  storeData = async () => {
-    if (this.state.body !== null) {
-      console.log("trying to save new journal entry to local storage");
+  updateEntry = async () => {
+    let { key, title, body, image, newImage } = this.state;
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc(key);
 
-      const journalEntry = {
-        title: this.state.title,
-        body: this.state.body,
-        image: this.state.image,
-        date: this.state.date
-      };
-      await AsyncStorage.setItem(this.state.key, JSON.stringify(journalEntry))
-        .then(() => {
-          console.log(
-            `updated journal entry ${this.state.key} saved to storage`
-          );
-          this.props.navigation.state.params.onGoBack();
-          this.props.navigation.goBack(null);
-        })
-        .catch(e => {
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    let now = new Date().toLocaleDateString("en-US", options);
+
+    return docRef
+      .set(
+        {
+          title: title,
+          body: body,
+          modifyDate: now
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log(`successfully created journal entry ${docRef.id}`);
+        if (newImage) {
+          _this.uploadJournalEntryPicture(newImage, docRef.id);
+        } else {
+          _this.props.navigation.state.params.onGoBack();
+          _this.props.navigation.goBack(null);
+        }
+      })
+
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  uploadJournalEntryPicture = async (picture, id) => {
+    let _this = this;
+    if (picture !== null) {
+      const blob = await new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.onload = function() {
+          resolve(xhr.response);
+        };
+        xhr.onerror = function(e) {
           console.log(e);
-        });
-    } else {
-      alert("please enter a reflection");
+          reject(new TypeError("Network request failed"));
+        };
+        xhr.responseType = "blob";
+        xhr.open("GET", picture, true);
+        xhr.send(null);
+      });
+
+      const userId = firebase.auth().currentUser.uid;
+      var storageRef = firebase.storage().ref();
+      var journalEntryPictureRef = storageRef.child(
+        `journalPictures/${userId}/${id}`
+      );
+      let uploadJournalEntryPictureTask = journalEntryPictureRef.put(blob);
+
+      uploadJournalEntryPictureTask.on(
+        "state_changed",
+        function(snapshot) {
+          switch (snapshot.state) {
+            case firebase.storage.TaskState.PAUSED:
+              console.log("Upload is paused");
+              break;
+            case firebase.storage.TaskState.RUNNING:
+              console.log("Upload is running");
+              break;
+            default:
+              break;
+          }
+        },
+        function(error) {
+          console.log(error);
+          blob.close();
+        },
+        function() {
+          blob.close();
+          uploadJournalEntryPictureTask.snapshot.ref
+            .getDownloadURL()
+            .then(function(downloadURL) {
+              console.log("File available at", downloadURL);
+              _this.registerJournalEntryPictureUrl(downloadURL, id);
+            });
+        }
+      );
     }
+  };
+
+  registerJournalEntryPictureUrl = async (downloadUrl, id) => {
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc(id);
+
+    return docRef
+      .set(
+        {
+          image: downloadUrl
+        },
+        { merge: true }
+      )
+      .then(function() {
+        console.log(
+          "successfully updated journal entry with picture reference"
+        );
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
+      })
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  saveNewJournalEntry = async () => {
+    let { title, body, image, key } = this.state;
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .doc(key);
+
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    let now = new Date().toLocaleDateString("en-US", options);
+
+    return docRef
+      .set(
+        {
+          title: title,
+          body: body,
+          modifyDate: now
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log(docRef.id);
+        console.log(`successfully updated journal entry ${docRef.id}`);
+        _this.uploadJournalEntryPicture(image, docRef.id);
+      })
+
+      .catch(function(error) {
+        console.log(error);
+      });
   };
 
   render() {
@@ -229,21 +384,22 @@ const styles = StyleSheet.create({
     height: "100%"
   },
   headerRightContainer: {
-    flex: 1,
+    display: "flex",
     flexDirection: "row",
-    padding: 8
+    justifyContent: "center",
+    alignItems: "center"
   },
   save: {
     color: "rgba(0, 122, 255,1.0)",
     fontSize: 18,
-    marginRight: 8,
-    backgroundColor: "rgba(0, 0, 0, 0.0)"
+    padding: 15,
+    marginRight: 10
   },
   delete: {
     color: "red",
     fontSize: 18,
-    marginRight: 20,
-    backgroundColor: "rgba(0, 0, 0, 0.0)"
+    padding: 15,
+    marginRight: 15
   },
   headingContainer: {
     backgroundColor: "#f7f7f8",

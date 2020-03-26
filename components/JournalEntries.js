@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   AsyncStorage,
   Text,
@@ -7,155 +7,118 @@ import {
   TouchableOpacity,
   FlatList,
   ScrollView,
-  RefreshControl
+  ActivityIndicator
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
-import { SafeAreaView } from "react-native-safe-area-context";
+import firebase from "../firebase";
 import { StatusBar } from "react-native";
 
-class JournalEntries extends Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      isLoading: false,
-      journalEntries: [],
-      debugMode: false
-    };
-  }
-
-  componentDidMount() {
-    this.retrieveJournalEntries();
-  }
-
-  createJournalEntry(item) {
-    if (item !== undefined) {
-      const key = item[0];
-      const data = JSON.parse(item[1]);
-
-      return (
-        <View key={key}>
-          <TouchableOpacity onPress={() => this.onSelect(item)}>
-            <Card image={{ uri: data.image }}>
-              <Text style={styles.title}>{data.title}</Text>
-              <Text
-                style={styles.caption}
-                numberOfLines={1}
-                style={{
-                  marginBottom: 10
-                }}
-              >
-                {data.body}
-              </Text>
-              <Text style={styles.date}>{data.date}</Text>
-            </Card>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    return null;
-  }
-
-  onSelect(item) {
-    const key = item[0];
-    const data = JSON.parse(item[1]);
-    NavigationService.navigate("JournalEntry", {
-      key,
-      data,
-      onGoBack: () => {
-        this.retrieveJournalEntries();
-      }
-    });
-  }
-
-  retrieveJournalEntries() {
-    this.setState({ isLoading: true });
-
-    try {
-      AsyncStorage.getAllKeys().then(async keys => {
-        let journalEntryKeys = [];
-
-        for (const key in keys) {
-          if (keys[key].includes("journal")) {
-            journalEntryKeys.push(keys[key]);
-          }
-        }
-
-        await AsyncStorage.multiGet(journalEntryKeys).then(result => {
-          this.setState({ journalEntries: result });
-        });
-      });
-
-      this.setState({ isLoading: false });
-    } catch (e) {
-      this.setState({
-        isLoading: false
-      });
-      console.log(e.message);
-    }
-  }
-
-  clearStorage() {
-    AsyncStorage.clear();
-  }
-
-  render() {
+function createJournalEntry(entry) {
+  if (entry) {
     return (
-      <SafeAreaView style={styles.container}>
-        {this.state.debugMode && (
-          <TouchableOpacity
-            style={styles.clearButton}
-            title="Clear Storage"
-            onPress={this.clearStorage}
-          >
-            <Text> Clear Storage</Text>
-          </TouchableOpacity>
-        )}
-        <StatusBar barStyle={"dark-content"} translucent={true} />
-        <Text style={styles.pageTitle}>Journal</Text>
-
-        <ScrollView
-          contentContainerStyle={{
-            flexDirection: "row",
-            alignSelf: "flex-end",
-            flexGrow: 1
-          }}
-          refreshControl={
-            <RefreshControl
-              refreshing={this.state.isLoading}
-              onRefresh={() => this.retrieveJournalEntries()}
-            />
-          }
-        >
-          <FlatList
-            data={this.state.journalEntries}
-            renderItem={({ item }) => this.createJournalEntry(item)}
-            keyExtractor={index => index.toString()}
-          />
-        </ScrollView>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            NavigationService.navigate("NewJournalEntry", {
-              onGoBack: () => {
-                this.retrieveJournalEntries();
-              }
-            })
-          }
-        >
-          <MaterialCommunityIcons
-            name="plus-circle"
-            size={50}
-            color="#509C96"
-          />
+      <View key={entry.id}>
+        <TouchableOpacity onPress={() => onSelect(entry)}>
+          <Card image={{ uri: entry.image }}>
+            <Text style={styles.title}>{entry.title}</Text>
+            <Text
+              style={styles.caption}
+              numberOfLines={1}
+              style={{
+                marginBottom: 10
+              }}
+            >
+              {entry.body}
+            </Text>
+            <Text style={styles.date}>{entry.creationDate}</Text>
+          </Card>
         </TouchableOpacity>
-      </SafeAreaView>
+      </View>
     );
   }
+  return null;
+}
+
+function onSelect(entry) {
+  const key = entry.id;
+  NavigationService.navigate("JournalEntry", {
+    key,
+    entry,
+    onGoBack: () => {
+      console.log("went back to journal entries");
+    }
+  });
+}
+
+function useJournalEntries() {
+  const [entries, setEntries] = useState([]);
+  const userId = firebase.auth().currentUser.uid;
+
+  useEffect(() => {
+    const unsubscribe = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("journalEntries")
+      .onSnapshot(snapshot => {
+        const retrievedEntries = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+        setEntries(retrievedEntries);
+        return () => unsubscribe();
+      });
+  }, []);
+  return entries;
+}
+
+function JournalEntries() {
+  const [isLoading, setIsLoading] = useState(false);
+  const journalEntries = useJournalEntries();
+  const [debugMode, setDebugMode] = useState(false);
+
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={"dark-content"} translucent={true} />
+      <Text style={styles.pageTitle}>Journal</Text>
+
+      <ScrollView
+        contentContainerStyle={{
+          flexDirection: "row",
+          alignSelf: "flex-end",
+          flexGrow: 1
+        }}
+      >
+        {journalEntries ? (
+          <FlatList
+            data={journalEntries}
+            renderItem={({ item }) => createJournalEntry(item)}
+            keyExtractor={item => item.id.toString()}
+          />
+        ) : (
+          <View style={[styles.container, styles.horizontal]}>
+            <ActivityIndicator size="large" color="#509C96" />
+          </View>
+        )}
+      </ScrollView>
+
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          NavigationService.navigate("NewJournalEntry", {
+            onGoBack: () => {
+              console.log("went back to journal entries");
+            }
+          })
+        }
+      >
+        <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({

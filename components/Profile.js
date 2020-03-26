@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, Alert, Button, StatusBar, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as firebase from "firebase";
@@ -6,34 +6,32 @@ import "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import _ from "lodash";
 
-export default class Profile extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { userData: [] };
-  }
+export default function Profile() {
+  const [userData, setUserData] = useState([]);
+  const [groupData, setGroupData] = useState([]);
+  const [lastSignInTime, setLastSignInTime] = useState();
+  const [creationDate, setCreationDate] = useState();
 
-  componentDidMount() {
+  useEffect(() => {
     const db = firebase.firestore();
-    let lastSignInTime = this.formatDate(
+    let lastSignInTime = formatDate(
       new Date(firebase.auth().currentUser.metadata.lastSignInTime)
     );
-    const creationDate = this.formatDate(
+    const creationDate = formatDate(
       new Date(firebase.auth().currentUser.metadata.creationTime)
     );
 
-    this.setState({
-      lastSignInTime: lastSignInTime,
-      creationDate: creationDate
-    });
+    setLastSignInTime(lastSignInTime);
+    setCreationDate(creationDate);
+
     var userId = firebase.auth().currentUser.uid;
     var userDocRef = db.collection("users").doc(userId);
-    const _this = this;
 
     userDocRef
       .get()
       .then(function(doc) {
         if (doc.exists) {
-          _this.setState({ userData: doc.data() });
+          setUserData(doc.data());
 
           Object.keys(doc.data().groups).map(function(key) {
             db.collection("groups")
@@ -47,7 +45,7 @@ export default class Profile extends Component {
                       name: doc.data().name
                     }
                   };
-                  _this.setState({ groupData: groupData });
+                  setGroupData(groupData);
                 }
               });
           });
@@ -58,9 +56,9 @@ export default class Profile extends Component {
       .catch(function(error) {
         console.log("Error getting document:", error);
       });
-  }
+  }, []);
 
-  formatDate(date) {
+  function formatDate(date) {
     var monthNames = [
       "January",
       "February",
@@ -83,7 +81,7 @@ export default class Profile extends Component {
     return `${monthNames[monthIndex]} ${day}, ${year}`;
   }
 
-  signOut() {
+  function signOut() {
     firebase
       .auth()
       .signOut()
@@ -95,107 +93,92 @@ export default class Profile extends Component {
       });
   }
 
-  createGroupItem(value, key, map) {
-    console.log(`${value}: ${key}`);
-  }
+  return (
+    <View style={styles.container}>
+      <StatusBar barStyle={"light-content"} translucent={true} />
 
-  render() {
-    const { userData, groupData, lastSignInTime, creationDate } = this.state;
-    return (
-      <SafeAreaView style={styles.container}>
-        <StatusBar barStyle={"light-content"} translucent={true} />
-
-        <MaterialCommunityIcons
-          name="account-circle"
-          size={80}
-          color="#509C96"
-        />
-        <Text
-          style={{
-            color: "#EDEDED",
-            fontSize: 24,
-            fontFamily: "montserrat-regular"
-          }}
-        >
-          {userData?.username}
-        </Text>
-        <Text
-          style={{
-            color: "#EDEDED",
-            fontSize: 16,
-            fontFamily: "montserrat-regular"
-          }}
-        >
-          {firebase.auth().currentUser.email}
-        </Text>
-        <Text
-          style={{
-            color: "#EDEDED",
-            fontSize: 16,
-            fontFamily: "montserrat-regular",
-            marginTop: "10%"
-          }}
-        >
-          Your Groups:
-        </Text>
-        {userData.groups && groupData
-          ? Object.keys(userData.groups).map(function(key) {
-              return (
-                <View
-                  key={`${key}View`}
-                  style={{ display: "flex", flexDirection: "row" }}
+      <MaterialCommunityIcons name="account-circle" size={80} color="#509C96" />
+      <Text
+        style={{
+          color: "#EDEDED",
+          fontSize: 24,
+          fontFamily: "montserrat-regular"
+        }}
+      >
+        {userData?.username}
+      </Text>
+      <Text
+        style={{
+          color: "#EDEDED",
+          fontSize: 16,
+          fontFamily: "montserrat-regular"
+        }}
+      >
+        {firebase.auth().currentUser.email}
+      </Text>
+      <Text
+        style={{
+          color: "#EDEDED",
+          fontSize: 16,
+          fontFamily: "montserrat-regular",
+          marginTop: "10%"
+        }}
+      >
+        Your Groups:
+      </Text>
+      {userData.groups && groupData
+        ? Object.keys(userData.groups).map(function(key) {
+            return (
+              <View
+                key={`${key}View`}
+                style={{ display: "flex", flexDirection: "row" }}
+              >
+                <Text
+                  style={{
+                    color: "#EDEDED",
+                    fontSize: 16,
+                    fontFamily: "montserrat-regular"
+                  }}
+                  key={key}
                 >
-                  <Text
-                    style={{
-                      color: "#EDEDED",
-                      fontSize: 16,
-                      fontFamily: "montserrat-regular"
-                    }}
-                    key={key}
-                  >
-                    {`${groupData[key].name} - `}
-                  </Text>
+                  {`${groupData[key].name} - `}
+                </Text>
 
-                  <Text
-                    style={{
-                      color: "#EDEDED",
-                      fontSize: 16,
-                      fontFamily: "montserrat-regular"
-                    }}
-                    key={`${key}UsersNumber`}
-                  >
-                    {`${groupData[key].numberOfMembers} Member(s)`}
-                  </Text>
-                </View>
-              );
-            })
-          : null}
+                <Text
+                  style={{
+                    color: "#EDEDED",
+                    fontSize: 16,
+                    fontFamily: "montserrat-regular"
+                  }}
+                  key={`${key}UsersNumber`}
+                >
+                  {`${groupData[key].numberOfMembers} Member(s)`}
+                </Text>
+              </View>
+            );
+          })
+        : null}
 
-        <Text
-          style={{
-            color: "#EDEDED",
-            fontSize: 16,
-            fontFamily: "montserrat-regular",
-            marginTop: "40%"
-          }}
-        >{`UMatter member since ${creationDate}`}</Text>
-        <Text
-          style={{
-            color: "#EDEDED",
-            fontSize: 16,
-            fontFamily: "montserrat-regular",
-            marginBottom: "10%"
-          }}
-        >{`Last signed in on ${lastSignInTime}`}</Text>
+      <Text
+        style={{
+          color: "#EDEDED",
+          fontSize: 16,
+          fontFamily: "montserrat-regular",
+          marginTop: "40%"
+        }}
+      >{`UMatter member since ${creationDate}`}</Text>
+      <Text
+        style={{
+          color: "#EDEDED",
+          fontSize: 16,
+          fontFamily: "montserrat-regular",
+          marginBottom: "10%"
+        }}
+      >{`Last signed in on ${lastSignInTime}`}</Text>
 
-        <Button
-          title={"Sign Out"}
-          color="#509C96"
-          onPress={() => this.signOut()}
-        />
-      </SafeAreaView>
-    );
-  }
+      <Button title={"Sign Out"} color="#509C96" onPress={() => signOut()} />
+    </View>
+  );
 }
 
 const styles = StyleSheet.create({
