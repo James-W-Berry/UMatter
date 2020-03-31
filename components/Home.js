@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BottomNavigation } from "react-native-paper";
 import JournalEntries from "./JournalEntries";
 import Moments from "./Moments";
-import SmileFile from "./SmileFile";
+import Gold from "./Gold";
 import Badges from "./Badges";
 import Profile from "./Profile";
 
@@ -10,7 +10,7 @@ const JournalEntriesRoute = () => <JournalEntries />;
 
 const MomentsRoute = () => <Moments />;
 
-const GoldRoute = () => <SmileFile />;
+const GoldRoute = () => <Gold />;
 
 const BadgesRoute = () => <Badges />;
 
@@ -28,7 +28,7 @@ export default function Home() {
     { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
     {
       key: "gold",
-      title: "Smile File",
+      title: "Gold",
       icon: "treasure-chest",
       color: "#160C21"
     },

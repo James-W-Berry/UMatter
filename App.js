@@ -6,6 +6,14 @@ import "firebase/auth";
 import * as Font from "expo-font";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import NavigationService from "./components/NavigationService";
+import { decode, encode } from "base-64";
+
+if (!global.btoa) {
+  global.btoa = encode;
+}
+if (!global.atob) {
+  global.atob = decode;
+}
 
 export default function App() {
   const [user, setUser] = useState({ loggedIn: false, isLoaded: false });

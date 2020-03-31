@@ -8,6 +8,7 @@ import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
+import NewMoment from "./NewMoment";
 import MomentVisualization from "./MomentVisualization";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
@@ -56,6 +57,9 @@ const MainNavigator = createStackNavigator({
   },
   JournalEntry: {
     screen: JournalEntry
+  },
+  NewMoment: {
+    screen: NewMoment
   },
   MomentVisualization: {
     screen: MomentVisualization

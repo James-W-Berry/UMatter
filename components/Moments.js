@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -11,7 +11,7 @@ import {
   Text,
   StatusBar
 } from "react-native";
-import { Calendar } from "react-native-calendars";
+import { Calendar, Agenda } from "react-native-calendars";
 import uuid from "uuid";
 import { Icon } from "react-native-elements";
 import ActionButton from "react-native-action-button";
@@ -20,25 +20,63 @@ import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
 import DateTimePicker from "react-native-modal-datetime-picker";
+import { SafeAreaView } from "react-navigation";
+import firebase from "../firebase";
+import { TouchableOpacity } from "react-native-gesture-handler";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default class Moments extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      moments: [],
-      isDateTimePickerVisible: false,
-      showActionButton: true
-    };
+function useMoments(currentMonth) {
+  console.log(currentMonth);
+  const [moments, setMoments] = useState({});
+  const userId = firebase.auth().currentUser.uid;
 
-    this.onDayPress = this.onDayPress.bind(this);
-  }
+  useEffect(() => {
+    const unsubscribe = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("moments")
+      // .where("month of timestamp field", "==", "currentMonth")
+      .onSnapshot(snapshot => {
+        const retrievedMoments = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
 
-  componentDidMount() {
-    this.getPermissionAsync();
-    this.listenForNotifications();
-  }
+        setMoments(retrievedMoments);
+      });
 
-  getPermissionAsync = async () => {
+    return () => unsubscribe();
+  }, []);
+
+  let test = {
+    "2020-03-30": [{ name: "Item1", time: "10am-11am", with: "Erin" }],
+    "2020-03-30": [{ name: "item 2- any js object" }],
+    "2020-03-31": [{ name: "item 3 - any js object" }]
+  };
+
+  return test;
+}
+
+export default function Moments() {
+  const [sortBy, setSortBy] = useState("");
+  const moments = useMoments(sortBy);
+  const [isDateTimePickerVisible, setIsDateTimePickerVisible] = useState(false);
+  const [showActionButton, setShowActionButton] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [selectedDay, setSelectedDay] = useState();
+  const [items, setItems] = useState({});
+  useEffect(() => {
+    getPermissionAsync();
+    listenForNotifications();
+  });
+
+  useEffect(() => {
+    let today = new Date().getDate();
+    setSelectedDay(today);
+  }, []);
+
+  async function getPermissionAsync() {
     let { status } = await Permissions.askAsync(
       Permissions.USER_FACING_NOTIFICATIONS
     );
@@ -46,13 +84,13 @@ export default class Moments extends Component {
     if (status !== "granted") {
       alert("Sorry, we need notification permissions to make this work!");
     }
-  };
+  }
 
-  listenForNotifications = () => {
-    Notifications.addListener(this._handleNotification);
-  };
+  async function listenForNotifications() {
+    Notifications.addListener(handleNotification);
+  }
 
-  _handleNotification = ({ origin, data, remote }) => {
+  function handleNotification(origin, data, remote) {
     message = data.message;
     let info = `Start your moment!`;
     Alert.alert(
@@ -74,28 +112,28 @@ export default class Moments extends Component {
       ],
       { cancelable: false }
     );
-  };
+  }
 
-  showDateTimePicker = () => {
-    this.setState({ isDateTimePickerVisible: true });
-  };
+  function showDateTimePicker() {
+    setIsDateTimePickerVisible(true);
+  }
 
-  hideDateTimePicker = () => {
-    this.setState({ isDateTimePickerVisible: false });
-  };
+  function hideDateTimePicker() {
+    setIsDateTimePickerVisible(false);
+  }
 
-  handleDatePicked = date => {
+  function handleDatePicked() {
     console.log("A date has been picked: ", date);
-    this.hideDateTimePicker();
-  };
+    hideDateTimePicker();
+  }
 
-  saveNewMoment = async date => {
+  async function saveNewMoment(date) {
     try {
-      const momentId = `moment_${this.state.selected}_${uuid.v4()}`;
+      const momentId = `moment_${selectedDay}_${uuid.v4()}`;
 
       const newMoment = {
         title: "",
-        date: this.state.selected,
+        date: selectedDay,
         time: date,
         series: "",
         id: momentId
@@ -105,8 +143,7 @@ export default class Moments extends Component {
         .then(() => {
           console.log(`new scheduled moment saved to storage: `);
           console.log(newMoment);
-          this.setState({ showScheduler: false });
-          this.retrieveMoments(this.state.selected);
+          setShowScheduler(false);
         })
         .catch(e => {
           console.log(e);
@@ -114,58 +151,30 @@ export default class Moments extends Component {
     } catch (e) {
       console.log(e.message);
     }
-    this.setState({ showActionButton: true });
-  };
+    setShowActionButton(true);
+  }
 
-  deleteMoment = async key => {
+  function deleteMoment(key) {
     try {
       console.log(`deleting moment ${key}`);
       AsyncStorage.removeItem(key).then(response => {
         console.log(response);
-        this.retrieveMoments(this.state.selected);
       });
     } catch (e) {
-      console.log(e.message);
-    }
-  };
-
-  retrieveMoments(day) {
-    this.setState({ isLoading: true });
-
-    try {
-      AsyncStorage.getAllKeys().then(async keys => {
-        let momentKeys = [];
-
-        for (const key in keys) {
-          if (keys[key].includes(`moment_${day}`)) {
-            momentKeys.push(keys[key]);
-          }
-        }
-
-        await AsyncStorage.multiGet(momentKeys).then(result => {
-          this.setState({ moments: result });
-        });
-      });
-
-      this.setState({ isLoading: false });
-    } catch (e) {
-      this.setState({
-        isLoading: false
-      });
       console.log(e.message);
     }
   }
 
-  hideDateTimePicker = () => {
-    this.setState({ isDateTimePickerVisible: false });
-  };
+  function hideDateTimePicker() {
+    setIsDateTimePickerVisible(false);
+  }
 
-  handleDatePicked = date => {
-    this.hideDateTimePicker();
-    this.saveNewMoment(date);
-  };
+  function handleDatePicked() {
+    hideDateTimePicker();
+    saveNewMoment(date);
+  }
 
-  createMomentWidget(item) {
+  function createMomentWidget(item) {
     if (item !== undefined) {
       const key = item[0];
       const data = JSON.parse(item[1]);
@@ -175,9 +184,8 @@ export default class Moments extends Component {
           <MomentWidget
             id={key}
             moment={data}
-            deleteMoment={this.deleteMoment}
-            retrieveMoments={this.retrieveMoments}
-            selectedDate={this.state.selected}
+            deleteMoment={deleteMoment}
+            selectedDate={selectedDay}
           />
         </View>
       );
@@ -185,149 +193,110 @@ export default class Moments extends Component {
     return null;
   }
 
-  onDayPress(day) {
-    this.setState({
-      selected: day.dateString
-    });
-    this.retrieveMoments(day.dateString);
+  const onDayPress = day => {
+    setSelected(day.dateString);
+  };
+
+  function loadItems(day) {
+    setTimeout(() => {
+      for (let i = -15; i < 85; i++) {
+        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
+        const date = new Date(time);
+        const strTime = date.toISOString().split("T")[0];
+        if (!items[strTime]) {
+          items[strTime] = [];
+          const numItems = Math.floor(Math.random() * 5);
+          for (let j = 0; j < numItems; j++) {
+            items[strTime].push({
+              name: "Hello Name",
+              height: Math.max(50, Math.floor(Math.random() * 150))
+            });
+          }
+        }
+      }
+      const newItems = {};
+      Object.keys(items).forEach(key => {
+        newItems[key] = items[key];
+      });
+      setItems(newItems);
+    }, 1000);
   }
 
-  render() {
+  function renderItem(item) {
     return (
-      <View style={styles.container}>
-        <StatusBar barStyle={"light-content"} translucent={true} />
-        <KeyboardAvoidingView
-          style={styles.container}
-          behavior="padding"
-          enabled
-        >
-          <Calendar
-            style={styles.calendar}
-            onDayPress={this.onDayPress}
-            theme={{
-              backgroundColor: "#ffffff",
-              calendarBackground: "#2C239A",
-              textSectionTitleColor: "#b6c1cd",
-              selectedDayBackgroundColor: "#ffffff",
-              selectedDayTextColor: "#3E31B1",
-              todayTextColor: "#509C96",
-              dayTextColor: "#ffffff",
-              textDisabledColor: "#d9e1e8",
-              arrowColor: "#509C96",
-              disabledArrowColor: "#d9e1e8",
-              monthTextColor: "#ffffff",
-              indicatorColor: "blue",
-              textDayFontFamily: "montserrat-regular",
-              textMonthFontFamily: "montserrat-regular",
-              textDayHeaderFontFamily: "montserrat-regular",
-              textDayFontWeight: "300",
-              textMonthFontWeight: "bold",
-              textDayHeaderFontWeight: "300",
-              textDayFontSize: 16,
-              textMonthFontSize: 24,
-              textDayHeaderFontSize: 16
-            }}
-            hideExtraDays
-            hideDayNames
-            markedDates={{
-              [this.state.selected]: {
-                selected: true,
-                disableTouchEvent: true
-              }
-            }}
-          />
-          {this.state.selected && (
-            <View style={styles.dayView}>
-              <DateTimePicker
-                isVisible={this.state.isDateTimePickerVisible}
-                onConfirm={this.handleDatePicked}
-                onCancel={this.hideDateTimePicker}
-                mode="time"
-                isDarkModeEnabled={true}
-              />
-              <View style={styles.momentSummary}>
-                <ScrollView
-                  refreshControl={
-                    <RefreshControl
-                      refreshing={this.state.isLoading}
-                      onRefresh={() =>
-                        this.retrieveMoments(this.state.selected)
-                      }
-                    />
-                  }
-                >
-                  <FlatList
-                    data={this.state.moments}
-                    renderItem={({ item }) => this.createMomentWidget(item)}
-                    keyExtractor={index => index.toString()}
-                  />
-                </ScrollView>
-              </View>
-
-              {this.state.showActionButton && (
-                <ActionButton buttonColor="#509C96">
-                  <ActionButton.Item
-                    buttonColor="#509C96"
-                    title="Schedule Moment"
-                    onPress={() =>
-                      this.setState({
-                        showActionButton: false,
-                        isDateTimePickerVisible: true
-                      })
-                    }
-                  >
-                    <Icon
-                      style={styles.actionButtonIcon}
-                      name="plus"
-                      type="material-community"
-                      color="#509C96"
-                      reverse={true}
-                    />
-                  </ActionButton.Item>
-                  <ActionButton.Item
-                    buttonColor="#509C96"
-                    title="Start Moment Now"
-                    onPress={() => {
-                      console.log("starting moment");
-                      NavigationService.navigate("MomentVisualization");
-                    }}
-                  >
-                    <Icon
-                      style={styles.actionButtonIcon}
-                      name="plus"
-                      type="material-community"
-                      color="#509C96"
-                      reverse={true}
-                    />
-                  </ActionButton.Item>
-                </ActionButton>
-              )}
-            </View>
-          )}
-          {!this.state.selected && (
-            <View style={styles.selectPrompt}>
-              <Text
-                style={{
-                  fontSize: 16,
-                  color: "#EDEDED",
-                  fontFamily: "montserrat-regular"
-                }}
-              >
-                Select a date
-              </Text>
-            </View>
-          )}
-        </KeyboardAvoidingView>
-      </View>
+      <TouchableOpacity
+        style={[styles.item, { height: item.height }]}
+        onPress={() => Alert.alert(item.name)}
+      >
+        <Text>{item.name}</Text>
+      </TouchableOpacity>
     );
   }
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={"light-content"} translucent={true} />
+      <Text style={styles.pageTitle}>Moments</Text>
+      <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+        <Agenda
+          items={items}
+          // loadItemsForMonth={month => {
+          //   console.log(month);
+          //   setSortBy(month);
+          // }}
+          renderItem={renderItem}
+          loadItemsForMonth={loadItems}
+          onCalendarToggled={calendarOpened => {
+            console.log(calendarOpened);
+          }}
+          onDayPress={day => {
+            console.log("day pressed");
+            setSelectedDay(day);
+          }}
+          onDayChange={day => {
+            console.log("day changed");
+            setSelectedDay(day);
+          }}
+          selected={selectedDay}
+          pastScrollRange={50}
+          futureScrollRange={50}
+          rowHasChanged={(r1, r2) => {
+            return r1.text !== r2.text;
+          }}
+          hideKnob={false}
+          theme={{
+            agendaDayTextColor: "#191919",
+            agendaDayNumColor: "green",
+            agendaTodayColor: "red",
+            agendaKnobColor: "blue"
+          }}
+          // Agenda container style
+          style={{
+            backgroundColor: "#3E31B1"
+          }}
+        />
+      </KeyboardAvoidingView>
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() =>
+          NavigationService.navigate("NewMoment", {
+            onGoBack: () => {
+              console.log("went back to Agenda");
+            }
+          })
+        }
+      >
+        <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
+      </TouchableOpacity>
+    </SafeAreaView>
+  );
 }
 
 const styles = StyleSheet.create({
   container: {
-    display: "flex",
     flex: 1,
-    paddingBottom: 0,
+    display: "flex",
+    justifyContent: "center",
     flexDirection: "column",
     backgroundColor: "#2C239A"
   },
@@ -346,6 +315,12 @@ const styles = StyleSheet.create({
     shadowRadius: 0,
     shadowColor: "#3E31B1"
   },
+  pageTitle: {
+    fontSize: 24,
+    color: "#EFEFEF",
+    alignSelf: "center",
+    fontFamily: "montserrat-regular"
+  },
   selectPrompt: {
     flex: 1,
     justifyContent: "center",
@@ -363,5 +338,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     height: 22,
     color: "white"
+  },
+  button: {
+    elevation: 10,
+    display: "flex",
+    alignSelf: "flex-end",
+    alignItems: "center",
+    justifyContent: "center"
   }
 });

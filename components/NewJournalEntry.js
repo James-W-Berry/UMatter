@@ -97,12 +97,28 @@ class NewJournalEntry extends Component {
       .then(() => {
         console.log(docRef.id);
         console.log(`successfully created journal entry ${docRef.id}`);
+        _this.updateTotalJournalEntries(1);
         _this.uploadJournalEntryPicture(image, docRef.id);
       })
 
       .catch(function(error) {
         console.log(error);
       });
+  };
+
+  updateTotalJournalEntries = async value => {
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId);
+
+    docRef.set(
+      {
+        totalJournalEntries: firebase.firestore.FieldValue.increment(value)
+      },
+      { merge: true }
+    );
   };
 
   uploadJournalEntryPicture = async (picture, id) => {

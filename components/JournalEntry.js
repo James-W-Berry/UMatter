@@ -71,6 +71,7 @@ class JournalEntry extends Component {
       .delete()
       .then(() => {
         console.log(`successfully deleted journal entry ${docRef.id}`);
+        _this.updateTotalJournalEntries(-1);
       })
       .catch(function(error) {
         console.log(error);
@@ -96,6 +97,21 @@ class JournalEntry extends Component {
       _this.props.navigation.state.params.onGoBack();
       _this.props.navigation.goBack(null);
     }
+  };
+
+  updateTotalJournalEntries = async value => {
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId);
+
+    docRef.set(
+      {
+        totalJournalEntries: firebase.firestore.FieldValue.increment(value)
+      },
+      { merge: true }
+    );
   };
 
   getPermissionAsync = async () => {

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import {
-  AsyncStorage,
   Text,
   View,
   StyleSheet,
@@ -15,6 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
 import firebase from "../firebase";
 import { StatusBar } from "react-native";
+import { SafeAreaView } from "react-navigation";
 
 function createJournalEntry(entry) {
   if (entry) {
@@ -86,8 +86,9 @@ function useJournalEntries() {
         }));
 
         setEntries(retrievedEntries);
-        return () => unsubscribe();
       });
+
+    return () => unsubscribe();
   }, []);
   return entries;
 }
@@ -98,8 +99,8 @@ function JournalEntries() {
   const [debugMode, setDebugMode] = useState(false);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={"dark-content"} translucent={true} />
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle={"dark-content"} translucent={false} />
       <Text style={styles.pageTitle}>Journal</Text>
 
       <ScrollView
@@ -134,7 +135,7 @@ function JournalEntries() {
       >
         <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
       </TouchableOpacity>
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -144,11 +145,11 @@ const styles = StyleSheet.create({
     display: "flex",
     justifyContent: "center",
     flexDirection: "column",
-    backgroundColor: "#FFFFFF"
+    backgroundColor: "#EFEFEF"
   },
   pageTitle: {
     fontSize: 24,
-    color: "#191919",
+    color: "#160C21",
     alignSelf: "center",
     fontFamily: "montserrat-regular"
   },

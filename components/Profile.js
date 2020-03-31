@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Text, StyleSheet, Alert, Button, StatusBar, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as firebase from "firebase";
 import "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import _ from "lodash";
+
+function logout() {
+  firebase.auth().signOut();
+}
 
 export default function Profile() {
   const [userData, setUserData] = useState([]);
@@ -81,17 +85,9 @@ export default function Profile() {
     return `${monthNames[monthIndex]} ${day}, ${year}`;
   }
 
-  function signOut() {
-    firebase
-      .auth()
-      .signOut()
-      .then(function() {
-        // Sign-out successful.
-      })
-      .catch(function(error) {
-        Alert.alert("Could not sign out!");
-      });
-  }
+  const requestLogout = useCallback(() => {
+    logout();
+  }, []);
 
   return (
     <View style={styles.container}>
@@ -176,7 +172,7 @@ export default function Profile() {
         }}
       >{`Last signed in on ${lastSignInTime}`}</Text>
 
-      <Button title={"Sign Out"} color="#509C96" onPress={() => signOut()} />
+      <Button title={"Sign Out"} color="#509C96" onPress={requestLogout} />
     </View>
   );
 }
