@@ -7,6 +7,7 @@ import * as Font from "expo-font";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import NavigationService from "./components/NavigationService";
 import { decode, encode } from "base-64";
+import { SafeAreaView } from "react-navigation";
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -45,7 +46,7 @@ export default function App() {
   if (fontIsLoaded && user.isLoaded) {
     return (
       <SafeAreaProvider>
-        <Main />
+        <Main style={styles.container} />
       </SafeAreaProvider>
     );
   }

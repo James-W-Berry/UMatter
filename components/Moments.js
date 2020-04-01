@@ -2,9 +2,6 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  ScrollView,
-  RefreshControl,
-  FlatList,
   AsyncStorage,
   KeyboardAvoidingView,
   Alert,
@@ -20,13 +17,12 @@ import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
 import DateTimePicker from "react-native-modal-datetime-picker";
-import { SafeAreaView } from "react-navigation";
 import firebase from "../firebase";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useSafeArea } from "react-native-safe-area-context";
 
-function useMoments(currentMonth) {
-  console.log(currentMonth);
+function useMoments() {
   const [moments, setMoments] = useState({});
   const userId = firebase.auth().currentUser.uid;
 
@@ -36,36 +32,46 @@ function useMoments(currentMonth) {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      // .where("month of timestamp field", "==", "currentMonth")
       .onSnapshot(snapshot => {
         const retrievedMoments = snapshot.docs.map(doc => ({
           id: doc.id,
           ...doc.data()
         }));
 
-        setMoments(retrievedMoments);
+        let formattedMoments = {};
+
+        retrievedMoments.forEach(moment => {
+          const time = new Date(moment.timestamp);
+          const strTime = time.toISOString().split("T")[0];
+
+          if (!formattedMoments[strTime]) {
+            formattedMoments[strTime] = [];
+          }
+          formattedMoments[strTime].push({
+            name: moment.title,
+            time: moment.timestampFormatted,
+            duration: moment.duration
+          });
+        });
+
+        setMoments(formattedMoments);
       });
 
     return () => unsubscribe();
   }, []);
 
-  let test = {
-    "2020-03-30": [{ name: "Item1", time: "10am-11am", with: "Erin" }],
-    "2020-03-30": [{ name: "item 2- any js object" }],
-    "2020-03-31": [{ name: "item 3 - any js object" }]
-  };
-
-  return test;
+  return moments;
 }
 
 export default function Moments() {
-  const [sortBy, setSortBy] = useState("");
-  const moments = useMoments(sortBy);
+  const moments = useMoments();
   const [isDateTimePickerVisible, setIsDateTimePickerVisible] = useState(false);
   const [showActionButton, setShowActionButton] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedDay, setSelectedDay] = useState();
   const [items, setItems] = useState({});
+  const insets = useSafeArea();
+
   useEffect(() => {
     getPermissionAsync();
     listenForNotifications();
@@ -80,7 +86,6 @@ export default function Moments() {
     let { status } = await Permissions.askAsync(
       Permissions.USER_FACING_NOTIFICATIONS
     );
-    console.log(status);
     if (status !== "granted") {
       alert("Sorry, we need notification permissions to make this work!");
     }
@@ -174,78 +179,75 @@ export default function Moments() {
     saveNewMoment(date);
   }
 
-  function createMomentWidget(item) {
-    if (item !== undefined) {
-      const key = item[0];
-      const data = JSON.parse(item[1]);
-      console.log(data);
-      return (
-        <View key={key} style={styles.momentWidget}>
-          <MomentWidget
-            id={key}
-            moment={data}
-            deleteMoment={deleteMoment}
-            selectedDate={selectedDay}
-          />
-        </View>
-      );
-    }
-    return null;
-  }
-
-  const onDayPress = day => {
-    setSelected(day.dateString);
-  };
-
-  function loadItems(day) {
-    setTimeout(() => {
-      for (let i = -15; i < 85; i++) {
-        const time = day.timestamp + i * 24 * 60 * 60 * 1000;
-        const date = new Date(time);
-        const strTime = date.toISOString().split("T")[0];
-        if (!items[strTime]) {
-          items[strTime] = [];
-          const numItems = Math.floor(Math.random() * 5);
-          for (let j = 0; j < numItems; j++) {
-            items[strTime].push({
-              name: "Hello Name",
-              height: Math.max(50, Math.floor(Math.random() * 150))
-            });
-          }
-        }
+  function onEditMoment(moment) {
+    console.log(moment);
+    NavigationService.navigate("EditMoment", {
+      moment,
+      onGoBack: () => {
+        console.log("went back to moments");
       }
-      const newItems = {};
-      Object.keys(items).forEach(key => {
-        newItems[key] = items[key];
-      });
-      setItems(newItems);
-    }, 1000);
+    });
   }
 
   function renderItem(item) {
     return (
       <TouchableOpacity
-        style={[styles.item, { height: item.height }]}
-        onPress={() => Alert.alert(item.name)}
+        style={[styles.item]}
+        onPress={() =>
+          Alert.alert(
+            item.name,
+            `Moment scheduled for ${item.duration}min at ${
+              item.time.split(" at ")[1]
+            }`,
+            [
+              { text: "Edit", onPress: () => onEditMoment(item) },
+              {
+                text: "Delete",
+                onPress: () => console.log("delete")
+              },
+              {
+                text: "OK",
+                onPress: () => console.log("OK Pressed"),
+                style: "cancel"
+              }
+            ],
+            { cancelable: false }
+          )
+        }
       >
-        <Text>{item.name}</Text>
+        <Text style={{ color: "#EFEFEF" }}>{item.name}</Text>
+        <Text style={{ color: "#EFEFEF" }}>{`for ${item.duration}min at ${
+          item.time.split(" at ")[1]
+        }`}</Text>
       </TouchableOpacity>
     );
   }
 
+  function renderNoItems() {
+    return (
+      <View style={[styles.item]}>
+        <Text style={{ color: "#EFEFEF" }}>No moments planned</Text>
+      </View>
+    );
+  }
+
   return (
-    <SafeAreaView style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        paddingTop: insets.top
+      }}
+    >
       <StatusBar barStyle={"light-content"} translucent={true} />
       <Text style={styles.pageTitle}>Moments</Text>
       <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
         <Agenda
-          items={items}
-          // loadItemsForMonth={month => {
-          //   console.log(month);
-          //   setSortBy(month);
-          // }}
+          items={moments}
           renderItem={renderItem}
-          loadItemsForMonth={loadItems}
+          renderEmptyData={renderNoItems}
           onCalendarToggled={calendarOpened => {
             console.log(calendarOpened);
           }}
@@ -271,8 +273,10 @@ export default function Moments() {
             agendaKnobColor: "blue"
           }}
           // Agenda container style
-          style={{
-            backgroundColor: "#3E31B1"
+          theme={{
+            "stylesheet.agenda.list": {
+              container: {}
+            }
           }}
         />
       </KeyboardAvoidingView>
@@ -288,7 +292,7 @@ export default function Moments() {
       >
         <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -300,32 +304,23 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#2C239A"
   },
+  item: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#2C239A",
+    padding: 10,
+    borderRadius: 10
+  },
   calendar: {
     flex: 1
   },
-  dayView: {
-    flex: 1
-  },
-  momentSummary: {
-    flex: 1,
-    borderTopLeftRadius: 120,
-    backgroundColor: "#EFEFEF",
-    shadowOffset: { width: 0, height: -15 },
-    shadowOpacity: 1.0,
-    shadowRadius: 0,
-    shadowColor: "#3E31B1"
-  },
   pageTitle: {
     fontSize: 24,
-    color: "#EFEFEF",
+    color: "#160C21",
     alignSelf: "center",
     fontFamily: "montserrat-regular"
-  },
-  selectPrompt: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: 32
   },
   momentWidget: {
     display: "flex",
@@ -333,11 +328,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignSelf: "center"
-  },
-  actionButtonIcon: {
-    fontSize: 20,
-    height: 22,
-    color: "white"
   },
   button: {
     elevation: 10,

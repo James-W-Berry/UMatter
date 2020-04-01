@@ -32,9 +32,15 @@ import fridayCheckedIcon from "../assets/friday_checked.png";
 import saturdayIcon from "../assets/saturday.png";
 import saturdayCheckedIcon from "../assets/saturday_checked.png";
 
-export default class NewMoment extends Component {
+export default class EditMoment extends Component {
   constructor(props) {
     super(props);
+
+    let moment = props.navigation.state.params.moment;
+
+    this.state = {
+      title: moment.name
+    };
   }
 
   static navigationOptions = ({ navigation }) => {
@@ -95,7 +101,6 @@ export default class NewMoment extends Component {
       .then(() => {
         console.log(`successfully created moment ${docRef.id}`);
         _this.updateTotalMoments(1);
-        NavigationService.navigate("Moments");
       })
 
       .catch(function(error) {

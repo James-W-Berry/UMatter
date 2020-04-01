@@ -14,7 +14,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
 import firebase from "../firebase";
 import { StatusBar } from "react-native";
-import { SafeAreaView } from "react-navigation";
+import { useSafeArea } from "react-native-safe-area-context";
 
 function createJournalEntry(entry) {
   if (entry) {
@@ -97,9 +97,19 @@ function JournalEntries() {
   const [isLoading, setIsLoading] = useState(false);
   const journalEntries = useJournalEntries();
   const [debugMode, setDebugMode] = useState(false);
+  const insets = useSafeArea();
 
   return (
-    <SafeAreaView style={styles.container}>
+    <View
+      style={{
+        flex: 1,
+        display: "flex",
+        justifyContent: "center",
+        flexDirection: "column",
+        backgroundColor: "#EFEFEF",
+        paddingTop: insets.top
+      }}
+    >
       <StatusBar barStyle={"dark-content"} translucent={false} />
       <Text style={styles.pageTitle}>Journal</Text>
 
@@ -135,7 +145,7 @@ function JournalEntries() {
       >
         <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
       </TouchableOpacity>
-    </SafeAreaView>
+    </View>
   );
 }
 

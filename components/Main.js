@@ -9,6 +9,7 @@ import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
 import NewMoment from "./NewMoment";
+import EditMoment from "./EditMoment";
 import MomentVisualization from "./MomentVisualization";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
@@ -59,7 +60,15 @@ const MainNavigator = createStackNavigator({
     screen: JournalEntry
   },
   NewMoment: {
-    screen: NewMoment
+    screen: NewMoment,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96"
+    }
+  },
+  EditMoment: {
+    screen: EditMoment
   },
   MomentVisualization: {
     screen: MomentVisualization
