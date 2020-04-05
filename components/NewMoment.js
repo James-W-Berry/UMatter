@@ -66,7 +66,6 @@ export default class NewMoment extends Component {
   componentDidMount() {
     const options = { year: "numeric", month: "long", day: "numeric" };
     let now = new Date().toLocaleDateString("en-US", options);
-
     this.setState({ timestamp: now });
 
     this.props.navigation.setParams({ handleSave: this.saveNewMoment });
@@ -195,13 +194,13 @@ export default class NewMoment extends Component {
               </View>
 
               <View style={styles.repeatingItem}>
-                <Text style={styles.text}>Duration</Text>
+                <Text style={styles.text}>Duration (min)</Text>
                 <Input
                   style={styles.text}
                   color="#EFEFEF"
                   onChangeText={text => this.setState({ duration: text })}
-                  value={`${this.state.duration} min`}
-                  placeholder={`${this.state.duration} min`}
+                  value={`${this.state.duration}`}
+                  placeholder={`${this.state.duration}`}
                   placeholderTextColor="#EFEFEF80"
                   keyboardType={"numeric"}
                   returnKeyType="done"

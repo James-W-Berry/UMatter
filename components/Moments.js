@@ -48,9 +48,7 @@ function useMoments() {
             formattedMoments[strTime] = [];
           }
           formattedMoments[strTime].push({
-            name: moment.title,
-            time: moment.timestampFormatted,
-            duration: moment.duration
+            ...moment
           });
         });
 
@@ -119,66 +117,6 @@ export default function Moments() {
     );
   }
 
-  function showDateTimePicker() {
-    setIsDateTimePickerVisible(true);
-  }
-
-  function hideDateTimePicker() {
-    setIsDateTimePickerVisible(false);
-  }
-
-  function handleDatePicked() {
-    console.log("A date has been picked: ", date);
-    hideDateTimePicker();
-  }
-
-  async function saveNewMoment(date) {
-    try {
-      const momentId = `moment_${selectedDay}_${uuid.v4()}`;
-
-      const newMoment = {
-        title: "",
-        date: selectedDay,
-        time: date,
-        series: "",
-        id: momentId
-      };
-
-      await AsyncStorage.setItem(momentId, JSON.stringify(newMoment))
-        .then(() => {
-          console.log(`new scheduled moment saved to storage: `);
-          console.log(newMoment);
-          setShowScheduler(false);
-        })
-        .catch(e => {
-          console.log(e);
-        });
-    } catch (e) {
-      console.log(e.message);
-    }
-    setShowActionButton(true);
-  }
-
-  function deleteMoment(key) {
-    try {
-      console.log(`deleting moment ${key}`);
-      AsyncStorage.removeItem(key).then(response => {
-        console.log(response);
-      });
-    } catch (e) {
-      console.log(e.message);
-    }
-  }
-
-  function hideDateTimePicker() {
-    setIsDateTimePickerVisible(false);
-  }
-
-  function handleDatePicked() {
-    hideDateTimePicker();
-    saveNewMoment(date);
-  }
-
   function onEditMoment(moment) {
     console.log(moment);
     NavigationService.navigate("EditMoment", {
@@ -189,21 +127,59 @@ export default function Moments() {
     });
   }
 
+  onDeleteMoment = async moment => {
+    let _this = this;
+    const userId = firebase.auth().currentUser.uid;
+
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("moments")
+      .doc(moment.id);
+
+    return docRef
+      .delete()
+      .then(() => {
+        console.log(`successfully deleted moment ${docRef.id}`);
+        _this.updateTotalMoments(-1);
+      })
+
+      .catch(function(error) {
+        console.log(error);
+      });
+  };
+
+  updateTotalMoments = async value => {
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId);
+
+    docRef.set(
+      {
+        totalMoments: firebase.firestore.FieldValue.increment(value)
+      },
+      { merge: true }
+    );
+  };
+
   function renderItem(item) {
     return (
       <TouchableOpacity
         style={[styles.item]}
         onPress={() =>
           Alert.alert(
-            item.name,
+            item.title,
             `Moment scheduled for ${item.duration}min at ${
-              item.time.split(" at ")[1]
+              item.timestampFormatted.split(" at ")[1]
             }`,
             [
               { text: "Edit", onPress: () => onEditMoment(item) },
               {
                 text: "Delete",
-                onPress: () => console.log("delete")
+                onPress: () => onDeleteMoment(item)
               },
               {
                 text: "OK",
@@ -215,9 +191,9 @@ export default function Moments() {
           )
         }
       >
-        <Text style={{ color: "#EFEFEF" }}>{item.name}</Text>
+        <Text style={{ color: "#EFEFEF" }}>{item.title}</Text>
         <Text style={{ color: "#EFEFEF" }}>{`for ${item.duration}min at ${
-          item.time.split(" at ")[1]
+          item.timestampFormatted.split(" at ")[1]
         }`}</Text>
       </TouchableOpacity>
     );

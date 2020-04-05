@@ -37,9 +37,8 @@ export default class EditMoment extends Component {
     super(props);
 
     let moment = props.navigation.state.params.moment;
-
     this.state = {
-      title: moment.name
+      ...moment
     };
   }
 
@@ -56,32 +55,18 @@ export default class EditMoment extends Component {
     };
   };
 
-  state = {
-    timestamp: "Schedule time",
-    title: null,
-    duration: 5,
-    sunday: false,
-    monday: false,
-    tuesday: false,
-    wednesday: false,
-    thursday: false,
-    friday: false,
-    saturday: false
-  };
-
   componentDidMount() {
     const options = { year: "numeric", month: "long", day: "numeric" };
     let now = new Date().toLocaleDateString("en-US", options);
-
     this.setState({ timestamp: now });
-
-    this.props.navigation.setParams({ handleSave: this.saveNewMoment });
+    this.props.navigation.setParams({
+      handleSave: this.saveEditedMoment
+    });
   }
 
-  saveNewMoment = async () => {
+  saveEditedMoment = async () => {
     let moment = this.state;
-
-    let _this = this;
+    console.log(moment);
     const userId = firebase.auth().currentUser.uid;
 
     const docRef = firebase
@@ -89,18 +74,13 @@ export default class EditMoment extends Component {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      .doc();
+      .doc(moment.id);
 
     return docRef
-      .set(
-        {
-          ...moment
-        },
-        { merge: true }
-      )
+      .set({ ...moment }, { merge: true })
       .then(() => {
         console.log(`successfully created moment ${docRef.id}`);
-        _this.updateTotalMoments(1);
+        NavigationService.navigate("Moments");
       })
 
       .catch(function(error) {
@@ -200,13 +180,13 @@ export default class EditMoment extends Component {
               </View>
 
               <View style={styles.repeatingItem}>
-                <Text style={styles.text}>Duration</Text>
+                <Text style={styles.text}>Duration (min)</Text>
                 <Input
                   style={styles.text}
                   color="#EFEFEF"
                   onChangeText={text => this.setState({ duration: text })}
-                  value={`${this.state.duration} min`}
-                  placeholder={`${this.state.duration} min`}
+                  value={`${this.state.duration}`}
+                  placeholder={`${this.state.duration}`}
                   placeholderTextColor="#EFEFEF80"
                   keyboardType={"numeric"}
                   returnKeyType="done"

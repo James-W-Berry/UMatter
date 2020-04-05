@@ -8,6 +8,7 @@ import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
+import Moments from "./Moments";
 import NewMoment from "./NewMoment";
 import EditMoment from "./EditMoment";
 import MomentVisualization from "./MomentVisualization";
@@ -68,10 +69,18 @@ const MainNavigator = createStackNavigator({
     }
   },
   EditMoment: {
-    screen: EditMoment
+    screen: EditMoment,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96"
+    }
   },
   MomentVisualization: {
     screen: MomentVisualization
+  },
+  Moments: {
+    screen: Moments
   }
 });
 
