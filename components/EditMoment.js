@@ -4,10 +4,10 @@ import {
   Text,
   View,
   StyleSheet,
-  AsyncStorage,
+  ActivityIndicator,
   TextInput,
   KeyboardAvoidingView,
-  SafeAreaView
+  SafeAreaView,
 } from "react-native";
 import React, { Component } from "react";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -38,7 +38,8 @@ export default class EditMoment extends Component {
 
     let moment = props.navigation.state.params.moment;
     this.state = {
-      ...moment
+      ...moment,
+      isLoading: false,
     };
   }
 
@@ -51,7 +52,7 @@ export default class EditMoment extends Component {
             Save
           </Text>
         </View>
-      )
+      ),
     };
   };
 
@@ -60,13 +61,15 @@ export default class EditMoment extends Component {
     let now = new Date().toLocaleDateString("en-US", options);
     this.setState({ timestamp: now });
     this.props.navigation.setParams({
-      handleSave: this.saveEditedMoment
+      handleSave: this.saveEditedMoment,
     });
   }
 
   saveEditedMoment = async () => {
+    this.setState({ isLoading: true });
     let moment = this.state;
     console.log(moment);
+    let _this = this;
     const userId = firebase.auth().currentUser.uid;
 
     const docRef = firebase
@@ -80,24 +83,22 @@ export default class EditMoment extends Component {
       .set({ ...moment }, { merge: true })
       .then(() => {
         console.log(`successfully created moment ${docRef.id}`);
+        _this.setState({ isLoading: false });
         NavigationService.navigate("Moments");
       })
 
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
 
-  updateTotalMoments = async value => {
+  updateTotalMoments = async (value) => {
     const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(userId);
+    const docRef = firebase.firestore().collection("users").doc(userId);
 
     docRef.set(
       {
-        totalMoments: firebase.firestore.FieldValue.increment(value)
+        totalMoments: firebase.firestore.FieldValue.increment(value),
       },
       { merge: true }
     );
@@ -105,7 +106,7 @@ export default class EditMoment extends Component {
 
   toggleDateTimePicker = () => {
     this.setState({
-      isDateTimePickerVisible: !this.state.isDateTimePickerVisible
+      isDateTimePickerVisible: !this.state.isDateTimePickerVisible,
     });
   };
 
@@ -120,7 +121,7 @@ export default class EditMoment extends Component {
     return strTime;
   }
 
-  handleDatePicked = date => {
+  handleDatePicked = (date) => {
     const monthNames = [
       "January",
       "February",
@@ -133,7 +134,7 @@ export default class EditMoment extends Component {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     let formattedDate = `${
@@ -158,181 +159,187 @@ export default class EditMoment extends Component {
           behavior="padding"
           enabled
         >
-          <View style={styles.container}>
-            <View style={styles.headingContainer}>
-              <TextInput
-                style={styles.text}
-                value={this.state.title}
-                placeholder="Add title"
-                placeholderTextColor="#EFEFEF80"
-                onChangeText={text => this.setState({ title: text })}
-              />
+          {this.state.isLoading ? (
+            <View style={[styles.container, styles.horizontal]}>
+              <ActivityIndicator size="large" color="#509C96" />
             </View>
-
-            <View style={styles.timeContainer}>
-              <View style={styles.repeatingItem}>
-                <Text style={styles.text}>Schedule time</Text>
-                <TouchableOpacity onPress={this.toggleDateTimePicker}>
-                  <Text style={styles.text} color="#EFEFEF">
-                    {this.state.timestampFormatted}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              <View style={styles.repeatingItem}>
-                <Text style={styles.text}>Duration (min)</Text>
-                <Input
+          ) : (
+            <View style={styles.container}>
+              <View style={styles.headingContainer}>
+                <TextInput
                   style={styles.text}
-                  color="#EFEFEF"
-                  onChangeText={text => this.setState({ duration: text })}
-                  value={`${this.state.duration}`}
-                  placeholder={`${this.state.duration}`}
+                  value={this.state.title}
+                  placeholder="Add title"
                   placeholderTextColor="#EFEFEF80"
-                  keyboardType={"numeric"}
-                  returnKeyType="done"
+                  onChangeText={(text) => this.setState({ title: text })}
                 />
               </View>
-            </View>
 
-            <View style={styles.repeatingOptionsContainer}>
-              <View style={styles.repeatingHeader}>
-                <Text style={styles.text}>Repeating options</Text>
-              </View>
-              <View style={styles.repeatingDays}>
+              <View style={styles.timeContainer}>
                 <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={sundayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={sundayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.sunday}
-                    onPress={() => {
-                      this.setState({ sunday: !this.state.sunday });
-                    }}
-                  />
+                  <Text style={styles.text}>Schedule time</Text>
+                  <TouchableOpacity onPress={this.toggleDateTimePicker}>
+                    <Text style={styles.text} color="#EFEFEF">
+                      {this.state.timestampFormatted}
+                    </Text>
+                  </TouchableOpacity>
                 </View>
 
                 <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={mondayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={mondayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.monday}
-                    onPress={() =>
-                      this.setState({ monday: !this.state.monday })
-                    }
-                  />
-                </View>
-
-                <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={tuesdayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={tuesdayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.tuesday}
-                    onPress={() =>
-                      this.setState({ tuesday: !this.state.tuesday })
-                    }
-                  />
-                </View>
-
-                <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={wednesdayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={wednesdayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.wednesday}
-                    onPress={() =>
-                      this.setState({ wednesday: !this.state.wednesday })
-                    }
-                  />
-                </View>
-
-                <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={thursdayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={thursdayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.thursday}
-                    onPress={() =>
-                      this.setState({ thursday: !this.state.thursday })
-                    }
-                  />
-                </View>
-                <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={fridayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={fridayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.friday}
-                    onPress={() =>
-                      this.setState({ friday: !this.state.friday })
-                    }
-                  />
-                </View>
-                <View style={styles.repeatingItem}>
-                  <CheckBox
-                    uncheckedIcon={
-                      <Image style={styles.checkbox} source={saturdayIcon} />
-                    }
-                    checkedIcon={
-                      <Image
-                        style={styles.checkbox}
-                        source={saturdayCheckedIcon}
-                      />
-                    }
-                    checked={this.state.saturday}
-                    onPress={() =>
-                      this.setState({ saturday: !this.state.saturday })
-                    }
+                  <Text style={styles.text}>Duration (min)</Text>
+                  <Input
+                    style={styles.text}
+                    color="#EFEFEF"
+                    onChangeText={(text) => this.setState({ duration: text })}
+                    value={`${this.state.duration}`}
+                    placeholder={`${this.state.duration}`}
+                    placeholderTextColor="#EFEFEF80"
+                    keyboardType={"numeric"}
+                    returnKeyType="done"
                   />
                 </View>
               </View>
-            </View>
 
-            <DateTimePicker
-              isVisible={this.state.isDateTimePickerVisible}
-              onConfirm={this.handleDatePicked}
-              onCancel={this.toggleDateTimePicker}
-              mode="datetime"
-              isDarkModeEnabled={true}
-            />
-          </View>
+              <View style={styles.repeatingOptionsContainer}>
+                <View style={styles.repeatingHeader}>
+                  <Text style={styles.text}>Repeating options</Text>
+                </View>
+                <View style={styles.repeatingDays}>
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={sundayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={sundayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.sunday}
+                      onPress={() => {
+                        this.setState({ sunday: !this.state.sunday });
+                      }}
+                    />
+                  </View>
+
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={mondayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={mondayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.monday}
+                      onPress={() =>
+                        this.setState({ monday: !this.state.monday })
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={tuesdayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={tuesdayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.tuesday}
+                      onPress={() =>
+                        this.setState({ tuesday: !this.state.tuesday })
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={wednesdayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={wednesdayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.wednesday}
+                      onPress={() =>
+                        this.setState({ wednesday: !this.state.wednesday })
+                      }
+                    />
+                  </View>
+
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={thursdayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={thursdayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.thursday}
+                      onPress={() =>
+                        this.setState({ thursday: !this.state.thursday })
+                      }
+                    />
+                  </View>
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={fridayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={fridayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.friday}
+                      onPress={() =>
+                        this.setState({ friday: !this.state.friday })
+                      }
+                    />
+                  </View>
+                  <View style={styles.repeatingItem}>
+                    <CheckBox
+                      uncheckedIcon={
+                        <Image style={styles.checkbox} source={saturdayIcon} />
+                      }
+                      checkedIcon={
+                        <Image
+                          style={styles.checkbox}
+                          source={saturdayCheckedIcon}
+                        />
+                      }
+                      checked={this.state.saturday}
+                      onPress={() =>
+                        this.setState({ saturday: !this.state.saturday })
+                      }
+                    />
+                  </View>
+                </View>
+              </View>
+
+              <DateTimePicker
+                isVisible={this.state.isDateTimePickerVisible}
+                onConfirm={this.handleDatePicked}
+                onCancel={this.toggleDateTimePicker}
+                mode="datetime"
+                isDarkModeEnabled={true}
+              />
+            </View>
+          )}
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
@@ -343,55 +350,55 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   text: {
     justifyContent: "center",
     alignItems: "center",
     color: "#EFEFEF",
     fontFamily: "montserrat-regular",
-    fontSize: 20
+    fontSize: 20,
   },
   headerRightContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   save: {
     color: "#509C96",
     fontSize: 18,
     padding: 15,
-    marginRight: 10
+    marginRight: 10,
   },
   cancelButton: {
-    marginRight: 8
+    marginRight: 8,
   },
   headingContainer: {
     display: "flex",
     fontSize: 30,
     flex: 1,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   repeatingHeader: {
     display: "flex",
     fontSize: 30,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   repeatingDays: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   headingInput: {
     flex: 1,
     fontSize: 24,
     margin: 8,
     fontFamily: "montserrat-regular",
-    color: "#EFEFEF"
+    color: "#EFEFEF",
   },
   timeContainer: {
     display: "flex",
@@ -399,7 +406,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 30,
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   repeatingOptionsContainer: {
     display: "flex",
@@ -407,13 +414,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    alignContent: "center"
+    alignContent: "center",
   },
   repeatingItem: {
-    flex: 1
+    flex: 1,
   },
   checkbox: {
     width: 30,
-    height: 30
-  }
+    height: 30,
+  },
 });

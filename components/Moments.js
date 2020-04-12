@@ -2,25 +2,20 @@ import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  AsyncStorage,
   KeyboardAvoidingView,
   Alert,
   Text,
-  StatusBar
+  ActivityIndicator,
 } from "react-native";
-import { Calendar, Agenda } from "react-native-calendars";
-import uuid from "uuid";
-import { Icon } from "react-native-elements";
-import ActionButton from "react-native-action-button";
-import MomentWidget from "./MomentWidget";
+import { Agenda } from "react-native-calendars";
 import { Notifications } from "expo";
 import * as Permissions from "expo-permissions";
 import NavigationService from "./NavigationService";
-import DateTimePicker from "react-native-modal-datetime-picker";
 import firebase from "../firebase";
 import { TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeArea } from "react-native-safe-area-context";
+import Constants from "expo-constants";
 
 function useMoments() {
   const [moments, setMoments] = useState({});
@@ -32,15 +27,15 @@ function useMoments() {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      .onSnapshot(snapshot => {
-        const retrievedMoments = snapshot.docs.map(doc => ({
+      .onSnapshot((snapshot) => {
+        const retrievedMoments = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
 
         let formattedMoments = {};
 
-        retrievedMoments.forEach(moment => {
+        retrievedMoments.forEach((moment) => {
           const time = new Date(moment.timestamp);
           const strTime = time.toISOString().split("T")[0];
 
@@ -48,7 +43,7 @@ function useMoments() {
             formattedMoments[strTime] = [];
           }
           formattedMoments[strTime].push({
-            ...moment
+            ...moment,
           });
         });
 
@@ -94,6 +89,7 @@ export default function Moments() {
   }
 
   function handleNotification(origin, data, remote) {
+    console.log(data);
     message = data.message;
     let info = `Start your moment!`;
     Alert.alert(
@@ -105,13 +101,13 @@ export default function Moments() {
           onPress: () => {
             console.log("starting moment");
             NavigationService.navigate("MomentVisualization");
-          }
+          },
         },
         {
           text: "Cancel",
           onPress: () => console.log("Cancel Pressed"),
-          style: "cancel"
-        }
+          style: "cancel",
+        },
       ],
       { cancelable: false }
     );
@@ -123,11 +119,12 @@ export default function Moments() {
       moment,
       onGoBack: () => {
         console.log("went back to moments");
-      }
+      },
     });
   }
 
-  onDeleteMoment = async moment => {
+  onDeleteMoment = async (moment) => {
+    setIsLoading(true);
     let _this = this;
     const userId = firebase.auth().currentUser.uid;
 
@@ -144,25 +141,28 @@ export default function Moments() {
         console.log(`successfully deleted moment ${docRef.id}`);
         _this.updateTotalMoments(-1);
       })
-
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
 
-  updateTotalMoments = async value => {
+  updateTotalMoments = async (value) => {
     const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(userId);
+    const docRef = firebase.firestore().collection("users").doc(userId);
 
-    docRef.set(
-      {
-        totalMoments: firebase.firestore.FieldValue.increment(value)
-      },
-      { merge: true }
-    );
+    docRef
+      .set(
+        {
+          totalMoments: firebase.firestore.FieldValue.increment(value),
+        },
+        { merge: true }
+      )
+      .then(() => {
+        setIsLoading(false);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
   };
 
   function renderItem(item) {
@@ -179,13 +179,13 @@ export default function Moments() {
               { text: "Edit", onPress: () => onEditMoment(item) },
               {
                 text: "Delete",
-                onPress: () => onDeleteMoment(item)
+                onPress: () => onDeleteMoment(item),
               },
               {
                 text: "OK",
                 onPress: () => console.log("OK Pressed"),
-                style: "cancel"
-              }
+                style: "cancel",
+              },
             ],
             { cancelable: false }
           )
@@ -201,8 +201,10 @@ export default function Moments() {
 
   function renderNoItems() {
     return (
-      <View style={[styles.item]}>
-        <Text style={{ color: "#EFEFEF" }}>No moments planned</Text>
+      <View style={[styles.noMoments]}>
+        <Text style={{ fontSize: 20, fontFamily: "montserrat-medium" }}>
+          No moments planned
+        </Text>
       </View>
     );
   }
@@ -214,24 +216,28 @@ export default function Moments() {
         display: "flex",
         justifyContent: "center",
         flexDirection: "column",
-        paddingTop: insets.top
       }}
     >
-      <StatusBar barStyle={"light-content"} translucent={true} />
+      <View style={styles.statusBar} />
       <Text style={styles.pageTitle}>Moments</Text>
+      {isLoading && (
+        <View style={[styles.container, styles.horizontal]}>
+          <ActivityIndicator size="large" color="#509C96" />
+        </View>
+      )}
       <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
         <Agenda
           items={moments}
           renderItem={renderItem}
           renderEmptyData={renderNoItems}
-          onCalendarToggled={calendarOpened => {
+          onCalendarToggled={(calendarOpened) => {
             console.log(calendarOpened);
           }}
-          onDayPress={day => {
+          onDayPress={(day) => {
             console.log("day pressed");
             setSelectedDay(day);
           }}
-          onDayChange={day => {
+          onDayChange={(day) => {
             console.log("day changed");
             setSelectedDay(day);
           }}
@@ -246,13 +252,13 @@ export default function Moments() {
             agendaDayTextColor: "#191919",
             agendaDayNumColor: "green",
             agendaTodayColor: "red",
-            agendaKnobColor: "blue"
+            agendaKnobColor: "blue",
           }}
           // Agenda container style
           theme={{
             "stylesheet.agenda.list": {
-              container: {}
-            }
+              container: {},
+            },
           }}
         />
       </KeyboardAvoidingView>
@@ -262,7 +268,7 @@ export default function Moments() {
           NavigationService.navigate("NewMoment", {
             onGoBack: () => {
               console.log("went back to Agenda");
-            }
+            },
           })
         }
       >
@@ -273,12 +279,16 @@ export default function Moments() {
 }
 
 const styles = StyleSheet.create({
+  statusBar: {
+    backgroundColor: "#2C239A",
+    height: Constants.statusBarHeight,
+  },
   container: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
     flexDirection: "column",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   item: {
     flex: 1,
@@ -287,29 +297,40 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: "#2C239A",
     padding: 10,
-    borderRadius: 10
+    borderRadius: 10,
+  },
+  noMoments: {
+    flex: 1,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    // backgroundColor: "#2C239A",
+    padding: 10,
+    borderRadius: 10,
   },
   calendar: {
-    flex: 1
+    flex: 1,
   },
   pageTitle: {
     fontSize: 24,
+    marginTop: 10,
+    marginBottom: 10,
     color: "#160C21",
     alignSelf: "center",
-    fontFamily: "montserrat-regular"
+    fontFamily: "montserrat-medium",
   },
   momentWidget: {
     display: "flex",
     flex: 1,
     flexDirection: "row",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   button: {
     elevation: 10,
     display: "flex",
     alignSelf: "flex-end",
     alignItems: "center",
-    justifyContent: "center"
-  }
+    justifyContent: "center",
+  },
 });

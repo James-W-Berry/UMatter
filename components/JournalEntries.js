@@ -5,16 +5,15 @@ import {
   StyleSheet,
   TouchableOpacity,
   FlatList,
-  ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import { Card } from "react-native-elements";
 import _ from "lodash";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
 import firebase from "../firebase";
-import { StatusBar } from "react-native";
 import { useSafeArea } from "react-native-safe-area-context";
+import Constants from "expo-constants";
 
 function createJournalEntry(entry) {
   if (entry) {
@@ -28,7 +27,7 @@ function createJournalEntry(entry) {
                 style={styles.caption}
                 numberOfLines={1}
                 style={{
-                  marginBottom: 10
+                  marginBottom: 10,
                 }}
               >
                 {entry.body}
@@ -42,7 +41,7 @@ function createJournalEntry(entry) {
                 style={styles.caption}
                 numberOfLines={1}
                 style={{
-                  marginBottom: 10
+                  marginBottom: 10,
                 }}
               >
                 {entry.body}
@@ -64,7 +63,7 @@ function onSelect(entry) {
     entry,
     onGoBack: () => {
       console.log("went back to journal entries");
-    }
+    },
   });
 }
 
@@ -79,10 +78,10 @@ function useJournalEntries() {
       .doc(userId)
       .collection("journalEntries")
       .orderBy("creationTimestamp", "desc")
-      .onSnapshot(snapshot => {
-        const retrievedEntries = snapshot.docs.map(doc => ({
+      .onSnapshot((snapshot) => {
+        const retrievedEntries = snapshot.docs.map((doc) => ({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         }));
 
         setEntries(retrievedEntries);
@@ -96,7 +95,6 @@ function useJournalEntries() {
 function JournalEntries() {
   const [isLoading, setIsLoading] = useState(false);
   const journalEntries = useJournalEntries();
-  const [debugMode, setDebugMode] = useState(false);
   const insets = useSafeArea();
 
   return (
@@ -106,62 +104,73 @@ function JournalEntries() {
         display: "flex",
         justifyContent: "center",
         flexDirection: "column",
-        backgroundColor: "#EFEFEF",
-        paddingTop: insets.top
       }}
     >
-      <StatusBar barStyle={"dark-content"} translucent={false} />
-      <Text style={styles.pageTitle}>Journal</Text>
+      <View style={styles.statusBar} />
 
-      <ScrollView
-        contentContainerStyle={{
-          flexDirection: "row",
-          alignSelf: "flex-end",
-          flexGrow: 1
+      <View
+        style={{
+          flex: 1,
+          display: "flex",
+          justifyContent: "center",
+          flexDirection: "column",
+          backgroundColor: "#EFEFEF",
         }}
       >
+        <Text style={styles.pageTitle}>Journal</Text>
+
         {journalEntries ? (
           <FlatList
             data={journalEntries}
             renderItem={({ item }) => createJournalEntry(item)}
-            keyExtractor={item => item.id.toString()}
+            keyExtractor={(item) => item.id.toString()}
           />
         ) : (
           <View style={[styles.container, styles.horizontal]}>
             <ActivityIndicator size="large" color="#509C96" />
           </View>
         )}
-      </ScrollView>
 
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          NavigationService.navigate("NewJournalEntry", {
-            onGoBack: () => {
-              console.log("went back to journal entries");
-            }
-          })
-        }
-      >
-        <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
-      </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={() =>
+            NavigationService.navigate("NewJournalEntry", {
+              onGoBack: () => {
+                console.log("went back to journal entries");
+              },
+            })
+          }
+        >
+          <MaterialCommunityIcons
+            name="plus-circle"
+            size={50}
+            color="#509C96"
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  statusBar: {
+    backgroundColor: "#2C239A",
+    height: Constants.statusBarHeight,
+  },
   container: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
     flexDirection: "column",
-    backgroundColor: "#EFEFEF"
+    backgroundColor: "#EFEFEF",
   },
   pageTitle: {
     fontSize: 24,
+    marginTop: 10,
+    marginBottom: 10,
     color: "#160C21",
     alignSelf: "center",
-    fontFamily: "montserrat-regular"
+    fontFamily: "montserrat-medium",
   },
   button: {
     elevation: 10,
@@ -171,25 +180,25 @@ const styles = StyleSheet.create({
     height: "10%",
     alignSelf: "flex-end",
     alignItems: "center",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   title: {
     fontSize: 20,
-    fontFamily: "montserrat-medium"
+    fontFamily: "montserrat-medium",
   },
   caption: {
     fontSize: 8,
-    fontFamily: "montserrat-regular"
+    fontFamily: "montserrat-regular",
   },
   date: {
     fontSize: 12,
-    fontFamily: "montserrat-regular"
+    fontFamily: "montserrat-regular",
   },
   clearButton: {
     alignSelf: "center",
     width: "30%",
-    backgroundColor: "#00A9A5"
-  }
+    backgroundColor: "#00A9A5",
+  },
 });
 
 export default JournalEntries;
