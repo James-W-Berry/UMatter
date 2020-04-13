@@ -8,13 +8,10 @@ import {
   TextInput,
   KeyboardAvoidingView,
   SafeAreaView,
-  // Modal,
   TouchableHighlight,
   Alert,
 } from "react-native";
 import React, { Component } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import NavigationService from "./NavigationService";
 import firebase from "../firebase";
 import { CheckBox, Input } from "react-native-elements";
 import sundayIcon from "../assets/sunday.png";
@@ -35,18 +32,13 @@ import { Notifications } from "expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Modal from "react-native-modal";
 
-const options = { year: "numeric", month: "long", day: "numeric" };
-let now = new Date();
-let formattedDate = new Date().toLocaleDateString("en-US", options);
-
 export default class NewMoment extends Component {
   constructor(props) {
     super(props);
   }
 
   state = {
-    currentTime: now,
-    formattedDate: formattedDate,
+    readableMomentTime: "Set a time",
     title: null,
     duration: 5,
     sunday: false,
@@ -74,10 +66,11 @@ export default class NewMoment extends Component {
   };
 
   componentDidMount() {
-    // const options = { year: "numeric", month: "long", day: "numeric" };
-    // let now = new Date().toLocaleDateString("en-US", options);
-    // this.setState({ timestamp: now });
     this.props.navigation.setParams({ handleSave: this.saveNewMoment });
+    var coeff = 1000 * 60 * 1;
+    let now = new Date();
+    let nowEpoch = new Date(Math.floor(now.getTime() / coeff) * coeff);
+    this.setState({ scheduledMomentTime: nowEpoch });
   }
 
   saveNewMoment = async () => {
@@ -114,13 +107,14 @@ export default class NewMoment extends Component {
   };
 
   scheduleMomentNotification = async () => {
-    if (this.state.scheduledTimestamp) {
+    let { scheduledMomentTime, title } = this.state;
+    let _this = this;
+    console.log(title);
+
+    if (scheduledMomentTime) {
       const notification = {
-        title: "UMatter",
+        title: title,
         body: "Start your moment now!",
-        data: {
-          message: this.state.title,
-        },
         android: {
           sound: true,
         },
@@ -130,7 +124,7 @@ export default class NewMoment extends Component {
       };
 
       const schedulingOptions = {
-        time: this.state.scheduledTimestamp,
+        time: scheduledMomentTime,
       };
 
       Notifications.scheduleLocalNotificationAsync(
@@ -138,7 +132,7 @@ export default class NewMoment extends Component {
         schedulingOptions
       )
         .then((notificationId) => {
-          this.setState({ notificationId: notificationId });
+          _this.setState({ notificationId: notificationId });
           console.log(`scheduled moment notification ${notificationId}`);
           return notificationId;
         })
@@ -164,7 +158,8 @@ export default class NewMoment extends Component {
       )
       .then(() => {
         _this.setState({ isLoading: false });
-        NavigationService.navigate("Moments");
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
       })
       .catch(function (error) {
         console.log(error);
@@ -188,34 +183,40 @@ export default class NewMoment extends Component {
     return strTime;
   }
 
-  handleDatePicked = (date) => {
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+  handleChange = (event, date) => {
+    if (date) {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
 
-    let formattedDate = `${
-      monthNames[date.getMonth()]
-    } ${date.getDate()} at ${this.format12HrTime(date)}`;
-    let newDate = new Date(date);
-    var coeff = 1000 * 60 * 1;
-    let momentTime = new Date(Math.floor(newDate.getTime() / coeff) * coeff);
-    let yearAndMonth = `${date.getFullYear()}_${date.getMonth() + 1}`;
+      let scheduledMomentTime = new Date(date);
 
-    this.setState({ momentMonth: yearAndMonth });
-    this.setState({ scheduledTimestamp: momentTime });
-    this.setState({ timestampFormatted: formattedDate });
-    this.toggleDateTimePicker();
+      console.log(scheduledMomentTime);
+
+      // get easily readable moment time
+      let readableMomentTime = `${
+        monthNames[scheduledMomentTime.getMonth()]
+      } ${scheduledMomentTime.getDate()} at ${this.format12HrTime(
+        scheduledMomentTime
+      )}`;
+
+      this.setState({ scheduledMomentTime: scheduledMomentTime });
+      this.setState({
+        timeZoneOffset: scheduledMomentTime.getTimezoneOffset() * 60 * 1000,
+      });
+      this.setState({ readableMomentTime: readableMomentTime });
+    }
   };
 
   render() {
@@ -248,98 +249,90 @@ export default class NewMoment extends Component {
                     this.setState({ isDateTimePickerVisible: true });
                   }}
                 >
-                  <Text style={styles.text}>{this.state.formattedDate}</Text>
+                  <Text style={styles.text}>
+                    {this.state.readableMomentTime}
+                  </Text>
                 </TouchableHighlight>
               </View>
 
               <Modal
-                style={{
-                  // marginTop: "40%",
-                  // marginBottom: "40%",
-                  backgroundColor: "#EFEFEF",
-                  display: "flex",
-                  flexDirection: "column",
-                }}
+                onBackdropPress={() =>
+                  this.setState({ isDateTimePickerVisible: false })
+                }
                 isVisible={this.state.isDateTimePickerVisible}
                 animationIn="slideInUp"
                 animationOut="slideOutDown"
-                coverScreen={true}
+                coverScreen={false}
               >
-                <View
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    justifyContent: "center",
-                    backgroundColor: "#efefef",
-                  }}
-                >
-                  <DateTimePicker
-                    timeZoneOffsetInMinutes={0}
-                    is24Hour={false}
-                    display="default"
-                    onConfirm={this.handleDatePicked}
-                    onCancel={this.toggleDateTimePicker}
-                    mode="datetime"
-                    value={this.state.currentTime}
-                  />
-                </View>
+                <View style={styles.content}>
+                  <View
+                    style={{
+                      display: "flex",
+                      flex: 1,
+                    }}
+                  >
+                    <Text style={styles.contentTitle}>Schedule Moment</Text>
+                  </View>
 
-                <View
-                  style={{
-                    flex: 1,
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "center",
-                    alignItems: "center",
-                    backgroundColor: "#1919",
-                  }}
-                >
-                  <TouchableHighlight
+                  <View
                     style={{
-                      flex: 1,
-                      backgroundColor: "#564981",
                       display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    onPress={() => {
-                      this.setState({ isDateTimePickerVisible: false });
+                      flex: 4,
+                      height: "100%",
+                      width: "100%",
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 24,
-                        fontFamily: "montserrat-regular",
-                        padding: 20,
-                      }}
-                    >
-                      Cancel
-                    </Text>
-                  </TouchableHighlight>
-                  <TouchableHighlight
+                    <DateTimePicker
+                      is24Hour={false}
+                      display="default"
+                      onChange={this.handleChange}
+                      onCancel={this.toggleDateTimePicker}
+                      mode="datetime"
+                      value={this.state.scheduledMomentTime}
+                    />
+                  </View>
+
+                  <View
                     style={{
-                      flex: 1,
-                      backgroundColor: "#985667",
                       display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    onPress={() => {
-                      this.setState({ isDateTimePickerVisible: false });
+                      flex: 1,
+                      flexDirection: "row",
                     }}
                   >
-                    <Text
-                      style={{
-                        fontSize: 24,
-                        fontFamily: "montserrat-regular",
-                        padding: 20,
+                    <TouchableHighlight
+                      onPress={() => {
+                        this.setState({ isDateTimePickerVisible: false });
                       }}
                     >
-                      Ok
-                    </Text>
-                  </TouchableHighlight>
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: "montserrat-regular",
+                          padding: 20,
+                        }}
+                      >
+                        Cancel
+                      </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight
+                      onPress={() => {
+                        this.setState({ isDateTimePickerVisible: false });
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: "montserrat-regular",
+                          padding: 20,
+                        }}
+                      >
+                        Ok
+                      </Text>
+                    </TouchableHighlight>
+                  </View>
                 </View>
               </Modal>
+
               <View style={styles.repeatingItem}>
                 <Input
                   style={styles.text}
@@ -574,21 +567,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 22,
   },
-  modalView: {
-    width: "50%",
-    height: "50%",
-    margin: 20,
+
+  content: {
     backgroundColor: "white",
-    borderRadius: 20,
-    padding: 35,
+    padding: 22,
+    display: "flex",
+    flex: 1,
+    maxHeight: "60%",
+    justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    borderRadius: 4,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+  },
+  contentTitle: {
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
+    marginBottom: 12,
   },
 });

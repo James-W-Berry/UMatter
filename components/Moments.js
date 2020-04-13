@@ -36,7 +36,10 @@ function useMoments() {
         let formattedMoments = {};
 
         retrievedMoments.forEach((moment) => {
-          const time = new Date(moment.timestamp);
+          let time = new Date(
+            moment.scheduledMomentTime.seconds * 1000 - moment.timeZoneOffset
+          );
+
           const strTime = time.toISOString().split("T")[0];
 
           if (!formattedMoments[strTime]) {
@@ -68,7 +71,7 @@ export default function Moments() {
   useEffect(() => {
     getPermissionAsync();
     listenForNotifications();
-  });
+  }, []);
 
   useEffect(() => {
     let today = new Date().getDate();
@@ -85,32 +88,30 @@ export default function Moments() {
   }
 
   async function listenForNotifications() {
-    Notifications.addListener(handleNotification);
-  }
+    Notifications.addListener((notification) => {
+      console.log(`${JSON.stringify(notification)}`);
 
-  function handleNotification(origin, data, remote) {
-    console.log(data);
-    message = data.message;
-    let info = `Start your moment!`;
-    Alert.alert(
-      `UMatter - ${message}`,
-      info,
-      [
-        {
-          text: "Begin",
-          onPress: () => {
-            console.log("starting moment");
-            NavigationService.navigate("MomentVisualization");
+      let info = `Start your moment!`;
+      Alert.alert(
+        `UMatter`,
+        info,
+        [
+          {
+            text: "Begin",
+            onPress: () => {
+              console.log("starting moment");
+              NavigationService.navigate("MomentVisualization");
+            },
           },
-        },
-        {
-          text: "Cancel",
-          onPress: () => console.log("Cancel Pressed"),
-          style: "cancel",
-        },
-      ],
-      { cancelable: false }
-    );
+          {
+            text: "Cancel",
+            onPress: () => console.log("Cancel Pressed"),
+            style: "cancel",
+          },
+        ],
+        { cancelable: true }
+      );
+    });
   }
 
   function onEditMoment(moment) {
@@ -125,7 +126,6 @@ export default function Moments() {
 
   onDeleteMoment = async (moment) => {
     setIsLoading(true);
-    let _this = this;
     const userId = firebase.auth().currentUser.uid;
 
     const docRef = firebase
@@ -139,7 +139,7 @@ export default function Moments() {
       .delete()
       .then(() => {
         console.log(`successfully deleted moment ${docRef.id}`);
-        _this.updateTotalMoments(-1);
+        updateTotalMoments(-1);
       })
       .catch(function (error) {
         console.log(error);
@@ -173,7 +173,7 @@ export default function Moments() {
           Alert.alert(
             item.title,
             `Moment scheduled for ${item.duration}min at ${
-              item.timestampFormatted.split(" at ")[1]
+              item.readableMomentTime.split(" at ")[1]
             }`,
             [
               { text: "Edit", onPress: () => onEditMoment(item) },
@@ -186,6 +186,13 @@ export default function Moments() {
                 onPress: () => console.log("OK Pressed"),
                 style: "cancel",
               },
+              {
+                text: "Start now",
+                onPress: () => {
+                  console.log("starting moment");
+                  NavigationService.navigate("MomentVisualization");
+                },
+              },
             ],
             { cancelable: false }
           )
@@ -193,7 +200,7 @@ export default function Moments() {
       >
         <Text style={{ color: "#EFEFEF" }}>{item.title}</Text>
         <Text style={{ color: "#EFEFEF" }}>{`for ${item.duration}min at ${
-          item.timestampFormatted.split(" at ")[1]
+          item.readableMomentTime.split(" at ")[1]
         }`}</Text>
       </TouchableOpacity>
     );
@@ -202,7 +209,7 @@ export default function Moments() {
   function renderNoItems() {
     return (
       <View style={[styles.noMoments]}>
-        <Text style={{ fontSize: 20, fontFamily: "montserrat-medium" }}>
+        <Text style={{ fontSize: 20, fontFamily: "montserrat-regular" }}>
           No moments planned
         </Text>
       </View>
