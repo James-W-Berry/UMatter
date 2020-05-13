@@ -11,7 +11,7 @@ function useUser() {
       .firestore()
       .collection("users")
       .doc(userId)
-      .onSnapshot(doc => {
+      .onSnapshot((doc) => {
         const user = doc.data();
         setUser(user);
       });
@@ -29,7 +29,10 @@ export default function Badges() {
       <Text style={styles.pageTitle}>Achievements</Text>
       <Text
         style={styles.text}
-      >{`Total Entries: ${user.totalJournalEntries}`}</Text>
+      >{`Entries Recorded: ${user.totalJournalEntries}`}</Text>
+      <Text
+        style={styles.text}
+      >{`Moments Completed: ${user.totalMoments}`}</Text>
     </View>
   );
 }
@@ -41,18 +44,18 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   pageTitle: {
     fontSize: 24,
     color: "#EFEFEF",
     alignSelf: "center",
-    fontFamily: "montserrat-regular"
+    fontFamily: "montserrat-regular",
   },
   text: {
     color: "#EDEDED",
-    fontSize: 16,
+    fontSize: 24,
     fontFamily: "montserrat-regular",
-    marginTop: "10%"
-  }
+    marginTop: "10%",
+  },
 });

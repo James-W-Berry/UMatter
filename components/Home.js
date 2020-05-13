@@ -23,32 +23,32 @@ export default function Home() {
       key: "journalEntries",
       title: "Journal",
       icon: "notebook",
-      color: "#160C21"
+      color: "#160C21",
     },
     { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
     {
       key: "gold",
       title: "Gold",
       icon: "treasure-chest",
-      color: "#160C21"
+      color: "#160C21",
     },
     {
       key: "badges",
       title: "Badges",
       icon: "trophy-award",
-      color: "#160C21"
+      color: "#160C21",
     },
-    { key: "profile", title: "Profile", icon: "account", color: "#160C21" }
+    { key: "profile", title: "Profile", icon: "account", color: "#160C21" },
   ];
 
-  const handleIndexChange = index => setIndex(index);
+  const handleIndexChange = (index) => setIndex(index);
 
   const renderScene = BottomNavigation.SceneMap({
     journalEntries: JournalEntriesRoute,
     moments: MomentsRoute,
     gold: GoldRoute,
     badges: BadgesRoute,
-    profile: ProfileRoute
+    profile: ProfileRoute,
   });
 
   return (

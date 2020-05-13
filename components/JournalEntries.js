@@ -14,13 +14,14 @@ import NavigationService from "./NavigationService";
 import firebase from "../firebase";
 import { useSafeArea } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import ActionButton from "react-native-action-button";
 
 function createJournalEntry(entry) {
   if (entry) {
     return (
       <View key={entry.id}>
         <TouchableOpacity onPress={() => onSelect(entry)}>
-          {entry.image ? (
+          {/* {entry.image ? (
             <Card image={{ uri: entry.image }}>
               <Text style={styles.title}>{entry.title}</Text>
               <Text
@@ -34,21 +35,21 @@ function createJournalEntry(entry) {
               </Text>
               <Text style={styles.date}>{entry.creationDate}</Text>
             </Card>
-          ) : (
-            <Card>
-              <Text style={styles.title}>{entry.title}</Text>
-              <Text
-                style={styles.caption}
-                numberOfLines={1}
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                {entry.body}
-              </Text>
-              <Text style={styles.date}>{entry.creationDate}</Text>
-            </Card>
-          )}
+          ) : ( */}
+          <Card>
+            <Text style={styles.title}>{entry.title}</Text>
+            <Text
+              style={styles.caption}
+              numberOfLines={1}
+              style={{
+                marginBottom: 10,
+              }}
+            >
+              {entry.body}
+            </Text>
+            <Text style={styles.date}>{entry.creationDate}</Text>
+          </Card>
+          {/* )} */}
         </TouchableOpacity>
       </View>
     );
@@ -131,7 +132,18 @@ function JournalEntries() {
           </View>
         )}
 
-        <TouchableOpacity
+        <ActionButton
+          buttonColor="#509C96"
+          onPress={() =>
+            NavigationService.navigate("NewJournalEntry", {
+              onGoBack: () => {
+                console.log("went back to journal entries");
+              },
+            })
+          }
+        ></ActionButton>
+
+        {/* <TouchableOpacity
           style={styles.button}
           onPress={() =>
             NavigationService.navigate("NewJournalEntry", {
@@ -146,7 +158,7 @@ function JournalEntries() {
             size={50}
             color="#509C96"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
     </View>
   );

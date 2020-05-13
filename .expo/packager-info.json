@@ -1,9 +1,10 @@
 {
-  "devToolsPort": 19002,
-  "expoServerPort": 19000,
-  "packagerPort": 19001,
-  "packagerPid": 99233,
-  "expoServerNgrokUrl": "https://n7-xd8.friendship-circle.umatter.exp.direct",
-  "packagerNgrokUrl": "https://packager.n7-xd8.friendship-circle.umatter.exp.direct",
-  "ngrokPid": 99248
+  "devToolsPort": 19003,
+  "expoServerPort": null,
+  "packagerPort": null,
+  "packagerPid": null,
+  "expoServerNgrokUrl": null,
+  "packagerNgrokUrl": null,
+  "ngrokPid": null,
+  "webpackServerPort": null
 }

@@ -1,22 +1,14 @@
 import {
-  Button,
-  Image,
   Text,
   View,
   StyleSheet,
-  AsyncStorage,
   TextInput,
   KeyboardAvoidingView,
-  SafeAreaView
+  SafeAreaView,
 } from "react-native";
 import React, { Component } from "react";
-import * as ImagePicker from "expo-image-picker";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import Constants from "expo-constants";
-import * as Permissions from "expo-permissions";
-import uuid from "uuid";
-import NavigationService from "./NavigationService";
 import firebase from "../firebase";
+import NavigationService from "./NavigationService";
 
 class NewJournalEntry extends Component {
   constructor(props) {
@@ -32,42 +24,19 @@ class NewJournalEntry extends Component {
             Save
           </Text>
         </View>
-      )
+      ),
     };
   };
 
   state = {
     image: null,
     title: null,
-    body: null
+    body: null,
   };
 
   componentDidMount() {
-    this.getPermissionAsync();
     this.props.navigation.setParams({ handleSave: this.saveNewJournalEntry });
   }
-
-  getPermissionAsync = async () => {
-    if (Constants.platform.ios) {
-      const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
-      if (status !== "granted") {
-        alert("Sorry, we need camera roll permissions to make this work!");
-      }
-    }
-  };
-
-  pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.All,
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1
-    });
-
-    if (!result.cancelled) {
-      this.setState({ image: result.uri });
-    }
-  };
 
   saveNewJournalEntry = async () => {
     let { title, body, image } = this.state;
@@ -90,127 +59,36 @@ class NewJournalEntry extends Component {
           title: title,
           body: body,
           creationDate: now,
-          creationTimestamp: nowTimestamp
+          creationTimestamp: nowTimestamp,
         },
         { merge: true }
       )
       .then(() => {
-        console.log(docRef.id);
         console.log(`successfully created journal entry ${docRef.id}`);
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
         _this.updateTotalJournalEntries(1);
-        _this.uploadJournalEntryPicture(image, docRef.id);
+        //NavigationService.navigate("JournalEntries");
       })
 
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
 
-  updateTotalJournalEntries = async value => {
+  updateTotalJournalEntries = async (value) => {
     const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(userId);
+    const docRef = firebase.firestore().collection("users").doc(userId);
 
     docRef.set(
       {
-        totalJournalEntries: firebase.firestore.FieldValue.increment(value)
+        totalJournalEntries: firebase.firestore.FieldValue.increment(value),
       },
       { merge: true }
     );
   };
 
-  uploadJournalEntryPicture = async (picture, id) => {
-    let _this = this;
-    if (picture !== null) {
-      const blob = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.onload = function() {
-          resolve(xhr.response);
-        };
-        xhr.onerror = function(e) {
-          console.log(e);
-          reject(new TypeError("Network request failed"));
-        };
-        xhr.responseType = "blob";
-        xhr.open("GET", picture, true);
-        xhr.send(null);
-      });
-
-      const userId = firebase.auth().currentUser.uid;
-      var storageRef = firebase.storage().ref();
-      var journalEntryPictureRef = storageRef.child(
-        `journalPictures/${userId}/${id}`
-      );
-      let uploadJournalEntryPictureTask = journalEntryPictureRef.put(blob);
-
-      uploadJournalEntryPictureTask.on(
-        "state_changed",
-        function(snapshot) {
-          switch (snapshot.state) {
-            case firebase.storage.TaskState.PAUSED:
-              console.log("Upload is paused");
-              break;
-            case firebase.storage.TaskState.RUNNING:
-              console.log("Upload is running");
-              break;
-            default:
-              break;
-          }
-        },
-        function(error) {
-          console.log(error);
-          blob.close();
-        },
-        function() {
-          blob.close();
-          uploadJournalEntryPictureTask.snapshot.ref
-            .getDownloadURL()
-            .then(function(downloadURL) {
-              console.log("File available at", downloadURL);
-              _this.registerJournalEntryPictureUrl(downloadURL, id);
-            });
-        }
-      );
-    } else {
-      _this.props.navigation.state.params.onGoBack();
-      _this.props.navigation.goBack(null);
-    }
-  };
-
-  registerJournalEntryPictureUrl = async (downloadUrl, id) => {
-    let _this = this;
-    const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(userId)
-      .collection("journalEntries")
-      .doc(id);
-
-    return docRef
-      .set(
-        {
-          image: downloadUrl
-        },
-        { merge: true }
-      )
-      .then(function() {
-        console.log(
-          "successfully updated journal entry with picture reference"
-        );
-        _this.props.navigation.state.params.onGoBack();
-        _this.props.navigation.goBack(null);
-      })
-      .catch(function(error) {
-        console.log(error);
-      });
-  };
-
   render() {
-    let { image } = this.state;
-
     return (
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
@@ -219,24 +97,11 @@ class NewJournalEntry extends Component {
           enabled
         >
           <View style={styles.container}>
-            <View style={styles.banner}>
-              <TouchableOpacity
-                style={styles.imageContainer}
-                onPress={this.pickImage}
-              >
-                {image ? (
-                  <Image source={{ uri: image }} style={styles.image} />
-                ) : (
-                  <Text style={styles.pickImageText}> Pick an image</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-
             <View style={styles.headingContainer}>
               <TextInput
                 style={styles.headingInput}
-                placeholder="Title"
-                onChangeText={text => this.setState({ title: text })}
+                placeholder="Entry title"
+                onChangeText={(text) => this.setState({ title: text })}
                 value={this.state.title}
                 numberOfLines={1}
               />
@@ -245,8 +110,9 @@ class NewJournalEntry extends Component {
             <View style={styles.entryContainer}>
               <TextInput
                 style={styles.entryInput}
+                autoFocus={true}
                 placeholder="Your entry"
-                onChangeText={text => this.setState({ body: text })}
+                onChangeText={(text) => this.setState({ body: text })}
                 value={this.state.body}
                 multiline={true}
               />
@@ -261,68 +127,54 @@ class NewJournalEntry extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column"
+    flexDirection: "column",
   },
   banner: {
     backgroundColor: "#d1d1d1",
     flex: 4,
-    justifyContent: "center"
-  },
-  pickImageText: {
-    fontSize: 16,
-    color: "rgba(0, 122, 255,1.0)",
-    alignSelf: "center"
-  },
-  imageContainer: {
-    height: "100%",
-    width: "100%",
-    justifyContent: "center"
-  },
-  image: {
-    flex: 1,
-    width: "100%",
-    height: "100%"
+    justifyContent: "center",
   },
   headerRightContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   save: {
-    color: "rgba(0, 122, 255,1.0)",
+    color: "#509C96",
     fontSize: 18,
     padding: 15,
-    marginRight: 10
-  },
-  cancelButton: {
-    marginRight: 8,
-    backgroundColor: "#fff4"
+    marginRight: 10,
   },
   headingContainer: {
-    backgroundColor: "#f7f7f8",
     flex: 1,
-    fontSize: 30
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f7f7f8",
   },
   headingInput: {
     flex: 1,
     fontSize: 24,
-    margin: 8,
-    fontFamily: "montserrat-regular"
+    width: "100%",
+    textAlign: "center",
+    fontFamily: "montserrat-regular",
   },
   entryContainer: {
     backgroundColor: "#ededed",
     flex: 8,
-    fontSize: 16,
-    borderColor: "gray",
-    borderWidth: 1
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: "15%",
   },
   entryInput: {
     flex: 1,
-    fontSize: 16,
-    margin: 8,
-    fontFamily: "montserrat-regular"
-  }
+    fontSize: 20,
+    width: "100%",
+    textAlign: "left",
+    paddingHorizontal: "10%",
+    paddingVertical: "10%",
+    textAlignVertical: "top",
+  },
 });
 
 export default NewJournalEntry;

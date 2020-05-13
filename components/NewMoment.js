@@ -10,6 +10,7 @@ import {
   SafeAreaView,
   TouchableHighlight,
   Alert,
+  Picker,
 } from "react-native";
 import React, { Component } from "react";
 import firebase from "../firebase";
@@ -31,6 +32,7 @@ import saturdayCheckedIcon from "../assets/saturday_checked.png";
 import { Notifications } from "expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Modal from "react-native-modal";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 export default class NewMoment extends Component {
   constructor(props) {
@@ -38,9 +40,9 @@ export default class NewMoment extends Component {
   }
 
   state = {
-    readableMomentTime: "Set a time",
+    readableMomentTime: "Set time",
     title: null,
-    duration: 5,
+    duration: "5",
     sunday: false,
     monday: false,
     tuesday: false,
@@ -76,34 +78,6 @@ export default class NewMoment extends Component {
   saveNewMoment = async () => {
     this.setState({ isLoading: true });
     let notificationId = await this.scheduleMomentNotification();
-    if (notificationId !== null) {
-      let moment = this.state;
-      let _this = this;
-      const userId = firebase.auth().currentUser.uid;
-
-      const docRef = firebase
-        .firestore()
-        .collection("users")
-        .doc(userId)
-        .collection("moments")
-        .doc();
-
-      return docRef
-        .set(
-          {
-            ...moment,
-          },
-          { merge: true }
-        )
-        .then(() => {
-          console.log(`successfully created moment ${docRef.id}`);
-          _this.updateTotalMoments(1);
-        })
-
-        .catch(function (error) {
-          console.log(error);
-        });
-    }
   };
 
   scheduleMomentNotification = async () => {
@@ -115,6 +89,10 @@ export default class NewMoment extends Component {
       const notification = {
         title: title,
         body: "Start your moment now!",
+        data: {
+          duration: this.duration,
+          title: this.title,
+        },
         android: {
           sound: true,
         },
@@ -134,7 +112,7 @@ export default class NewMoment extends Component {
         .then((notificationId) => {
           _this.setState({ notificationId: notificationId });
           console.log(`scheduled moment notification ${notificationId}`);
-          return notificationId;
+          _this.saveMomentToFirebase(notificationId);
         })
         .catch(function (error) {
           console.log(error);
@@ -144,23 +122,33 @@ export default class NewMoment extends Component {
     }
   };
 
-  updateTotalMoments = async (value) => {
+  saveMomentToFirebase = (notificationId) => {
+    let moment = this.state;
     let _this = this;
-    const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase.firestore().collection("users").doc(userId);
 
-    docRef
+    const userId = firebase.auth().currentUser.uid;
+
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("moments")
+      .doc(notificationId);
+
+    return docRef
       .set(
         {
-          totalMoments: firebase.firestore.FieldValue.increment(value),
+          ...moment,
         },
         { merge: true }
       )
       .then(() => {
+        console.log(`successfully created moment ${docRef.id}`);
         _this.setState({ isLoading: false });
         _this.props.navigation.state.params.onGoBack();
         _this.props.navigation.goBack(null);
       })
+
       .catch(function (error) {
         console.log(error);
       });
@@ -233,11 +221,17 @@ export default class NewMoment extends Component {
             </View>
           ) : (
             <View style={styles.container}>
+              <View style={styles.pageLabelContainer}>
+                <Text style={styles.pageLabelText}>
+                  Schedule a moment of silence
+                </Text>
+              </View>
               <View style={styles.headingContainer}>
                 <TextInput
-                  style={styles.text}
+                  style={styles.headingInput}
                   value={this.state.title}
-                  placeholder="Add title"
+                  placeholder="Moment title"
+                  numberOfLines={1}
                   placeholderTextColor="#EFEFEF80"
                   onChangeText={(text) => this.setState({ title: text })}
                 />
@@ -249,10 +243,29 @@ export default class NewMoment extends Component {
                     this.setState({ isDateTimePickerVisible: true });
                   }}
                 >
-                  <Text style={styles.text}>
-                    {this.state.readableMomentTime}
-                  </Text>
+                  <View style={styles.timeContainer}>
+                    <MaterialCommunityIcons
+                      name="clock"
+                      size={32}
+                      color="white"
+                    />
+                    <Text style={styles.timeEntry}>
+                      {this.state.readableMomentTime}
+                    </Text>
+                  </View>
                 </TouchableHighlight>
+              </View>
+
+              <View style={styles.timeContainer}>
+                <TextInput
+                  style={styles.timeEntry}
+                  onChangeText={(text) => this.setState({ duration: text })}
+                  value={this.state.duration}
+                  placeholder={this.state.duration}
+                  keyboardType="numeric"
+                  returnKeyType="done"
+                />
+                <Text style={styles.timeEntryLabel}>minutes long</Text>
               </View>
 
               <Modal
@@ -332,19 +345,6 @@ export default class NewMoment extends Component {
                   </View>
                 </View>
               </Modal>
-
-              <View style={styles.repeatingItem}>
-                <Input
-                  style={styles.text}
-                  color="#EFEFEF"
-                  onChangeText={(text) => this.setState({ duration: text })}
-                  value={`${this.state.duration} min long`}
-                  placeholder={`${this.state.duration} min long`}
-                  placeholderTextColor="#EFEFEF80"
-                  keyboardType={"numeric"}
-                  returnKeyType="done"
-                />
-              </View>
 
               <View style={styles.repeatingOptionsContainer}>
                 <View style={styles.repeatingHeader}>
@@ -476,6 +476,7 @@ export default class NewMoment extends Component {
                   </View>
                 </View>
               </View>
+              <View style={{ flex: 3 }} />
             </View>
           )}
         </KeyboardAvoidingView>
@@ -490,13 +491,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#2C239A",
   },
-  text: {
-    justifyContent: "center",
-    alignItems: "center",
-    color: "#EFEFEF",
-    fontFamily: "montserrat-regular",
-    fontSize: 20,
-  },
   headerRightContainer: {
     display: "flex",
     flexDirection: "row",
@@ -509,15 +503,66 @@ const styles = StyleSheet.create({
     padding: 15,
     marginRight: 10,
   },
-  cancelButton: {
-    marginRight: 8,
+  pageLabelContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  pageLabelText: {
+    paddingTop: 15,
+    fontSize: 24,
+    textAlign: "center",
+    fontFamily: "montserrat-regular",
+    color: "#EFEFEF",
   },
   headingContainer: {
-    display: "flex",
-    fontSize: 30,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    padding: 15,
+  },
+  headingInput: {
+    flex: 1,
+    width: "100%",
+    fontSize: 24,
+    textAlign: "center",
+    fontFamily: "montserrat-regular",
+    color: "#EFEFEF",
+  },
+  timeContainer: {
+    display: "flex",
+    flex: 1,
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 15,
+  },
+  timeEntry: {
+    margin: 10,
+    textAlign: "center",
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
+    borderBottomWidth: 1,
+    borderBottomColor: "#EFEFEF",
+    padding: 15,
+  },
+  timeEntryLabel: {
+    margin: 10,
+    textAlign: "center",
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
+    marginLeft: 0,
+    padding: 10,
+  },
+  text: {
+    justifyContent: "center",
+    alignItems: "center",
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
   },
   repeatingHeader: {
     display: "flex",
@@ -531,21 +576,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headingInput: {
-    flex: 1,
-    fontSize: 24,
-    margin: 8,
-    fontFamily: "montserrat-regular",
-    color: "#EFEFEF",
-  },
-  timeContainer: {
-    display: "flex",
-    flexDirection: "row",
-    flex: 1,
-    fontSize: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   repeatingOptionsContainer: {
     display: "flex",
     flexDirection: "column",
@@ -553,6 +583,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignContent: "center",
+    padding: 15,
   },
   repeatingItem: {
     flex: 1,

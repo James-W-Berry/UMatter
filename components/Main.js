@@ -12,6 +12,7 @@ import Moments from "./Moments";
 import NewMoment from "./NewMoment";
 import EditMoment from "./EditMoment";
 import MomentVisualization from "./MomentVisualization";
+
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 
@@ -19,69 +20,82 @@ const MainNavigator = createStackNavigator({
   SignInPage: {
     screen: SignInPage,
     navigationOptions: {
-      header: null
-    }
+      header: null,
+    },
   },
   SignUpPage: {
     screen: SignUpPage,
     navigationOptions: {
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96"
-    }
+      headerTintColor: "#509C96",
+    },
   },
   LandingPage: {
     screen: LandingPage,
     navigationOptions: {
-      header: null
-    }
+      header: null,
+    },
   },
   Onboarding: {
     screen: OnboardingScreens,
     navigationOptions: {
-      header: null
-    }
+      header: null,
+    },
   },
   Home: {
     screen: Home,
     navigationOptions: {
-      header: null
-    }
+      header: null,
+    },
   },
   JournalEntries: {
     screen: JournalEntries,
     navigationOptions: {
-      header: null
-    }
+      header: null,
+    },
   },
   NewJournalEntry: {
-    screen: NewJournalEntry
+    screen: NewJournalEntry,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
+    },
   },
   JournalEntry: {
-    screen: JournalEntry
+    screen: JournalEntry,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
+    },
   },
   NewMoment: {
     screen: NewMoment,
     navigationOptions: {
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96"
-    }
+      headerTintColor: "#509C96",
+    },
   },
   EditMoment: {
     screen: EditMoment,
     navigationOptions: {
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96"
-    }
+      headerTintColor: "#509C96",
+    },
   },
   MomentVisualization: {
-    screen: MomentVisualization
+    screen: MomentVisualization,
+    navigationOptions: {
+      header: null,
+    },
   },
   Moments: {
-    screen: Moments
-  }
+    screen: Moments,
+  },
 });
 
 const AppContainer = createAppContainer(MainNavigator);
@@ -89,7 +103,7 @@ const AppContainer = createAppContainer(MainNavigator);
 function Main() {
   return (
     <AppContainer
-      ref={navigatorRef => {
+      ref={(navigatorRef) => {
         NavigationService.setTopLevelNavigator(navigatorRef);
       }}
     />

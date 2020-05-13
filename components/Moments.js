@@ -16,6 +16,7 @@ import { TouchableOpacity } from "react-native-gesture-handler";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useSafeArea } from "react-native-safe-area-context";
 import Constants from "expo-constants";
+import ActionButton from "react-native-action-button";
 
 function useMoments() {
   const [moments, setMoments] = useState({});
@@ -67,6 +68,10 @@ export default function Moments() {
   const [selectedDay, setSelectedDay] = useState();
   const [items, setItems] = useState({});
   const insets = useSafeArea();
+  const defaultItem = {
+    title: "Your Moment",
+    duration: "5",
+  };
 
   useEffect(() => {
     getPermissionAsync();
@@ -89,18 +94,16 @@ export default function Moments() {
 
   async function listenForNotifications() {
     Notifications.addListener((notification) => {
-      console.log(`${JSON.stringify(notification)}`);
-
-      let info = `Start your moment!`;
+      let info = "Start your moment!";
       Alert.alert(
-        `UMatter`,
+        "UMatter",
         info,
         [
           {
             text: "Begin",
             onPress: () => {
-              console.log("starting moment");
-              NavigationService.navigate("MomentVisualization");
+              console.log(`starting moment: ${JSON.stringify(notification)}`);
+              NavigationService.navigate("MomentVisualization", notification);
             },
           },
           {
@@ -126,8 +129,10 @@ export default function Moments() {
 
   onDeleteMoment = async (moment) => {
     setIsLoading(true);
-    const userId = firebase.auth().currentUser.uid;
 
+    Notifications.cancelScheduledNotificationAsync(moment.id);
+
+    const userId = firebase.auth().currentUser.uid;
     const docRef = firebase
       .firestore()
       .collection("users")
@@ -135,29 +140,12 @@ export default function Moments() {
       .collection("moments")
       .doc(moment.id);
 
-    return docRef
+    docRef
       .delete()
       .then(() => {
-        console.log(`successfully deleted moment ${docRef.id}`);
-        updateTotalMoments(-1);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-  };
-
-  updateTotalMoments = async (value) => {
-    const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase.firestore().collection("users").doc(userId);
-
-    docRef
-      .set(
-        {
-          totalMoments: firebase.firestore.FieldValue.increment(value),
-        },
-        { merge: true }
-      )
-      .then(() => {
+        console.log(
+          `successfully deleted moment entry ${docRef.id} from Firebase`
+        );
         setIsLoading(false);
       })
       .catch(function (error) {
@@ -189,8 +177,8 @@ export default function Moments() {
               {
                 text: "Start now",
                 onPress: () => {
-                  console.log("starting moment");
-                  NavigationService.navigate("MomentVisualization");
+                  console.log(`starting moment: ${JSON.stringify(item)}`);
+                  NavigationService.navigate("MomentVisualization", item);
                 },
               },
             ],
@@ -241,11 +229,9 @@ export default function Moments() {
             console.log(calendarOpened);
           }}
           onDayPress={(day) => {
-            console.log("day pressed");
             setSelectedDay(day);
           }}
           onDayChange={(day) => {
-            console.log("day changed");
             setSelectedDay(day);
           }}
           selected={selectedDay}
@@ -269,18 +255,34 @@ export default function Moments() {
           }}
         />
       </KeyboardAvoidingView>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() =>
-          NavigationService.navigate("NewMoment", {
-            onGoBack: () => {
-              console.log("went back to Agenda");
-            },
-          })
-        }
-      >
-        <MaterialCommunityIcons name="plus-circle" size={50} color="#509C96" />
-      </TouchableOpacity>
+      <ActionButton buttonColor="#509C96">
+        <ActionButton.Item
+          buttonColor="#3E31B1"
+          title="Start Moment Now"
+          onPress={() =>
+            NavigationService.navigate("MomentVisualization", defaultItem)
+          }
+        >
+          <MaterialCommunityIcons
+            name="arrow-right"
+            size={35}
+            color="#EDEDED"
+          />
+        </ActionButton.Item>
+        <ActionButton.Item
+          buttonColor="#3E31B1"
+          title="Schedule Moment"
+          onPress={() =>
+            NavigationService.navigate("NewMoment", {
+              onGoBack: () => {
+                console.log("went back to Agenda");
+              },
+            })
+          }
+        >
+          <MaterialCommunityIcons name="calendar" size={35} color="#EDEDED" />
+        </ActionButton.Item>
+      </ActionButton>
     </View>
   );
 }
@@ -305,6 +307,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#2C239A",
     padding: 10,
     borderRadius: 10,
+    width: "40%",
+    alignSelf: "center",
   },
   noMoments: {
     flex: 1,

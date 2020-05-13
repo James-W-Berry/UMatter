@@ -6,7 +6,8 @@ import {
   AsyncStorage,
   TextInput,
   SafeAreaView,
-  KeyboardAvoidingView
+  KeyboardAvoidingView,
+  Keyboard,
 } from "react-native";
 import React, { Component } from "react";
 import * as ImagePicker from "expo-image-picker";
@@ -26,7 +27,7 @@ class JournalEntry extends Component {
       body: entry.body,
       date: entry.creationDate,
       image: entry.image,
-      isLoading: false
+      isLoading: false,
     };
   }
 
@@ -46,7 +47,7 @@ class JournalEntry extends Component {
             Save
           </Text>
         </View>
-      )
+      ),
     };
   };
 
@@ -73,7 +74,7 @@ class JournalEntry extends Component {
         console.log(`successfully deleted journal entry ${docRef.id}`);
         _this.updateTotalJournalEntries(-1);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
 
@@ -90,7 +91,7 @@ class JournalEntry extends Component {
           _this.props.navigation.state.params.onGoBack();
           _this.props.navigation.goBack(null);
         })
-        .catch(function(error) {
+        .catch(function (error) {
           console.log(error);
         });
     } else {
@@ -99,16 +100,13 @@ class JournalEntry extends Component {
     }
   };
 
-  updateTotalJournalEntries = async value => {
+  updateTotalJournalEntries = async (value) => {
     const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase
-      .firestore()
-      .collection("users")
-      .doc(userId);
+    const docRef = firebase.firestore().collection("users").doc(userId);
 
     docRef.set(
       {
-        totalJournalEntries: firebase.firestore.FieldValue.increment(value)
+        totalJournalEntries: firebase.firestore.FieldValue.increment(value),
       },
       { merge: true }
     );
@@ -126,7 +124,7 @@ class JournalEntry extends Component {
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1
+      quality: 1,
     });
 
     console.log(result);
@@ -155,21 +153,21 @@ class JournalEntry extends Component {
         {
           title: title,
           body: body,
-          modifyDate: now
+          modifyDate: now,
         },
         { merge: true }
       )
       .then(() => {
         console.log(`successfully created journal entry ${docRef.id}`);
         if (newImage) {
-          _this.uploadJournalEntryPicture(newImage, docRef.id);
+          // _this.uploadJournalEntryPicture(newImage, docRef.id);
         } else {
           _this.props.navigation.state.params.onGoBack();
           _this.props.navigation.goBack(null);
         }
       })
 
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
@@ -179,10 +177,10 @@ class JournalEntry extends Component {
     if (picture !== null) {
       const blob = await new Promise((resolve, reject) => {
         const xhr = new XMLHttpRequest();
-        xhr.onload = function() {
+        xhr.onload = function () {
           resolve(xhr.response);
         };
-        xhr.onerror = function(e) {
+        xhr.onerror = function (e) {
           console.log(e);
           reject(new TypeError("Network request failed"));
         };
@@ -200,7 +198,7 @@ class JournalEntry extends Component {
 
       uploadJournalEntryPictureTask.on(
         "state_changed",
-        function(snapshot) {
+        function (snapshot) {
           switch (snapshot.state) {
             case firebase.storage.TaskState.PAUSED:
               console.log("Upload is paused");
@@ -212,15 +210,15 @@ class JournalEntry extends Component {
               break;
           }
         },
-        function(error) {
+        function (error) {
           console.log(error);
           blob.close();
         },
-        function() {
+        function () {
           blob.close();
           uploadJournalEntryPictureTask.snapshot.ref
             .getDownloadURL()
-            .then(function(downloadURL) {
+            .then(function (downloadURL) {
               console.log("File available at", downloadURL);
               _this.registerJournalEntryPictureUrl(downloadURL, id);
             });
@@ -242,18 +240,18 @@ class JournalEntry extends Component {
     return docRef
       .set(
         {
-          image: downloadUrl
+          image: downloadUrl,
         },
         { merge: true }
       )
-      .then(function() {
+      .then(function () {
         console.log(
           "successfully updated journal entry with picture reference"
         );
         _this.props.navigation.state.params.onGoBack();
         _this.props.navigation.goBack(null);
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
@@ -277,17 +275,17 @@ class JournalEntry extends Component {
         {
           title: title,
           body: body,
-          modifyDate: now
+          modifyDate: now,
         },
         { merge: true }
       )
       .then(() => {
         console.log(docRef.id);
         console.log(`successfully updated journal entry ${docRef.id}`);
-        _this.uploadJournalEntryPicture(image, docRef.id);
+        // _this.uploadJournalEntryPicture(image, docRef.id);
       })
 
-      .catch(function(error) {
+      .catch(function (error) {
         console.log(error);
       });
   };
@@ -295,155 +293,165 @@ class JournalEntry extends Component {
   render() {
     let { image } = this.state;
 
-    if (image == null) {
-      return (
-        <SafeAreaView style={styles.container}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior="padding"
-            enabled
-          >
-            <View style={styles.banner}>
+    // if (image == null) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior="padding"
+          enabled
+        >
+          {/* <View style={styles.banner}>
               <TouchableOpacity
                 style={styles.imageContainer}
                 onPress={this.pickImage}
               >
                 <Text style={styles.pickImageText}> Pick an image</Text>
               </TouchableOpacity>
-            </View>
+            </View> */}
 
-            <View style={styles.headingContainer}>
-              <TextInput
-                style={styles.headingInput}
-                placeholder="Title"
-                onChangeText={text => this.setState({ title: text })}
-                value={this.state.title}
-                numberOfLines={1}
-              />
-            </View>
+          <View style={styles.headingContainer}>
+            <TextInput
+              style={styles.headingInput}
+              placeholder="Title"
+              onChangeText={(text) => this.setState({ title: text })}
+              value={this.state.title}
+              numberOfLines={1}
+              onSubmitEditing={Keyboard.dismiss}
+            />
+          </View>
 
-            <View style={styles.entryContainer}>
-              <TextInput
-                style={styles.entryInput}
-                placeholder="Your entry"
-                onChangeText={text => this.setState({ body: text })}
-                value={this.state.body}
-                multiline={true}
-              />
-            </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      );
-    } else {
-      return (
-        <SafeAreaView style={styles.container}>
-          <KeyboardAvoidingView
-            style={styles.container}
-            behavior="padding"
-            enabled
-          >
-            <View style={styles.banner}>
-              {image && (
-                <TouchableOpacity
-                  style={styles.imageContainer}
-                  onPress={this.pickImage}
-                >
-                  <Image source={{ uri: image }} style={styles.image} />
-                </TouchableOpacity>
-              )}
-            </View>
+          <View style={styles.entryContainer}>
+            <TextInput
+              style={styles.entryInput}
+              placeholder="Your entry"
+              onChangeText={(text) => this.setState({ body: text })}
+              value={this.state.body}
+              multiline={true}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    );
+    // } else {
+    //   return (
+    //     <SafeAreaView style={styles.container}>
+    //       <KeyboardAvoidingView
+    //         style={styles.container}
+    //         behavior="padding"
+    //         enabled
+    //       >
+    //         <View style={styles.banner}>
+    //           {image && (
+    //             <TouchableOpacity
+    //               style={styles.imageContainer}
+    //               onPress={this.pickImage}
+    //             >
+    //               <Image source={{ uri: image }} style={styles.image} />
+    //             </TouchableOpacity>
+    //           )}
+    //         </View>
 
-            <View style={styles.headingContainer}>
-              <TextInput
-                style={styles.headingInput}
-                placeholder="Title"
-                onChangeText={text => this.setState({ title: text })}
-                value={this.state.title}
-                numberOfLines={1}
-              />
-            </View>
+    //         <View style={styles.headingContainer}>
+    //           <TextInput
+    //             style={styles.headingInput}
+    //             placeholder="Title"
+    //             onChangeText={(text) => this.setState({ title: text })}
+    //             value={this.state.title}
+    //             numberOfLines={1}
+    //           />
+    //         </View>
 
-            <View style={styles.entryContainer}>
-              <TextInput
-                style={styles.entryInput}
-                placeholder="Your entry"
-                onChangeText={text => this.setState({ body: text })}
-                value={this.state.body}
-                multiline={true}
-              />
-            </View>
-          </KeyboardAvoidingView>
-        </SafeAreaView>
-      );
-    }
+    //         <View style={styles.entryContainer}>
+    //           <TextInput
+    //             style={styles.entryInput}
+    //             placeholder="Your entry"
+    //             onChangeText={(text) => this.setState({ body: text })}
+    //             value={this.state.body}
+    //             multiline={true}
+    //           />
+    //         </View>
+    //       </KeyboardAvoidingView>
+    //     </SafeAreaView>
+    //   );
+    // }
   }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: "column"
+    flexDirection: "column",
   },
   banner: {
     flex: 4,
     justifyContent: "center",
-    backgroundColor: "#d1d1d1"
+    backgroundColor: "#d1d1d1",
   },
   pickImageText: {
     fontSize: 16,
     color: "rgba(0, 122, 255,1.0)",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   imageContainer: {
     height: "100%",
     width: "100%",
-    justifyContent: "center"
+    justifyContent: "center",
   },
   image: {
     flex: 1,
     width: "100%",
-    height: "100%"
+    height: "100%",
   },
   headerRightContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   save: {
-    color: "rgba(0, 122, 255,1.0)",
+    color: "#509C96",
     fontSize: 18,
     padding: 15,
-    marginRight: 10
+    marginRight: 10,
   },
   delete: {
-    color: "red",
+    color: "#509C96",
     fontSize: 18,
     padding: 15,
-    marginRight: 15
+    marginRight: 15,
   },
   headingContainer: {
     backgroundColor: "#f7f7f8",
     flex: 1,
-    paddingHorizontal: 8,
-    fontSize: 30
+    justifyContent: "center",
+    alignItems: "center",
   },
   headingInput: {
     flex: 1,
-    fontSize: 24
+    fontSize: 24,
+    width: "100%",
+    textAlign: "center",
+    fontFamily: "montserrat-regular",
   },
   entryContainer: {
     backgroundColor: "#ededed",
     flex: 8,
-    fontSize: 16,
-    borderColor: "gray",
-    borderWidth: 1,
-    paddingHorizontal: 8
+    justifyContent: "center",
+    alignItems: "center",
+    paddingBottom: "15%",
   },
   entryInput: {
     flex: 1,
-    fontSize: 16
-  }
+    fontSize: 20,
+    width: "100%",
+    textAlign: "left",
+    textAlignVertical: "top",
+
+    paddingHorizontal: "10%",
+    paddingVertical: "10%",
+    fontFamily: "montserrat-regular",
+  },
 });
 
 export default JournalEntry;
