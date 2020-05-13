@@ -121,6 +121,7 @@ export default class MomentVisualization extends Component {
                 NavigationService.navigate("NewJournalEntry", {
                   onGoBack: () => {
                     "coming back to MomentVisualization from NewJournalEntry";
+                    NavigationService.pop(2);
                   },
                 });
               }}
