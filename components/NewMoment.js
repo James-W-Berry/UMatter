@@ -33,6 +33,7 @@ import { Notifications } from "expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Modal from "react-native-modal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import NavigationService from "./NavigationService";
 
 export default class NewMoment extends Component {
   constructor(props) {

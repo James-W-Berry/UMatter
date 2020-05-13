@@ -33,21 +33,21 @@ export default function Profile() {
 
     userDocRef
       .get()
-      .then(function(doc) {
+      .then(function (doc) {
         if (doc.exists) {
           setUserData(doc.data());
 
-          Object.keys(doc.data().groups).map(function(key) {
+          Object.keys(doc.data().groups).map(function (key) {
             db.collection("groups")
               .doc(key)
               .get()
-              .then(function(doc) {
+              .then(function (doc) {
                 if (doc.exists) {
                   let groupData = {
                     [key]: {
                       numberOfMembers: Object.keys(doc.data().members).length,
-                      name: doc.data().name
-                    }
+                      name: doc.data().name,
+                    },
                   };
                   setGroupData(groupData);
                 }
@@ -57,7 +57,7 @@ export default function Profile() {
           console.log("No such document!");
         }
       })
-      .catch(function(error) {
+      .catch(function (error) {
         console.log("Error getting document:", error);
       });
   }, []);
@@ -75,7 +75,7 @@ export default function Profile() {
       "September",
       "October",
       "November",
-      "December"
+      "December",
     ];
 
     var day = date.getDate();
@@ -98,7 +98,7 @@ export default function Profile() {
         style={{
           color: "#EDEDED",
           fontSize: 24,
-          fontFamily: "montserrat-regular"
+          fontFamily: "montserrat-regular",
         }}
       >
         {userData?.username}
@@ -107,12 +107,12 @@ export default function Profile() {
         style={{
           color: "#EDEDED",
           fontSize: 16,
-          fontFamily: "montserrat-regular"
+          fontFamily: "montserrat-regular",
         }}
       >
         {firebase.auth().currentUser.email}
       </Text>
-      <Text
+      {/* <Text
         style={{
           color: "#EDEDED",
           fontSize: 16,
@@ -153,14 +153,14 @@ export default function Profile() {
               </View>
             );
           })
-        : null}
+        : null} */}
 
       <Text
         style={{
           color: "#EDEDED",
           fontSize: 16,
           fontFamily: "montserrat-regular",
-          marginTop: "40%"
+          marginTop: "40%",
         }}
       >{`UMatter member since ${creationDate}`}</Text>
       <Text
@@ -168,7 +168,7 @@ export default function Profile() {
           color: "#EDEDED",
           fontSize: 16,
           fontFamily: "montserrat-regular",
-          marginBottom: "10%"
+          marginBottom: "10%",
         }}
       >{`Last signed in on ${lastSignInTime}`}</Text>
 
@@ -182,6 +182,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#2C239A"
-  }
+    backgroundColor: "#2C239A",
+  },
 });

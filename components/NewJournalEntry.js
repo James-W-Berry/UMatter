@@ -65,10 +65,9 @@ class NewJournalEntry extends Component {
       )
       .then(() => {
         console.log(`successfully created journal entry ${docRef.id}`);
+        _this.updateTotalJournalEntries(1);
         _this.props.navigation.state.params.onGoBack();
         _this.props.navigation.goBack(null);
-        _this.updateTotalJournalEntries(1);
-        //NavigationService.navigate("JournalEntries");
       })
 
       .catch(function (error) {
@@ -174,6 +173,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: "10%",
     paddingVertical: "10%",
     textAlignVertical: "top",
+    fontFamily: "montserrat-regular",
   },
 });
 

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Text, StyleSheet, StatusBar, View } from "react-native";
 import firebase from "../firebase";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 function useUser() {
   const [user, setUser] = useState([]);
@@ -26,13 +27,26 @@ export default function Badges() {
   return (
     <View style={styles.container}>
       <StatusBar barStyle={"dark-content"} translucent={true} />
-      <Text style={styles.pageTitle}>Achievements</Text>
-      <Text
-        style={styles.text}
-      >{`Entries Recorded: ${user.totalJournalEntries}`}</Text>
-      <Text
-        style={styles.text}
-      >{`Moments Completed: ${user.totalMoments}`}</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.pageTitle}>Achievements</Text>
+        <MaterialCommunityIcons name="medal" size={60} color="white" />
+      </View>
+
+      <View style={styles.achievementContainer}>
+        <View style={styles.achievement}>
+          <MaterialCommunityIcons name="notebook" size={32} color="white" />
+          <Text
+            style={styles.text}
+          >{`Entries Recorded: ${user.totalJournalEntries}`}</Text>
+        </View>
+
+        <View style={styles.achievement}>
+          <MaterialCommunityIcons name="history" size={32} color="white" />
+          <Text
+            style={styles.text}
+          >{`Moments Completed: ${user.totalMoments}`}</Text>
+        </View>
+      </View>
     </View>
   );
 }
@@ -40,22 +54,37 @@ export default function Badges() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    display: "flex",
     justifyContent: "center",
     alignItems: "center",
     flexDirection: "column",
     backgroundColor: "#2C239A",
   },
+  headerContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  achievementContainer: {
+    flex: 1,
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  achievement: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   pageTitle: {
     fontSize: 24,
-    color: "#EFEFEF",
-    alignSelf: "center",
     fontFamily: "montserrat-regular",
+    color: "#EFEFEF",
   },
   text: {
     color: "#EDEDED",
     fontSize: 24,
     fontFamily: "montserrat-regular",
-    marginTop: "10%",
+    textAlign: "left",
+    padding: 10,
   },
 });

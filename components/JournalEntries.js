@@ -137,28 +137,11 @@ function JournalEntries() {
           onPress={() =>
             NavigationService.navigate("NewJournalEntry", {
               onGoBack: () => {
-                console.log("went back to journal entries");
+                console.log("back to JournalEntries");
               },
             })
           }
-        ></ActionButton>
-
-        {/* <TouchableOpacity
-          style={styles.button}
-          onPress={() =>
-            NavigationService.navigate("NewJournalEntry", {
-              onGoBack: () => {
-                console.log("went back to journal entries");
-              },
-            })
-          }
-        >
-          <MaterialCommunityIcons
-            name="plus-circle"
-            size={50}
-            color="#509C96"
-          />
-        </TouchableOpacity> */}
+        />
       </View>
     </View>
   );

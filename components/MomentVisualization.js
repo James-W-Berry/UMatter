@@ -54,7 +54,7 @@ export default class MomentVisualization extends Component {
         {
           status: "active",
         },
-        { merge: false }
+        { merge: true }
       )
       .then(function () {
         console.log("successfully updated user status to not inMoment");
@@ -85,8 +85,6 @@ export default class MomentVisualization extends Component {
       .then(() => {
         console.log("incremented totalMoments by 1");
         _this.setState({ isLoading: false });
-        _this.props.navigation.state.params.onGoBack();
-        _this.props.navigation.goBack(null);
       })
       .catch(function (error) {
         console.log(error);
@@ -122,7 +120,7 @@ export default class MomentVisualization extends Component {
                 this.updateTotalMoments(1);
                 NavigationService.navigate("NewJournalEntry", {
                   onGoBack: () => {
-                    NavigationService.navigate("JournalEntries");
+                    "coming back to MomentVisualization from NewJournalEntry";
                   },
                 });
               }}
@@ -165,8 +163,12 @@ export default class MomentVisualization extends Component {
             onPress={() => {
               this.updateTotalMoments(1);
               NavigationService.navigate("NewJournalEntry", {
-                onGoBack: () => {},
-                parent: "MomentVisualization",
+                onGoBack: () => {
+                  console.log(
+                    "coming back to MomentVisualization from NewJournalEntry"
+                  );
+                  NavigationService.pop(2);
+                },
               });
             }}
           >
