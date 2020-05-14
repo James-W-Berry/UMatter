@@ -2,7 +2,7 @@
   "expo": {
     "name": "UMatter",
     "slug": "UMatter",
-    "privacy": "public",
+    "privacy": "unlisted",
     "platforms": ["ios", "android", "web"],
     "version": "0.0.2",
     "orientation": "portrait",
