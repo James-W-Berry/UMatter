@@ -1,14 +1,13 @@
 import {
-  Image,
   Alert,
   TextInput,
   StatusBar,
   ActivityIndicator,
   StyleSheet,
   Text,
-  View
+  View,
 } from "react-native";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Button } from "react-native-elements";
 import NavigationService from "./NavigationService";
 import * as firebase from "firebase";
@@ -27,22 +26,22 @@ export default function SignUpPage() {
     firebase
       .auth()
       .createUserWithEmailAndPassword(email, password)
-      .then(function() {
+      .then(function () {
         var userId = firebase.auth().currentUser.uid;
 
         db.collection("users")
           .doc(userId)
           .set({
-            username: username
+            username: username,
           })
-          .catch(function(error) {
+          .catch(function (error) {
             setIsLoading(false);
             console.log(error);
           });
         console.log("sign up successful");
         NavigationService.navigate("Onboarding");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         setIsLoading(false);
         var errorCode = error.code;
         var errorMessage = error.message;
@@ -59,18 +58,11 @@ export default function SignUpPage() {
           style={{
             fontSize: 24,
             color: "#EDEDED",
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
         >
           Sign Up
         </Text>
-      </View>
-
-      <View style={styles.banner}>
-        <Image
-          source={require("../assets/umatter_banner.png")}
-          style={styles.image}
-        />
       </View>
 
       <View style={styles.searchSection}>
@@ -84,11 +76,11 @@ export default function SignUpPage() {
             color: "#EDEDED",
             margin: 10,
             fontSize: 16,
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
           placeholder="Username"
           placeholderTextColor="#ededed80"
-          onChangeText={text => setUsername(text)}
+          onChangeText={(text) => setUsername(text)}
           underlineColorAndroid="transparent"
           value={username}
         />
@@ -105,12 +97,12 @@ export default function SignUpPage() {
             color: "#EDEDED",
             margin: 10,
             fontSize: 16,
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
           placeholder="Email"
           autoCompleteType="email"
           placeholderTextColor="#ededed80"
-          onChangeText={text => setEmail(text)}
+          onChangeText={(text) => setEmail(text)}
           underlineColorAndroid="transparent"
           value={email}
         />
@@ -127,13 +119,13 @@ export default function SignUpPage() {
             color: "#EDEDED",
             margin: 10,
             fontSize: 16,
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
           placeholder="Password"
           autoCompleteType="password"
           secureTextEntry={true}
           placeholderTextColor="#ededed80"
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text) => setPassword(text)}
           underlineColorAndroid="transparent"
           value={password}
         />
@@ -149,7 +141,7 @@ export default function SignUpPage() {
             title={"Create New Account"}
             titleStyle={{
               fontFamily: "montserrat-regular",
-              justifyContent: "center"
+              justifyContent: "center",
             }}
             buttonStyle={styles.button}
             onPress={() => onSignUp(username, email, password)}
@@ -164,46 +156,38 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   signUpSpinner: {
     flex: 3,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   horizontal: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 10
+    padding: 10,
   },
   header: {
     flex: 1,
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
-  },
-  banner: {
-    flex: 2,
-    justifyContent: "center"
-  },
-  image: {
-    width: "100%",
-    height: "100%"
+    alignItems: "center",
   },
   bottom: {
     flex: 2,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   signUpButton: {
     flex: 3,
     width: "80%",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   signUp: {
     flex: 2,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   button: {
     alignSelf: "center",
@@ -211,18 +195,18 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 20,
     backgroundColor: "#509C96",
-    borderRadius: 30
+    borderRadius: 30,
   },
   searchSection: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#00000000"
+    backgroundColor: "#00000000",
   },
   input: {
     flex: 1,
     backgroundColor: "#00000000",
-    color: "#EDEDED"
-  }
+    color: "#EDEDED",
+  },
 });

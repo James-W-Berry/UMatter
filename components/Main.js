@@ -34,11 +34,9 @@ const MainNavigator = createStackNavigator({
   ForgottenPasswordPage: {
     screen: ForgottenPasswordPage,
     navigationOptions: {
-      navigationOptions: {
-        headerStyle: { backgroundColor: "#2C239A" },
-        headerTitleStyle: { color: "#509C96" },
-        headerTintColor: "#509C96",
-      },
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
     },
   },
   LandingPage: {

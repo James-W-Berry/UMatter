@@ -69,50 +69,59 @@ export default function SignInPage() {
         />
       </View>
 
-      <View style={styles.searchSection}>
-        <MaterialCommunityIcons name="email" size={32} color="white" />
+      <View
+        style={{
+          flex: 2,
+          marginTop: 10,
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <View style={styles.searchSection}>
+          <MaterialCommunityIcons name="email" size={32} color="white" />
 
-        <TextInput
-          style={{
-            borderBottomColor: "#EDEDED",
-            borderBottomWidth: 1,
-            width: "70%",
-            color: "#EDEDED",
-            margin: 10,
-            fontSize: 16,
-            fontFamily: "montserrat-regular",
-          }}
-          placeholder="Email"
-          autoCompleteType="email"
-          required
-          placeholderTextColor="#ededed80"
-          onChangeText={(text) => setEmail(text)}
-          underlineColorAndroid="transparent"
-          value={email}
-        />
-      </View>
+          <TextInput
+            style={{
+              borderBottomColor: "#EDEDED",
+              borderBottomWidth: 1,
+              width: "70%",
+              color: "#EDEDED",
+              margin: 10,
+              fontSize: 16,
+              fontFamily: "montserrat-regular",
+            }}
+            placeholder="Email"
+            autoCompleteType="email"
+            required
+            placeholderTextColor="#ededed80"
+            onChangeText={(text) => setEmail(text)}
+            underlineColorAndroid="transparent"
+            value={email}
+          />
+        </View>
 
-      <View style={styles.searchSection}>
-        <MaterialCommunityIcons name="account-key" size={32} color="white" />
-
-        <TextInput
-          style={{
-            borderBottomColor: "#ededed",
-            borderBottomWidth: 1,
-            width: "70%",
-            color: "#EDEDED",
-            margin: 10,
-            fontSize: 16,
-            fontFamily: "montserrat-regular",
-          }}
-          placeholder="Password"
-          autoCompleteType="password"
-          secureTextEntry={true}
-          placeholderTextColor="#ededed80"
-          onChangeText={(text) => setPassword(text)}
-          underlineColorAndroid="transparent"
-          value={password}
-        />
+        <View style={styles.searchSection}>
+          <MaterialCommunityIcons name="account-key" size={32} color="white" />
+          <TextInput
+            style={{
+              borderBottomColor: "#ededed",
+              borderBottomWidth: 1,
+              width: "70%",
+              color: "#EDEDED",
+              margin: 10,
+              fontSize: 16,
+              fontFamily: "montserrat-regular",
+            }}
+            placeholder="Password"
+            autoCompleteType="password"
+            secureTextEntry={true}
+            placeholderTextColor="#ededed80"
+            onChangeText={(text) => setPassword(text)}
+            underlineColorAndroid="transparent"
+            value={password}
+          />
+        </View>
       </View>
 
       {isLoading ? (
@@ -133,33 +142,43 @@ export default function SignInPage() {
         </View>
       )}
 
-      <View style={styles.forgotPassword}>
-        <Text
-          style={{
-            color: "#509C96",
-            fontWeight: "bold",
-            fontFamily: "montserrat-medium",
-          }}
-          onPress={() => NavigationService.navigate("ForgottenPasswordPage")}
+      <View style={{ flex: 2, justifyContent: "center", alignItems: "center" }}>
+        <View
+          style={{ flex: 1, justifyContent: "center", alignItems: "flex-end" }}
         >
-          Forgot your password?
-        </Text>
-      </View>
-
-      <View style={styles.signUp}>
-        <Text style={{ color: "#EDEDED", fontFamily: "montserrat-regular" }}>
-          Don't have an account?{" "}
-        </Text>
-        <Text
+          <Text
+            style={{
+              color: "#509C96",
+              fontWeight: "bold",
+              fontFamily: "montserrat-medium",
+            }}
+            onPress={() => NavigationService.navigate("ForgottenPasswordPage")}
+          >
+            Forgot your password?
+          </Text>
+        </View>
+        <View
           style={{
-            color: "#509C96",
-            fontWeight: "bold",
-            fontFamily: "montserrat-medium",
+            flex: 1,
+            flexDirection: "row",
+            justifyContent: "center",
+            alignItems: "flex-start",
           }}
-          onPress={() => NavigationService.navigate("SignUpPage")}
         >
-          Sign Up
-        </Text>
+          <Text style={{ color: "#EDEDED", fontFamily: "montserrat-regular" }}>
+            Don't have an account?{" "}
+          </Text>
+          <Text
+            style={{
+              color: "#509C96",
+              fontWeight: "bold",
+              fontFamily: "montserrat-medium",
+            }}
+            onPress={() => NavigationService.navigate("SignUpPage")}
+          >
+            Sign Up
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -189,6 +208,7 @@ const styles = StyleSheet.create({
   image: {
     width: "100%",
     height: "100%",
+    resizeMode: "contain",
   },
   bottom: {
     flex: 2,
@@ -200,17 +220,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "center",
   },
-  signUp: {
-    flex: 2,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-  },
   forgotPassword: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "center",
-    padding: 15,
   },
   button: {
     alignSelf: "center",
