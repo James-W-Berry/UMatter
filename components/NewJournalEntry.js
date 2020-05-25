@@ -91,31 +91,28 @@ class NewJournalEntry extends Component {
     return (
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
-          style={styles.container}
-          behavior="padding"
+          behavior="height"
           enabled
+          style={{ flex: 1, flexDirection: "column", paddingBottom: "10%" }}
         >
-          <View style={styles.container}>
-            <View style={styles.headingContainer}>
-              <TextInput
-                style={styles.headingInput}
-                placeholder="Entry title"
-                onChangeText={(text) => this.setState({ title: text })}
-                value={this.state.title}
-                numberOfLines={1}
-              />
-            </View>
-
-            <View style={styles.entryContainer}>
-              <TextInput
-                style={styles.entryInput}
-                autoFocus={true}
-                placeholder="Your entry"
-                onChangeText={(text) => this.setState({ body: text })}
-                value={this.state.body}
-                multiline={true}
-              />
-            </View>
+          <View style={styles.headingContainer}>
+            <TextInput
+              style={styles.headingInput}
+              placeholder="Entry title"
+              autoFocus={true}
+              onChangeText={(text) => this.setState({ title: text })}
+              value={this.state.title}
+              numberOfLines={1}
+            />
+          </View>
+          <View style={styles.entryContainer}>
+            <TextInput
+              style={styles.entryInput}
+              placeholder="Your entry"
+              onChangeText={(text) => this.setState({ body: text })}
+              value={this.state.body}
+              multiline={true}
+            />
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>
@@ -146,7 +143,10 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   headingContainer: {
-    flex: 1,
+    flex: 2,
+    width: "100%",
+    height: "100%",
+    margin: 0,
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "#f7f7f8",
@@ -155,23 +155,27 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 24,
     width: "100%",
+    height: "100%",
     textAlign: "center",
     fontFamily: "montserrat-regular",
   },
   entryContainer: {
     backgroundColor: "#ededed",
     flex: 8,
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingBottom: "15%",
+    paddingHorizontal: "10%",
+    paddingTop: "10%",
+    marginBottom: "20%",
   },
   entryInput: {
     flex: 1,
     fontSize: 20,
     width: "100%",
+    height: "100%",
     textAlign: "left",
-    paddingHorizontal: "10%",
-    paddingVertical: "10%",
     textAlignVertical: "top",
     fontFamily: "montserrat-regular",
   },

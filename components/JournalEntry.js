@@ -293,23 +293,13 @@ class JournalEntry extends Component {
   render() {
     let { image } = this.state;
 
-    // if (image == null) {
     return (
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
-          style={styles.container}
-          behavior="padding"
+          style={{ flex: 1, flexDirection: "column", paddingBottom: "10%" }}
+          behavior="height"
           enabled
         >
-          {/* <View style={styles.banner}>
-              <TouchableOpacity
-                style={styles.imageContainer}
-                onPress={this.pickImage}
-              >
-                <Text style={styles.pickImageText}> Pick an image</Text>
-              </TouchableOpacity>
-            </View> */}
-
           <View style={styles.headingContainer}>
             <TextInput
               style={styles.headingInput}
@@ -333,48 +323,6 @@ class JournalEntry extends Component {
         </KeyboardAvoidingView>
       </SafeAreaView>
     );
-    // } else {
-    //   return (
-    //     <SafeAreaView style={styles.container}>
-    //       <KeyboardAvoidingView
-    //         style={styles.container}
-    //         behavior="padding"
-    //         enabled
-    //       >
-    //         <View style={styles.banner}>
-    //           {image && (
-    //             <TouchableOpacity
-    //               style={styles.imageContainer}
-    //               onPress={this.pickImage}
-    //             >
-    //               <Image source={{ uri: image }} style={styles.image} />
-    //             </TouchableOpacity>
-    //           )}
-    //         </View>
-
-    //         <View style={styles.headingContainer}>
-    //           <TextInput
-    //             style={styles.headingInput}
-    //             placeholder="Title"
-    //             onChangeText={(text) => this.setState({ title: text })}
-    //             value={this.state.title}
-    //             numberOfLines={1}
-    //           />
-    //         </View>
-
-    //         <View style={styles.entryContainer}>
-    //           <TextInput
-    //             style={styles.entryInput}
-    //             placeholder="Your entry"
-    //             onChangeText={(text) => this.setState({ body: text })}
-    //             value={this.state.body}
-    //             multiline={true}
-    //           />
-    //         </View>
-    //       </KeyboardAvoidingView>
-    //     </SafeAreaView>
-    //   );
-    // }
   }
 }
 
@@ -422,34 +370,40 @@ const styles = StyleSheet.create({
     marginRight: 15,
   },
   headingContainer: {
-    backgroundColor: "#f7f7f8",
-    flex: 1,
+    flex: 2,
+    width: "100%",
+    height: "100%",
+    margin: 0,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#f7f7f8",
   },
   headingInput: {
     flex: 1,
     fontSize: 24,
     width: "100%",
+    height: "100%",
     textAlign: "center",
     fontFamily: "montserrat-regular",
   },
   entryContainer: {
     backgroundColor: "#ededed",
     flex: 8,
+    width: "100%",
+    height: "100%",
     justifyContent: "center",
     alignItems: "center",
-    paddingBottom: "15%",
+    paddingHorizontal: "10%",
+    paddingTop: "10%",
+    marginBottom: "20%",
   },
   entryInput: {
     flex: 1,
     fontSize: 20,
     width: "100%",
+    height: "100%",
     textAlign: "left",
     textAlignVertical: "top",
-
-    paddingHorizontal: "10%",
-    paddingVertical: "10%",
     fontFamily: "montserrat-regular",
   },
 });
