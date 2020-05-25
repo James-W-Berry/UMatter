@@ -6,7 +6,7 @@ import {
   Alert,
   TextInput,
   StatusBar,
-  ActivityIndicator
+  ActivityIndicator,
 } from "react-native";
 import React, { useState, useEffect } from "react";
 import { Button } from "react-native-elements";
@@ -24,10 +24,10 @@ export default function SignInPage() {
     firebase
       .auth()
       .signInWithEmailAndPassword(email, password)
-      .then(function() {
+      .then(function () {
         NavigationService.navigate("Home");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         Alert.alert("Incorrect email or password, please try again");
       });
   }
@@ -36,10 +36,10 @@ export default function SignInPage() {
     firebase
       .auth()
       .sendPasswordResetEmail(email)
-      .then(function() {
+      .then(function () {
         Alert.alert("Check your email to reset your password.");
       })
-      .catch(function(error) {
+      .catch(function (error) {
         Alert.alert(
           "Could not send email, please check the entered email address and try again."
         );
@@ -55,7 +55,7 @@ export default function SignInPage() {
           style={{
             fontSize: 24,
             color: "#EDEDED",
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
         >
           Sign In
@@ -80,13 +80,13 @@ export default function SignInPage() {
             color: "#EDEDED",
             margin: 10,
             fontSize: 16,
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
           placeholder="Email"
           autoCompleteType="email"
           required
           placeholderTextColor="#ededed80"
-          onChangeText={text => setEmail(text)}
+          onChangeText={(text) => setEmail(text)}
           underlineColorAndroid="transparent"
           value={email}
         />
@@ -103,13 +103,13 @@ export default function SignInPage() {
             color: "#EDEDED",
             margin: 10,
             fontSize: 16,
-            fontFamily: "montserrat-regular"
+            fontFamily: "montserrat-regular",
           }}
           placeholder="Password"
           autoCompleteType="password"
           secureTextEntry={true}
           placeholderTextColor="#ededed80"
-          onChangeText={text => setPassword(text)}
+          onChangeText={(text) => setPassword(text)}
           underlineColorAndroid="transparent"
           value={password}
         />
@@ -125,7 +125,7 @@ export default function SignInPage() {
             title={"Sign In"}
             titleStyle={{
               fontFamily: "montserrat-regular",
-              justifyContent: "center"
+              justifyContent: "center",
             }}
             buttonStyle={styles.button}
             onPress={() => signIn(email, password)}
@@ -138,9 +138,9 @@ export default function SignInPage() {
           style={{
             color: "#509C96",
             fontWeight: "bold",
-            fontFamily: "montserrat-medium"
+            fontFamily: "montserrat-medium",
           }}
-          onPress={() => resetPassword(email)}
+          onPress={() => NavigationService.navigate("ForgottenPasswordPage")}
         >
           Forgot your password?
         </Text>
@@ -154,7 +154,7 @@ export default function SignInPage() {
           style={{
             color: "#509C96",
             fontWeight: "bold",
-            fontFamily: "montserrat-medium"
+            fontFamily: "montserrat-medium",
           }}
           onPress={() => NavigationService.navigate("SignUpPage")}
         >
@@ -169,47 +169,48 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: "column",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   signUpSpinner: {
     flex: 3,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   header: {
     flex: 2,
     marginTop: "15%",
     display: "flex",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   banner: {
     flex: 3,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   image: {
     width: "100%",
-    height: "100%"
+    height: "100%",
   },
   bottom: {
     flex: 2,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   signInButton: {
     flex: 3,
     width: "80%",
     justifyContent: "center",
-    alignSelf: "center"
+    alignSelf: "center",
   },
   signUp: {
     flex: 2,
     flexDirection: "row",
     justifyContent: "center",
-    alignItems: "center"
+    alignItems: "center",
   },
   forgotPassword: {
     flex: 1,
     flexDirection: "row",
-    justifyContent: "center"
+    justifyContent: "center",
+    padding: 15,
   },
   button: {
     alignSelf: "center",
@@ -217,18 +218,18 @@ const styles = StyleSheet.create({
     width: "100%",
     padding: 20,
     backgroundColor: "#509C96",
-    borderRadius: 30
+    borderRadius: 30,
   },
   searchSection: {
     flex: 1,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#00000000"
+    backgroundColor: "#00000000",
   },
   input: {
     flex: 1,
     backgroundColor: "#00000000",
-    color: "#EDEDED"
-  }
+    color: "#EDEDED",
+  },
 });

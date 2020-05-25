@@ -12,9 +12,9 @@ import Moments from "./Moments";
 import NewMoment from "./NewMoment";
 import EditMoment from "./EditMoment";
 import MomentVisualization from "./MomentVisualization";
-
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
+import ForgottenPasswordPage from "./ForgottenPasswordPage";
 
 const MainNavigator = createStackNavigator({
   SignInPage: {
@@ -29,6 +29,16 @@ const MainNavigator = createStackNavigator({
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },
       headerTintColor: "#509C96",
+    },
+  },
+  ForgottenPasswordPage: {
+    screen: ForgottenPasswordPage,
+    navigationOptions: {
+      navigationOptions: {
+        headerStyle: { backgroundColor: "#2C239A" },
+        headerTitleStyle: { color: "#509C96" },
+        headerTintColor: "#509C96",
+      },
     },
   },
   LandingPage: {
