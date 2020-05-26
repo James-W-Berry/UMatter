@@ -5,6 +5,7 @@ import {
   TextInput,
   KeyboardAvoidingView,
   SafeAreaView,
+  ActivityIndicator,
 } from "react-native";
 import React, { Component } from "react";
 import firebase from "../firebase";
@@ -15,32 +16,42 @@ class NewJournalEntry extends Component {
     super(props);
   }
 
+  state = {
+    image: null,
+    title: null,
+    body: null,
+    isLoading: false,
+  };
+
   static navigationOptions = ({ navigation }) => {
     const { state } = navigation;
     return {
       headerRight: (
         <View style={styles.headerRightContainer}>
-          <Text style={styles.save} onPress={() => state.params.handleSave()}>
-            Save
-          </Text>
+          {state.params.isLoading ? (
+            <View style={{ width: "100%", padding: 15, marginRight: 10 }}>
+              <ActivityIndicator size="small" color="#509C96" />
+            </View>
+          ) : (
+            <Text style={styles.save} onPress={() => state.params.handleSave()}>
+              Save
+            </Text>
+          )}
         </View>
       ),
     };
   };
 
-  state = {
-    image: null,
-    title: null,
-    body: null,
-  };
-
   componentDidMount() {
-    this.props.navigation.setParams({ handleSave: this.saveNewJournalEntry });
+    this.props.navigation.setParams({
+      handleSave: this.saveNewJournalEntry,
+      isLoading: this.state.isLoading,
+    });
   }
 
   saveNewJournalEntry = async () => {
+    this.props.navigation.setParams({ isLoading: true });
     let { title, body, image } = this.state;
-    let _this = this;
     const userId = firebase.auth().currentUser.uid;
     const docRef = firebase
       .firestore()
@@ -53,7 +64,7 @@ class NewJournalEntry extends Component {
     let now = new Date().toLocaleDateString("en-US", options);
     let nowTimestamp = new Date().getTime();
 
-    return docRef
+    docRef
       .set(
         {
           title: title,
@@ -65,11 +76,8 @@ class NewJournalEntry extends Component {
       )
       .then(() => {
         console.log(`successfully created journal entry ${docRef.id}`);
-        _this.updateTotalJournalEntries(1);
-        _this.props.navigation.state.params.onGoBack();
-        _this.props.navigation.goBack(null);
+        this.updateTotalJournalEntries(1);
       })
-
       .catch(function (error) {
         console.log(error);
       });
@@ -79,12 +87,19 @@ class NewJournalEntry extends Component {
     const userId = firebase.auth().currentUser.uid;
     const docRef = firebase.firestore().collection("users").doc(userId);
 
-    docRef.set(
-      {
-        totalJournalEntries: firebase.firestore.FieldValue.increment(value),
-      },
-      { merge: true }
-    );
+    docRef
+      .set(
+        {
+          totalJournalEntries: firebase.firestore.FieldValue.increment(value),
+        },
+        { merge: true }
+      )
+      .then(() => {
+        console.log("added 1 to total journal entries count");
+        this.props.navigation.setParams({ isLoading: true });
+        this.props.navigation.state.params.onGoBack();
+        this.props.navigation.goBack(null);
+      });
   };
 
   render() {
