@@ -118,7 +118,7 @@ const styles = StyleSheet.create({
     width: "70%",
     color: "#EDEDED",
     margin: 10,
-    padding: 10,
+    padding: 0,
     fontSize: 16,
     fontFamily: "montserrat-regular",
   },
