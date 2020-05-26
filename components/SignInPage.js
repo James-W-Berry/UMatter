@@ -71,7 +71,7 @@ export default function SignInPage() {
 
       <View
         style={{
-          flex: 2,
+          flex: 3,
           marginTop: 10,
           flexDirection: "column",
           justifyContent: "center",
@@ -88,6 +88,7 @@ export default function SignInPage() {
               width: "70%",
               color: "#EDEDED",
               margin: 10,
+              padding: 0,
               fontSize: 16,
               fontFamily: "montserrat-regular",
             }}
@@ -111,6 +112,7 @@ export default function SignInPage() {
               color: "#EDEDED",
               margin: 10,
               fontSize: 16,
+              padding: 0,
               fontFamily: "montserrat-regular",
             }}
             placeholder="Password"
@@ -235,6 +237,7 @@ const styles = StyleSheet.create({
   },
   searchSection: {
     flex: 1,
+    height: "100%",
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
