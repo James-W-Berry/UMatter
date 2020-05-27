@@ -1,6 +1,4 @@
 import {
-  Button,
-  Image,
   Text,
   View,
   StyleSheet,
@@ -33,7 +31,6 @@ import { Notifications } from "expo";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import Modal from "react-native-modal";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import NavigationService from "./NavigationService";
 
 export default class NewMoment extends Component {
   constructor(props) {
@@ -213,7 +210,7 @@ export default class NewMoment extends Component {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.container}
-          behavior="padding"
+          behavior="height"
           enabled
         >
           {this.state.isLoading ? (
@@ -240,34 +237,72 @@ export default class NewMoment extends Component {
 
               <View style={styles.timeContainer}>
                 <TouchableHighlight
+                  style={styles.setTimeContainer}
                   onPress={() => {
                     this.setState({ isDateTimePickerVisible: true });
                   }}
                 >
-                  <View style={styles.timeContainer}>
+                  <View
+                    style={{
+                      display: "flex",
+                      width: "70%",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
                     <MaterialCommunityIcons
                       name="clock"
                       size={32}
                       color="white"
                     />
-                    <Text style={styles.timeEntry}>
+                    <Text style={styles.timeInput}>
                       {this.state.readableMomentTime}
                     </Text>
                   </View>
                 </TouchableHighlight>
+
+                <TouchableHighlight
+                  style={styles.setDurationContainer}
+                  onPress={() => {
+                    this.refs.durationInput.focus();
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      width: "70%",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <TextInput
+                      ref="durationInput"
+                      maxLength={3}
+                      style={styles.timeInput}
+                      onChangeText={(text) => {
+                        this.setState({ duration: text });
+                      }}
+                      onSubmitEditing={(event) => {
+                        console.log(event.nativeEvent.text);
+                        console.log(event.nativeEvent.text.length);
+
+                        if (event.nativeEvent.text.length < 1) {
+                          this.setState({ duration: "5" });
+                        }
+                      }}
+                      value={this.state.duration}
+                      placeholder={this.state.duration}
+                      keyboardType="numeric"
+                      returnKeyType="done"
+                    />
+                    <Text style={styles.durationLabel}>minutes long</Text>
+                  </View>
+                </TouchableHighlight>
               </View>
 
-              <View style={styles.timeContainer}>
-                <TextInput
-                  style={styles.timeEntry}
-                  onChangeText={(text) => this.setState({ duration: text })}
-                  value={this.state.duration}
-                  placeholder={this.state.duration}
-                  keyboardType="numeric"
-                  returnKeyType="done"
-                />
-                <Text style={styles.timeEntryLabel}>minutes long</Text>
-              </View>
+              <View style={{ flex: 6 }} />
 
               <Modal
                 onBackdropPress={() =>
@@ -346,7 +381,7 @@ export default class NewMoment extends Component {
                   </View>
                 </View>
               </Modal>
-
+              {/* 
               <View style={styles.repeatingOptionsContainer}>
                 <View style={styles.repeatingHeader}>
                   <Text style={styles.text}>Repeating options</Text>
@@ -477,7 +512,7 @@ export default class NewMoment extends Component {
                   </View>
                 </View>
               </View>
-              <View style={{ flex: 3 }} />
+              */}
             </View>
           )}
         </KeyboardAvoidingView>
@@ -505,7 +540,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   pageLabelContainer: {
-    flex: 1,
     justifyContent: "flex-start",
     alignItems: "center",
   },
@@ -518,8 +552,11 @@ const styles = StyleSheet.create({
   },
   headingContainer: {
     flex: 1,
+    minHeight: "15%",
+    flexDirection: "column",
     justifyContent: "center",
-    alignItems: "center",
+    alignItems: "flex-start",
+    textAlignVertical: "top",
     padding: 15,
   },
   headingInput: {
@@ -527,35 +564,54 @@ const styles = StyleSheet.create({
     width: "100%",
     fontSize: 24,
     textAlign: "center",
+    textAlignVertical: "center",
     fontFamily: "montserrat-regular",
     color: "#EFEFEF",
   },
   timeContainer: {
     display: "flex",
-    flex: 1,
-    width: "100%",
-    flexDirection: "row",
+    flex: 2,
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
     padding: 15,
   },
-  timeEntry: {
-    margin: 10,
-    textAlign: "center",
-    color: "#EFEFEF",
-    fontFamily: "montserrat-regular",
-    fontSize: 20,
-    borderBottomWidth: 1,
-    borderBottomColor: "#EFEFEF",
-    padding: 15,
+  setTimeContainer: {
+    display: "flex",
+    flex: 1,
+    minHeight: "15%",
+    width: "70%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 30,
+    backgroundColor: "#509C96",
   },
-  timeEntryLabel: {
-    margin: 10,
+  setDurationContainer: {
+    display: "flex",
+    flex: 1,
+    width: "70%",
+    minHeight: "15%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 15,
+    borderRadius: 30,
+    backgroundColor: "#509C96",
+  },
+  timeInput: {
+    color: "#EDEDED",
+    margin: 0,
+    padding: 10,
+    fontSize: 20,
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+  durationLabel: {
     textAlign: "center",
     color: "#EFEFEF",
     fontFamily: "montserrat-regular",
     fontSize: 20,
-    marginLeft: 0,
     padding: 10,
   },
   text: {
