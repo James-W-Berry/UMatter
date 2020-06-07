@@ -94,6 +94,7 @@ export default function Moments() {
 
   async function listenForNotifications() {
     Notifications.addListener((notification) => {
+      console.log(notification);
       let info = "Start your moment!";
       Alert.alert(
         "UMatter",
@@ -130,7 +131,8 @@ export default function Moments() {
   onDeleteMoment = async (moment) => {
     setIsLoading(true);
 
-    Notifications.cancelScheduledNotificationAsync(moment.id);
+    console.log(moment);
+    Notifications.cancelScheduledNotificationAsync(moment.notificationId);
 
     const userId = firebase.auth().currentUser.uid;
     const docRef = firebase
@@ -138,13 +140,13 @@ export default function Moments() {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      .doc(moment.id);
+      .doc(moment.notificationId);
 
     docRef
       .delete()
       .then(() => {
         console.log(
-          `successfully deleted moment entry ${docRef.id} from Firebase`
+          `successfully deleted moment entry ${docRef.notificationId} from Firebase`
         );
         setIsLoading(false);
       })

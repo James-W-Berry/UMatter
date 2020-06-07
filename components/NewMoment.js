@@ -9,6 +9,7 @@ import {
   TouchableHighlight,
   Alert,
   Picker,
+  Platform,
 } from "react-native";
 import React, { Component } from "react";
 import firebase from "../firebase";
@@ -188,8 +189,6 @@ export default class NewMoment extends Component {
 
       let scheduledMomentTime = new Date(date);
 
-      console.log(scheduledMomentTime);
-
       // get easily readable moment time
       let readableMomentTime = `${
         monthNames[scheduledMomentTime.getMonth()]
@@ -304,83 +303,105 @@ export default class NewMoment extends Component {
 
               <View style={{ flex: 6 }} />
 
-              <Modal
-                onBackdropPress={() =>
-                  this.setState({ isDateTimePickerVisible: false })
-                }
-                isVisible={this.state.isDateTimePickerVisible}
-                animationIn="slideInUp"
-                animationOut="slideOutDown"
-                coverScreen={false}
-              >
-                <View style={styles.content}>
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 1,
-                    }}
-                  >
-                    <Text style={styles.contentTitle}>Schedule Moment</Text>
-                  </View>
-
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 4,
-                      height: "100%",
-                      width: "100%",
-                    }}
-                  >
-                    <DateTimePicker
-                      is24Hour={false}
-                      display="default"
-                      onChange={this.handleChange}
-                      onCancel={this.toggleDateTimePicker}
-                      mode="datetime"
-                      value={this.state.scheduledMomentTime}
-                    />
-                  </View>
-
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 1,
-                      flexDirection: "row",
-                    }}
-                  >
-                    <TouchableHighlight
-                      onPress={() => {
-                        this.setState({ isDateTimePickerVisible: false });
+              {Platform.OS == "ios" ? (
+                <Modal
+                  onBackdropPress={() =>
+                    this.setState({ isDateTimePickerVisible: false })
+                  }
+                  isVisible={this.state.isDateTimePickerVisible}
+                  animationIn="slideInUp"
+                  animationOut="slideOutDown"
+                  coverScreen={false}
+                >
+                  <View style={styles.content}>
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 1,
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontFamily: "montserrat-regular",
-                          padding: 20,
-                        }}
-                      >
-                        Cancel
-                      </Text>
-                    </TouchableHighlight>
-                    <TouchableHighlight
-                      onPress={() => {
-                        this.setState({ isDateTimePickerVisible: false });
+                      <Text style={styles.contentTitle}>Schedule Moment</Text>
+                    </View>
+
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 4,
+                        height: "100%",
+                        width: "100%",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontFamily: "montserrat-regular",
-                          padding: 20,
+                      <DateTimePicker
+                        is24Hour={false}
+                        display="default"
+                        onChange={this.handleChange}
+                        onCancel={this.toggleDateTimePicker}
+                        mode="datetime"
+                        value={this.state.scheduledMomentTime}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 1,
+                        flexDirection: "row",
+                      }}
+                    >
+                      <TouchableHighlight
+                        onPress={() => {
+                          this.setState({ isDateTimePickerVisible: false });
                         }}
                       >
-                        Ok
-                      </Text>
-                    </TouchableHighlight>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontFamily: "montserrat-regular",
+                            padding: 20,
+                          }}
+                        >
+                          Cancel
+                        </Text>
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        onPress={() => {
+                          this.setState({ isDateTimePickerVisible: false });
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontFamily: "montserrat-regular",
+                            padding: 20,
+                          }}
+                        >
+                          Ok
+                        </Text>
+                      </TouchableHighlight>
+                    </View>
                   </View>
+                </Modal>
+              ) : (
+                <View
+                  style={{
+                    display: "flex",
+                    flex: 4,
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <DateTimePicker
+                    is24Hour={false}
+                    display="default"
+                    onChange={this.handleChange}
+                    onCancel={this.toggleDateTimePicker}
+                    mode="date"
+                    value={this.state.scheduledMomentTime}
+                    isVisible={this.state.isDateTimePickerVisible}
+                  />
                 </View>
-              </Modal>
+              )}
+
               {/* 
               <View style={styles.repeatingOptionsContainer}>
                 <View style={styles.repeatingHeader}>

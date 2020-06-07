@@ -8,14 +8,13 @@ import {
   TextInput,
   KeyboardAvoidingView,
   SafeAreaView,
+  TouchableHighlight,
+  Platform,
 } from "react-native";
 import React, { Component } from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
-import Constants from "expo-constants";
-import uuid from "uuid";
 import NavigationService from "./NavigationService";
 import firebase from "../firebase";
-import DateTimePicker from "react-native-modal-datetime-picker";
+import DateTimePicker from "@react-native-community/datetimepicker";
 import { CheckBox, Input } from "react-native-elements";
 import sundayIcon from "../assets/sunday.png";
 import sundayCheckedIcon from "../assets/sunday_checked.png";
@@ -31,6 +30,9 @@ import fridayIcon from "../assets/friday.png";
 import fridayCheckedIcon from "../assets/friday_checked.png";
 import saturdayIcon from "../assets/saturday.png";
 import saturdayCheckedIcon from "../assets/saturday_checked.png";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import Modal from "react-native-modal";
+import { Notifications } from "expo";
 
 export default class EditMoment extends Component {
   constructor(props) {
@@ -57,19 +59,92 @@ export default class EditMoment extends Component {
   };
 
   componentDidMount() {
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    let now = new Date().toLocaleDateString("en-US", options);
-    this.setState({ timestamp: now });
     this.props.navigation.setParams({
       handleSave: this.saveEditedMoment,
     });
+    var coeff = 1000 * 60 * 1;
+    let now = new Date();
+    let nowEpoch = new Date(Math.floor(now.getTime() / coeff) * coeff);
+    this.setState({ scheduledMomentTime: nowEpoch });
   }
 
   saveEditedMoment = async () => {
     this.setState({ isLoading: true });
-    let moment = this.state;
-    console.log(moment);
+    let deleteNotification = await this.deleteMoment(this.state.notificationId);
+    let notificationId = await this.scheduleMomentNotification();
+  };
+
+  deleteMoment = async (id) => {
+    let deleteConfirmation = await Notifications.cancelScheduledNotificationAsync(
+      id
+    );
+    console.log(deleteConfirmation);
+
+    const userId = firebase.auth().currentUser.uid;
+    const docRef = firebase
+      .firestore()
+      .collection("users")
+      .doc(userId)
+      .collection("moments")
+      .doc(id);
+
+    docRef
+      .delete()
+      .then(() => {
+        console.log(
+          `successfully deleted moment entry ${docRef.id} from Firebase`
+        );
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  };
+
+  scheduleMomentNotification = async () => {
+    let { scheduledMomentTime, title } = this.state;
     let _this = this;
+
+    if (scheduledMomentTime) {
+      const notification = {
+        title: title,
+        body: "Start your moment now!",
+        data: {
+          duration: this.duration,
+          title: this.title,
+        },
+        android: {
+          sound: true,
+        },
+        ios: {
+          sound: true,
+        },
+      };
+
+      const schedulingOptions = {
+        time: scheduledMomentTime,
+      };
+
+      Notifications.scheduleLocalNotificationAsync(
+        notification,
+        schedulingOptions
+      )
+        .then((notificationId) => {
+          _this.setState({ notificationId: notificationId });
+          console.log(`scheduled moment notification ${notificationId}`);
+          _this.saveMomentToFirebase(notificationId);
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    } else {
+      return null;
+    }
+  };
+
+  saveMomentToFirebase = (notificationId) => {
+    let moment = this.state;
+    let _this = this;
+
     const userId = firebase.auth().currentUser.uid;
 
     const docRef = firebase
@@ -77,31 +152,27 @@ export default class EditMoment extends Component {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      .doc(moment.id);
+      .doc(notificationId);
 
     return docRef
-      .set({ ...moment }, { merge: true })
+      .set(
+        {
+          ...moment,
+        },
+        { merge: true }
+      )
       .then(() => {
-        console.log(`successfully created moment ${docRef.id}`);
+        console.log(
+          `successfully created moment entry ${docRef.id} in Firebase`
+        );
         _this.setState({ isLoading: false });
-        NavigationService.navigate("Moments");
+        _this.props.navigation.state.params.onGoBack();
+        _this.props.navigation.goBack(null);
       })
 
       .catch(function (error) {
         console.log(error);
       });
-  };
-
-  updateTotalMoments = async (value) => {
-    const userId = firebase.auth().currentUser.uid;
-    const docRef = firebase.firestore().collection("users").doc(userId);
-
-    docRef.set(
-      {
-        totalMoments: firebase.firestore.FieldValue.increment(value),
-      },
-      { merge: true }
-    );
   };
 
   toggleDateTimePicker = () => {
@@ -121,34 +192,38 @@ export default class EditMoment extends Component {
     return strTime;
   }
 
-  handleDatePicked = (date) => {
-    const monthNames = [
-      "January",
-      "February",
-      "March",
-      "April",
-      "May",
-      "June",
-      "July",
-      "August",
-      "September",
-      "October",
-      "November",
-      "December",
-    ];
+  handleChange = (event, date) => {
+    if (date) {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
 
-    let formattedDate = `${
-      monthNames[date.getMonth()]
-    } ${date.getDate()} at ${this.format12HrTime(date)}`;
-    console.log(date);
-    let newDate = new Date(date);
-    let epoch = newDate.getTime();
-    let yearAndMonth = `${date.getFullYear()}_${date.getMonth() + 1}`;
+      let scheduledMomentTime = new Date(date);
 
-    this.setState({ momentMonth: yearAndMonth });
-    this.setState({ timestamp: epoch });
-    this.setState({ timestampFormatted: formattedDate });
-    this.toggleDateTimePicker();
+      // get easily readable moment time
+      let readableMomentTime = `${
+        monthNames[scheduledMomentTime.getMonth()]
+      } ${scheduledMomentTime.getDate()} at ${this.format12HrTime(
+        scheduledMomentTime
+      )}`;
+
+      this.setState({ scheduledMomentTime: scheduledMomentTime });
+      this.setState({
+        timeZoneOffset: scheduledMomentTime.getTimezoneOffset() * 60 * 1000,
+      });
+      this.setState({ readableMomentTime: readableMomentTime });
+    }
   };
 
   render() {
@@ -156,7 +231,7 @@ export default class EditMoment extends Component {
       <SafeAreaView style={styles.container}>
         <KeyboardAvoidingView
           style={styles.container}
-          behavior="padding"
+          behavior="height"
           enabled
         >
           {this.state.isLoading ? (
@@ -165,41 +240,169 @@ export default class EditMoment extends Component {
             </View>
           ) : (
             <View style={styles.container}>
+              <View style={styles.pageLabelContainer}>
+                <Text style={styles.pageLabelText}>
+                  Edit your moment of silence
+                </Text>
+              </View>
               <View style={styles.headingContainer}>
                 <TextInput
-                  style={styles.text}
+                  style={styles.headingInput}
                   value={this.state.title}
-                  placeholder="Add title"
+                  placeholder="Moment title"
+                  numberOfLines={1}
                   placeholderTextColor="#EFEFEF80"
                   onChangeText={(text) => this.setState({ title: text })}
                 />
               </View>
-
               <View style={styles.timeContainer}>
-                <View style={styles.repeatingItem}>
-                  <Text style={styles.text}>Schedule time</Text>
-                  <TouchableOpacity onPress={this.toggleDateTimePicker}>
-                    <Text style={styles.text} color="#EFEFEF">
-                      {this.state.timestampFormatted}
+                <TouchableHighlight
+                  style={styles.setTimeContainer}
+                  onPress={() => {
+                    this.setState({ isDateTimePickerVisible: true });
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      width: "70%",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="clock"
+                      size={32}
+                      color="white"
+                    />
+                    <Text style={styles.timeInput}>
+                      {this.state.readableMomentTime}
                     </Text>
-                  </TouchableOpacity>
-                </View>
+                  </View>
+                </TouchableHighlight>
 
-                <View style={styles.repeatingItem}>
-                  <Text style={styles.text}>Duration (min)</Text>
-                  <Input
-                    style={styles.text}
-                    color="#EFEFEF"
-                    onChangeText={(text) => this.setState({ duration: text })}
-                    value={`${this.state.duration}`}
-                    placeholder={`${this.state.duration}`}
-                    placeholderTextColor="#EFEFEF80"
-                    keyboardType={"numeric"}
-                    returnKeyType="done"
-                  />
-                </View>
+                <TouchableHighlight
+                  style={styles.setDurationContainer}
+                  onPress={() => {
+                    this.refs.durationInput.focus();
+                  }}
+                >
+                  <View
+                    style={{
+                      display: "flex",
+                      width: "70%",
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <TextInput
+                      ref="durationInput"
+                      maxLength={3}
+                      style={styles.timeInput}
+                      onChangeText={(text) => {
+                        this.setState({ duration: text });
+                      }}
+                      onSubmitEditing={(event) => {
+                        console.log(event.nativeEvent.text);
+                        console.log(event.nativeEvent.text.length);
+
+                        if (event.nativeEvent.text.length < 1) {
+                          this.setState({ duration: "5" });
+                        }
+                      }}
+                      value={this.state.duration}
+                      placeholder={this.state.duration}
+                      keyboardType="numeric"
+                      returnKeyType="done"
+                    />
+                    <Text style={styles.durationLabel}>minutes long</Text>
+                  </View>
+                </TouchableHighlight>
               </View>
 
+              <View style={{ flex: 6 }} />
+
+              <Modal
+                onBackdropPress={() =>
+                  this.setState({ isDateTimePickerVisible: false })
+                }
+                isVisible={this.state.isDateTimePickerVisible}
+                animationIn="slideInUp"
+                animationOut="slideOutDown"
+                coverScreen={false}
+              >
+                <View style={styles.content}>
+                  <View
+                    style={{
+                      display: "flex",
+                      flex: 1,
+                    }}
+                  >
+                    <Text style={styles.contentTitle}>Schedule Moment</Text>
+                  </View>
+
+                  <View
+                    style={{
+                      display: "flex",
+                      flex: 4,
+                      height: "100%",
+                      width: "100%",
+                    }}
+                  >
+                    <DateTimePicker
+                      is24Hour={false}
+                      display="default"
+                      onChange={this.handleChange}
+                      onCancel={this.toggleDateTimePicker}
+                      mode="datetime"
+                      value={this.state.scheduledMomentTime}
+                    />
+                  </View>
+
+                  <View
+                    style={{
+                      display: "flex",
+                      flex: 1,
+                      flexDirection: "row",
+                    }}
+                  >
+                    <TouchableHighlight
+                      onPress={() => {
+                        this.setState({ isDateTimePickerVisible: false });
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: "montserrat-regular",
+                          padding: 20,
+                        }}
+                      >
+                        Cancel
+                      </Text>
+                    </TouchableHighlight>
+                    <TouchableHighlight
+                      onPress={() => {
+                        this.setState({ isDateTimePickerVisible: false });
+                      }}
+                    >
+                      <Text
+                        style={{
+                          fontSize: 16,
+                          fontFamily: "montserrat-regular",
+                          padding: 20,
+                        }}
+                      >
+                        Ok
+                      </Text>
+                    </TouchableHighlight>
+                  </View>
+                </View>
+              </Modal>
+
+              {/* 
               <View style={styles.repeatingOptionsContainer}>
                 <View style={styles.repeatingHeader}>
                   <Text style={styles.text}>Repeating options</Text>
@@ -329,15 +532,15 @@ export default class EditMoment extends Component {
                     />
                   </View>
                 </View>
-              </View>
+              </View> */}
 
-              <DateTimePicker
+              {/* <DateTimePicker
                 isVisible={this.state.isDateTimePickerVisible}
                 onConfirm={this.handleDatePicked}
                 onCancel={this.toggleDateTimePicker}
                 mode="datetime"
                 isDarkModeEnabled={true}
-              />
+              /> */}
             </View>
           )}
         </KeyboardAvoidingView>
@@ -352,13 +555,6 @@ const styles = StyleSheet.create({
     flexDirection: "column",
     backgroundColor: "#2C239A",
   },
-  text: {
-    justifyContent: "center",
-    alignItems: "center",
-    color: "#EFEFEF",
-    fontFamily: "montserrat-regular",
-    fontSize: 20,
-  },
   headerRightContainer: {
     display: "flex",
     flexDirection: "row",
@@ -371,15 +567,87 @@ const styles = StyleSheet.create({
     padding: 15,
     marginRight: 10,
   },
-  cancelButton: {
-    marginRight: 8,
+  pageLabelContainer: {
+    justifyContent: "flex-start",
+    alignItems: "center",
+  },
+  pageLabelText: {
+    paddingTop: 15,
+    fontSize: 24,
+    textAlign: "center",
+    fontFamily: "montserrat-regular",
+    color: "#EFEFEF",
   },
   headingContainer: {
-    display: "flex",
-    fontSize: 30,
     flex: 1,
+    minHeight: "15%",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "flex-start",
+    textAlignVertical: "top",
+    padding: 15,
+  },
+  headingInput: {
+    flex: 1,
+    width: "100%",
+    fontSize: 24,
+    textAlign: "center",
+    textAlignVertical: "center",
+    fontFamily: "montserrat-regular",
+    color: "#EFEFEF",
+  },
+  timeContainer: {
+    display: "flex",
+    flex: 2,
+    flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",
+    padding: 15,
+  },
+  setTimeContainer: {
+    display: "flex",
+    flex: 1,
+    minHeight: "15%",
+    width: "70%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 30,
+    backgroundColor: "#509C96",
+  },
+  setDurationContainer: {
+    display: "flex",
+    flex: 1,
+    width: "70%",
+    minHeight: "15%",
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    margin: 15,
+    borderRadius: 30,
+    backgroundColor: "#509C96",
+  },
+  timeInput: {
+    color: "#EDEDED",
+    margin: 0,
+    padding: 10,
+    fontSize: 20,
+    textAlign: "center",
+    textAlignVertical: "center",
+  },
+  durationLabel: {
+    textAlign: "center",
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
+    padding: 10,
+  },
+  text: {
+    justifyContent: "center",
+    alignItems: "center",
+    color: "#EFEFEF",
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
   },
   repeatingHeader: {
     display: "flex",
@@ -393,21 +661,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-  headingInput: {
-    flex: 1,
-    fontSize: 24,
-    margin: 8,
-    fontFamily: "montserrat-regular",
-    color: "#EFEFEF",
-  },
-  timeContainer: {
-    display: "flex",
-    flexDirection: "row",
-    flex: 1,
-    fontSize: 30,
-    justifyContent: "center",
-    alignItems: "center",
-  },
   repeatingOptionsContainer: {
     display: "flex",
     flexDirection: "column",
@@ -415,6 +668,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     alignContent: "center",
+    padding: 15,
   },
   repeatingItem: {
     flex: 1,
@@ -422,5 +676,28 @@ const styles = StyleSheet.create({
   checkbox: {
     width: 30,
     height: 30,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+
+  content: {
+    backgroundColor: "white",
+    padding: 22,
+    display: "flex",
+    flex: 1,
+    maxHeight: "60%",
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 4,
+    borderColor: "rgba(0, 0, 0, 0.1)",
+  },
+  contentTitle: {
+    fontFamily: "montserrat-regular",
+    fontSize: 20,
+    marginBottom: 12,
   },
 });
