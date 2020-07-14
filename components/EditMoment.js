@@ -42,6 +42,9 @@ export default class EditMoment extends Component {
     this.state = {
       ...moment,
       isLoading: false,
+      isDateTimePickerVisible: false,
+      isAndroidDatePickerVisible: false,
+      isAndroidTimePickerVisible: false,
     };
   }
 
@@ -69,9 +72,20 @@ export default class EditMoment extends Component {
   }
 
   saveEditedMoment = async () => {
-    this.setState({ isLoading: true });
-    let deleteNotification = await this.deleteMoment(this.state.notificationId);
-    let notificationId = await this.scheduleMomentNotification();
+    if (this.state.title && this.state.scheduledMomentTime !== null) {
+      this.setState({ isLoading: true });
+      let deleteNotification = await this.deleteMoment(
+        this.state.notificationId.toString()
+      );
+      let notificationId = await this.scheduleMomentNotification();
+    } else {
+      Alert.alert(
+        "Cannot Save",
+        "Please enter a title and time for your moment",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+        { cancelable: false }
+      );
+    }
   };
 
   deleteMoment = async (id) => {
@@ -109,8 +123,8 @@ export default class EditMoment extends Component {
         title: title,
         body: "Start your moment now!",
         data: {
-          duration: this.duration,
-          title: this.title,
+          duration: _this.state.duration,
+          title: title,
         },
         android: {
           sound: true,
@@ -131,7 +145,7 @@ export default class EditMoment extends Component {
         .then((notificationId) => {
           _this.setState({ notificationId: notificationId });
           console.log(`scheduled moment notification ${notificationId}`);
-          _this.saveMomentToFirebase(notificationId);
+          _this.saveMomentToFirebase(notificationId.toString());
         })
         .catch(function (error) {
           console.log(error);
@@ -178,6 +192,21 @@ export default class EditMoment extends Component {
   toggleDateTimePicker = () => {
     this.setState({
       isDateTimePickerVisible: !this.state.isDateTimePickerVisible,
+      isAndroidDatePickerVisible: false,
+    });
+  };
+
+  toggleAndroidDatePicker = () => {
+    this.setState({
+      isAndroidDatePickerVisible: !this.state.isAndroidDatePickerVisible,
+      isDateTimePickerVisible: false,
+    });
+  };
+
+  toggleAndroidTimePicker = () => {
+    this.setState({
+      isAndroidTimePickerVisible: !this.state.isAndroidTimePickerVisible,
+      isDateTimePickerVisible: false,
     });
   };
 
@@ -193,6 +222,83 @@ export default class EditMoment extends Component {
   }
 
   handleChange = (event, date) => {
+    if (date) {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      let scheduledMomentTime = new Date(date);
+
+      // get easily readable moment time
+      let readableMomentTime = `${
+        monthNames[scheduledMomentTime.getMonth()]
+      } ${scheduledMomentTime.getDate()} at ${this.format12HrTime(
+        scheduledMomentTime
+      )}`;
+
+      this.setState({ scheduledMomentTime: scheduledMomentTime });
+      this.setState({
+        timeZoneOffset: scheduledMomentTime.getTimezoneOffset() * 60 * 1000,
+      });
+      this.setState({ readableMomentTime: readableMomentTime });
+    }
+  };
+
+  handleAndroidDateChange = (event, date) => {
+    if (event.type == "set") {
+      this.toggleAndroidDatePicker();
+      this.toggleAndroidTimePicker();
+    }
+
+    if (date) {
+      const monthNames = [
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
+      ];
+
+      let scheduledMomentTime = new Date(date);
+
+      // get easily readable moment time
+      let readableMomentTime = `${
+        monthNames[scheduledMomentTime.getMonth()]
+      } ${scheduledMomentTime.getDate()} at ${this.format12HrTime(
+        scheduledMomentTime
+      )}`;
+
+      this.setState({ scheduledMomentTime: scheduledMomentTime });
+      this.setState({
+        timeZoneOffset: scheduledMomentTime.getTimezoneOffset() * 60 * 1000,
+      });
+      this.setState({ readableMomentTime: readableMomentTime });
+    }
+  };
+
+  handleAndroidTimeChange = (event, date) => {
+    if (event.type == "set") {
+      this.toggleAndroidTimePicker();
+    }
+
     if (date) {
       const monthNames = [
         "January",
@@ -259,7 +365,10 @@ export default class EditMoment extends Component {
                 <TouchableHighlight
                   style={styles.setTimeContainer}
                   onPress={() => {
-                    this.setState({ isDateTimePickerVisible: true });
+                    this.setState({
+                      isDateTimePickerVisible: true,
+                      isAndroidDatePickerVisible: true,
+                    });
                   }}
                 >
                   <View
@@ -324,84 +433,132 @@ export default class EditMoment extends Component {
 
               <View style={{ flex: 6 }} />
 
-              <Modal
-                onBackdropPress={() =>
-                  this.setState({ isDateTimePickerVisible: false })
-                }
-                isVisible={this.state.isDateTimePickerVisible}
-                animationIn="slideInUp"
-                animationOut="slideOutDown"
-                coverScreen={false}
-              >
-                <View style={styles.content}>
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 1,
-                    }}
-                  >
-                    <Text style={styles.contentTitle}>Schedule Moment</Text>
-                  </View>
-
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 4,
-                      height: "100%",
-                      width: "100%",
-                    }}
-                  >
-                    <DateTimePicker
-                      is24Hour={false}
-                      display="default"
-                      onChange={this.handleChange}
-                      onCancel={this.toggleDateTimePicker}
-                      mode="datetime"
-                      value={this.state.scheduledMomentTime}
-                    />
-                  </View>
-
-                  <View
-                    style={{
-                      display: "flex",
-                      flex: 1,
-                      flexDirection: "row",
-                    }}
-                  >
-                    <TouchableHighlight
-                      onPress={() => {
-                        this.setState({ isDateTimePickerVisible: false });
+              {Platform.OS == "ios" && (
+                <Modal
+                  onBackdropPress={() =>
+                    this.this.setState({
+                      isDateTimePickerVisible: false,
+                      isAndroidDatePickerVisible: false,
+                    })({ isDateTimePickerVisible: false })
+                  }
+                  isVisible={this.state.isDateTimePickerVisible}
+                  animationIn="slideInUp"
+                  animationOut="slideOutDown"
+                  coverScreen={false}
+                >
+                  <View style={styles.content}>
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 1,
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontFamily: "montserrat-regular",
-                          padding: 20,
-                        }}
-                      >
-                        Cancel
-                      </Text>
-                    </TouchableHighlight>
-                    <TouchableHighlight
-                      onPress={() => {
-                        this.setState({ isDateTimePickerVisible: false });
+                      <Text style={styles.contentTitle}>Schedule Moment</Text>
+                    </View>
+
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 4,
+                        height: "100%",
+                        width: "100%",
                       }}
                     >
-                      <Text
-                        style={{
-                          fontSize: 16,
-                          fontFamily: "montserrat-regular",
-                          padding: 20,
+                      <DateTimePicker
+                        is24Hour={false}
+                        display="default"
+                        onChange={this.handleChange}
+                        onCancel={this.toggleDateTimePicker}
+                        mode="datetime"
+                        value={this.state.scheduledMomentTime}
+                      />
+                    </View>
+
+                    <View
+                      style={{
+                        display: "flex",
+                        flex: 1,
+                        flexDirection: "row",
+                      }}
+                    >
+                      <TouchableHighlight
+                        onPress={() => {
+                          this.setState({
+                            isDateTimePickerVisible: false,
+                            isAndroidDatePickerVisible: false,
+                          });
                         }}
                       >
-                        Ok
-                      </Text>
-                    </TouchableHighlight>
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontFamily: "montserrat-regular",
+                            padding: 20,
+                          }}
+                        >
+                          Cancel
+                        </Text>
+                      </TouchableHighlight>
+                      <TouchableHighlight
+                        onPress={() => {
+                          this.setState({
+                            isDateTimePickerVisible: false,
+                            isAndroidDatePickerVisible: false,
+                          });
+                        }}
+                      >
+                        <Text
+                          style={{
+                            fontSize: 16,
+                            fontFamily: "montserrat-regular",
+                            padding: 20,
+                          }}
+                        >
+                          Ok
+                        </Text>
+                      </TouchableHighlight>
+                    </View>
                   </View>
+                </Modal>
+              )}
+              {this.state.isAndroidDatePickerVisible && (
+                <View
+                  style={{
+                    display: "flex",
+                    flex: 4,
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <DateTimePicker
+                    is24Hour={false}
+                    display="default"
+                    onChange={this.handleAndroidDateChange}
+                    onCancel={this.toggleAndroidTimePicker}
+                    mode={"date"}
+                    value={new Date()}
+                  />
                 </View>
-              </Modal>
-
+              )}
+              {this.state.isAndroidTimePickerVisible && (
+                <View
+                  style={{
+                    display: "flex",
+                    flex: 4,
+                    height: "100%",
+                    width: "100%",
+                  }}
+                >
+                  <DateTimePicker
+                    is24Hour={false}
+                    display="default"
+                    onChange={this.handleAndroidTimeChange}
+                    onCancel={this.toggleAndroidTimePicker}
+                    mode={"time"}
+                    value={new Date()}
+                  />
+                </View>
+              )}
               {/* 
               <View style={styles.repeatingOptionsContainer}>
                 <View style={styles.repeatingHeader}>

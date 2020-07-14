@@ -140,7 +140,7 @@ export default function Moments() {
       .collection("users")
       .doc(userId)
       .collection("moments")
-      .doc(moment.notificationId);
+      .doc(moment.notificationId.toString());
 
     docRef
       .delete()

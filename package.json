@@ -10,7 +10,7 @@
   "dependencies": {
     "@expo/vector-icons": "^10.0.0",
     "@material-ui/core": "^4.8.3",
-    "@react-native-community/datetimepicker": "2.2.2",
+    "@react-native-community/datetimepicker": "2.6.0",
     "atob": "^2.1.2",
     "base-64": "^0.1.0",
     "expo": "^37.0.0",
