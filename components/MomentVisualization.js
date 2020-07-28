@@ -21,6 +21,7 @@ export default class MomentVisualization extends Component {
       userId: userId,
       title: props.navigation.state.params.title,
       duration: props.navigation.state.params.duration,
+      showCountdown: true,
     };
   }
 
@@ -140,7 +141,7 @@ export default class MomentVisualization extends Component {
               <MaterialCommunityIcons
                 style={{ alignSelf: "center" }}
                 name="arrow-right"
-                size={35}
+                size={30}
                 color="#EDEDED"
               />
             </TouchableOpacity>
@@ -149,16 +150,62 @@ export default class MomentVisualization extends Component {
       );
     } else {
       return (
-        <View style={{ justifyContent: "center", alignItems: "center" }}>
-          <Text
-            style={{
-              color: "#EDEDED",
-              fontSize: 24,
-              fontFamily: "montserrat-regular",
-            }}
-          >
-            {minutes}:{seconds}
-          </Text>
+        <View
+          style={{
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          {this.state.showCountdown ? (
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Text
+                style={{
+                  paddingRight: 20,
+                  color: "#EDEDED",
+                  fontSize: 48,
+                  fontFamily: "montserrat-regular",
+                }}
+              >
+                {minutes}:{seconds}
+              </Text>
+
+              <TouchableOpacity
+                style={{ paddingLeft: 20 }}
+                onPress={() => {
+                  this.setState({ showCountdown: false });
+                }}
+              >
+                <MaterialCommunityIcons
+                  style={{ alignSelf: "center" }}
+                  name="eye"
+                  size={30}
+                  color="#EDEDED"
+                />
+              </TouchableOpacity>
+            </View>
+          ) : (
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <TouchableOpacity
+                onPress={() => {
+                  this.setState({ showCountdown: true });
+                }}
+              >
+                <MaterialCommunityIcons
+                  style={{ alignSelf: "center" }}
+                  name="eye-off"
+                  size={35}
+                  color="#EDEDED"
+                />
+              </TouchableOpacity>
+            </View>
+          )}
+
           <TouchableOpacity
             style={styles.finishMoment}
             onPress={() => {
@@ -262,7 +309,8 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     backgroundColor: "#efefef",
     padding: 15,
-    marginTop: 5,
+    marginTop: 20,
+    marginBottom: 20,
     borderRadius: 10,
   },
 });
