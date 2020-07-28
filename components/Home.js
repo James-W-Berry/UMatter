@@ -26,12 +26,12 @@ export default function Home() {
       color: "#160C21",
     },
     { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
-    {
-      key: "gold",
-      title: "Gold",
-      icon: "treasure-chest",
-      color: "#160C21",
-    },
+    // {
+    //   key: "gold",
+    //   title: "Gold",
+    //   icon: "treasure-chest",
+    //   color: "#160C21",
+    // },
     {
       key: "badges",
       title: "Badges",
@@ -46,7 +46,7 @@ export default function Home() {
   const renderScene = BottomNavigation.SceneMap({
     journalEntries: JournalEntriesRoute,
     moments: MomentsRoute,
-    gold: GoldRoute,
+    // gold: GoldRoute,
     badges: BadgesRoute,
     profile: ProfileRoute,
   });
