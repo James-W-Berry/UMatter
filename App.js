@@ -23,7 +23,7 @@ export default function App() {
   async function loadFont() {
     await Font.loadAsync({
       "montserrat-regular": require("./assets/fonts/Montserrat-Regular.ttf"),
-      "montserrat-medium": require("./assets/fonts/Montserrat-Medium.ttf")
+      "montserrat-medium": require("./assets/fonts/Montserrat-Medium.ttf"),
     });
 
     setFontIsLoaded(true);
@@ -32,13 +32,14 @@ export default function App() {
   useEffect(() => {
     loadFont();
 
-    firebase.auth().onAuthStateChanged(function(user) {
+    firebase.auth().onAuthStateChanged(function (user) {
       if (user) {
         setUser({ loggedIn: true, isLoaded: true });
         NavigationService.navigate("Home");
       } else {
         setUser({ loggedIn: false, isLoaded: true });
-        NavigationService.navigate("SignInPage");
+        //NavigationService.navigate("SignInPage");
+        NavigationService.navigate("Home");
       }
     });
   }, []);
@@ -64,11 +65,11 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
-    backgroundColor: "#2C239A"
+    backgroundColor: "#2C239A",
   },
   horizontal: {
     flexDirection: "row",
     justifyContent: "space-around",
-    padding: 10
-  }
+    padding: 10,
+  },
 });

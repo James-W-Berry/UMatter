@@ -1,53 +1,53 @@
 import React, { useState } from "react";
 import { BottomNavigation } from "react-native-paper";
-import JournalEntries from "./JournalEntries";
-import Moments from "./Moments";
-import Gold from "./Gold";
-import Badges from "./Badges";
+import { Text, View, Icon, Image } from "react-native";
 import Profile from "./Profile";
+import Events from "./Events";
+import Resources from "./Resources";
+import umatterIcon from "../assets/icon.png";
 
-const JournalEntriesRoute = () => <JournalEntries />;
-
-const MomentsRoute = () => <Moments />;
-
-const GoldRoute = () => <Gold />;
-
-const BadgesRoute = () => <Badges />;
-
+const EventsRoute = () => <Events />;
+const ResourcesRoute = () => <Resources />;
 const ProfileRoute = () => <Profile />;
 
 export default function Home() {
   const [index, setIndex] = useState(0);
   const routes = [
     {
-      key: "journalEntries",
-      title: "Journal",
-      icon: "notebook",
+      key: "events",
+      title: "Events",
+      icon: "calendar",
       color: "#160C21",
     },
-    { key: "moments", title: "Moments", icon: "clock", color: "#160C21" },
-    // {
-    //   key: "gold",
-    //   title: "Gold",
-    //   icon: "treasure-chest",
-    //   color: "#160C21",
-    // },
     {
-      key: "badges",
-      title: "Badges",
-      icon: "trophy-award",
+      key: "resources",
+      title: "Resources",
+      icon: () => {
+        return (
+          <Image
+            source={require("../assets/umatter_orange.png")}
+            style={{
+              width: 15,
+              height: 15,
+            }}
+          />
+        );
+      },
       color: "#160C21",
     },
-    { key: "profile", title: "Profile", icon: "account", color: "#160C21" },
+    {
+      key: "profile",
+      title: "Profile",
+      icon: "account",
+      color: "#160C21",
+    },
   ];
 
   const handleIndexChange = (index) => setIndex(index);
 
   const renderScene = BottomNavigation.SceneMap({
-    journalEntries: JournalEntriesRoute,
-    moments: MomentsRoute,
-    // gold: GoldRoute,
-    badges: BadgesRoute,
+    events: EventsRoute,
+    resources: ResourcesRoute,
     profile: ProfileRoute,
   });
 

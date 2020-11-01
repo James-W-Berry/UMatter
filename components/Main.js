@@ -2,16 +2,9 @@ import React from "react";
 import OnboardingScreens from "./Onboarding";
 import LandingPage from "./LandingPage";
 import Home from "./Home";
-import JournalEntries from "./JournalEntries";
 import { createStackNavigator } from "react-navigation-stack";
 import { createAppContainer } from "react-navigation";
 import NavigationService from "./NavigationService";
-import NewJournalEntry from "./NewJournalEntry";
-import JournalEntry from "./JournalEntry";
-import Moments from "./Moments";
-import NewMoment from "./NewMoment";
-import EditMoment from "./EditMoment";
-import MomentVisualization from "./MomentVisualization";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import ForgottenPasswordPage from "./ForgottenPasswordPage";
@@ -56,53 +49,6 @@ const MainNavigator = createStackNavigator({
     navigationOptions: {
       header: null,
     },
-  },
-  JournalEntries: {
-    screen: JournalEntries,
-    navigationOptions: {
-      header: null,
-    },
-  },
-  NewJournalEntry: {
-    screen: NewJournalEntry,
-    navigationOptions: {
-      headerStyle: { backgroundColor: "#2C239A" },
-      headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96",
-    },
-  },
-  JournalEntry: {
-    screen: JournalEntry,
-    navigationOptions: {
-      headerStyle: { backgroundColor: "#2C239A" },
-      headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96",
-    },
-  },
-  NewMoment: {
-    screen: NewMoment,
-    navigationOptions: {
-      headerStyle: { backgroundColor: "#2C239A" },
-      headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96",
-    },
-  },
-  EditMoment: {
-    screen: EditMoment,
-    navigationOptions: {
-      headerStyle: { backgroundColor: "#2C239A" },
-      headerTitleStyle: { color: "#509C96" },
-      headerTintColor: "#509C96",
-    },
-  },
-  MomentVisualization: {
-    screen: MomentVisualization,
-    navigationOptions: {
-      header: null,
-    },
-  },
-  Moments: {
-    screen: Moments,
   },
 });
 
