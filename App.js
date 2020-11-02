@@ -27,21 +27,23 @@ export default function App() {
     });
 
     setFontIsLoaded(true);
+    setUser({ loggedIn: false, isLoaded: true });
+    NavigationService.navigate("Home");
   }
 
   useEffect(() => {
     loadFont();
 
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        setUser({ loggedIn: true, isLoaded: true });
-        NavigationService.navigate("Home");
-      } else {
-        setUser({ loggedIn: false, isLoaded: true });
-        //NavigationService.navigate("SignInPage");
-        NavigationService.navigate("Home");
-      }
-    });
+    // firebase.auth().onAuthStateChanged(function (user) {
+    //   if (user) {
+    //     setUser({ loggedIn: true, isLoaded: true });
+    //     NavigationService.navigate("Home");
+    //   } else {
+    //setUser({ loggedIn: false, isLoaded: true });
+    //     //NavigationService.navigate("SignInPage");
+    //NavigationService.navigate("Home");
+    //   }
+    // });
   }, []);
 
   if (fontIsLoaded && user.isLoaded) {

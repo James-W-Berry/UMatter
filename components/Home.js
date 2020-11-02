@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { BottomNavigation } from "react-native-paper";
-import { Text, View, Icon, Image } from "react-native";
+import { Image } from "react-native";
 import Profile from "./Profile";
 import Events from "./Events";
 import Resources from "./Resources";
-import umatterIcon from "../assets/icon.png";
 
 const EventsRoute = () => <Events />;
 const ResourcesRoute = () => <Resources />;
