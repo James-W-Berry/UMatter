@@ -24,10 +24,14 @@ export default function Home() {
       icon: () => {
         return (
           <Image
-            source={require("../assets/umatter_orange.png")}
+            source={
+              index == 1
+                ? require("../assets/umatter_white.png")
+                : require("../assets/umatter_unselected.png")
+            }
             style={{
-              width: 15,
-              height: 15,
+              width: 20,
+              height: 20,
             }}
           />
         );
@@ -52,6 +56,7 @@ export default function Home() {
 
   return (
     <BottomNavigation
+      // style={{ fontFamily: "montserrat-medium", color: "#191919" }}
       navigationState={{ index: index, routes: routes }}
       onIndexChange={handleIndexChange}
       renderScene={renderScene}

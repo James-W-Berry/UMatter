@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Text, StyleSheet, Alert, Button, StatusBar, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Text, StyleSheet, Button, View } from "react-native";
 import * as firebase from "firebase";
 import "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import _ from "lodash";
+import Constants from "expo-constants";
 
 function logout() {
   firebase.auth().signOut();
@@ -90,98 +89,65 @@ export default function Profile() {
   }, []);
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle={"light-content"} translucent={true} />
-
-      <MaterialCommunityIcons name="account-circle" size={80} color="#509C96" />
-      <Text
+    <View
+      style={{
+        flex: 1,
+        display: "flex",
+      }}
+    >
+      <View style={styles.statusBar} />
+      <View
         style={{
-          color: "#EDEDED",
-          fontSize: 24,
-          fontFamily: "montserrat-regular",
+          flex: 1,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}
       >
-        {userData?.username}
-      </Text>
-      <Text
-        style={{
-          color: "#EDEDED",
-          fontSize: 16,
-          fontFamily: "montserrat-regular",
-        }}
-      >
-        {firebase.auth().currentUser.email}
-      </Text>
-      {/* <Text
-        style={{
-          color: "#EDEDED",
-          fontSize: 16,
-          fontFamily: "montserrat-regular",
-          marginTop: "10%"
-        }}
-      >
-        Your Groups:
-      </Text>
-      {userData.groups && groupData
-        ? Object.keys(userData.groups).map(function(key) {
-            return (
-              <View
-                key={`${key}View`}
-                style={{ display: "flex", flexDirection: "row" }}
-              >
-                <Text
-                  style={{
-                    color: "#EDEDED",
-                    fontSize: 16,
-                    fontFamily: "montserrat-regular"
-                  }}
-                  key={key}
-                >
-                  {`${groupData[key].name} - `}
-                </Text>
-
-                <Text
-                  style={{
-                    color: "#EDEDED",
-                    fontSize: 16,
-                    fontFamily: "montserrat-regular"
-                  }}
-                  key={`${key}UsersNumber`}
-                >
-                  {`${groupData[key].numberOfMembers} Member(s)`}
-                </Text>
-              </View>
-            );
-          })
-        : null} */}
-
-      <Text
-        style={{
-          color: "#EDEDED",
-          fontSize: 16,
-          fontFamily: "montserrat-regular",
-          marginTop: "40%",
-        }}
-      >{`UMatter member since ${creationDate}`}</Text>
-      <Text
-        style={{
-          color: "#EDEDED",
-          fontSize: 16,
-          fontFamily: "montserrat-regular",
-          marginBottom: "10%",
-        }}
-      >{`Last signed in on ${lastSignInTime}`}</Text>
-
-      <Button title={"Sign Out"} color="#509C96" onPress={requestLogout} />
+        <MaterialCommunityIcons
+          name="account-circle"
+          size={80}
+          color="#509C96"
+        />
+        <Text
+          style={{
+            fontSize: 24,
+            fontFamily: "montserrat-regular",
+          }}
+        >
+          {userData?.username}
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: "montserrat-regular",
+          }}
+        >
+          {firebase.auth().currentUser.email}
+        </Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: "montserrat-regular",
+            marginTop: "40%",
+          }}
+        >{`UMatter member since ${creationDate}`}</Text>
+        <Text
+          style={{
+            fontSize: 16,
+            fontFamily: "montserrat-regular",
+            marginBottom: "10%",
+          }}
+        >{`Last signed in on ${lastSignInTime}`}</Text>
+        <Button title={"Sign Out"} color="#509C96" onPress={requestLogout} />
+      </View>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  statusBar: {
     backgroundColor: "#2C239A",
+    height: Constants.statusBarHeight,
   },
 });

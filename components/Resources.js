@@ -3,10 +3,9 @@ import {
   Text,
   View,
   StyleSheet,
-  TouchableOpacity,
-  FlatList,
-  ActivityIndicator,
   ImageBackground,
+  Alert,
+  TouchableOpacity,
 } from "react-native";
 import { FlatGrid, SectionGrid } from "react-native-super-grid";
 import Constants from "expo-constants";
@@ -14,14 +13,64 @@ import breathing from "../assets/breathing.jpeg";
 import games from "../assets/games.jpeg";
 import inspiration from "../assets/inspiration.jpeg";
 import support from "../assets/support.jpeg";
+import move from "../assets/move.jpg";
+import talk from "../assets/talk.jpeg";
+import learn from "../assets/learn.jpeg";
 
 export default function Resources() {
   const [resourceTiles, setResourceTiles] = useState([
-    { name: "Breathing Exercises", description: "#1abc9c", image: breathing },
-    { name: "Inspiration", description: "#2ecc71", image: inspiration },
-    { name: "Games", description: "#3498db", image: games },
-    { name: "Support", description: "#9b59b6", image: support },
+    {
+      name: "Breathe",
+      code: "#9302F7",
+      description: "Learn breathing practices",
+      image: breathing,
+    },
+    {
+      name: "Inspiration",
+      code: "#A80F88",
+      description: "Become inspired",
+      image: inspiration,
+    },
+    {
+      name: "Play",
+      code: "#F70B02",
+      description: "Enjoy games",
+      image: games,
+    },
+    {
+      name: "Move",
+      code: "#1FDEA8",
+      description: "Engage in physical activity",
+      image: move,
+    },
+    {
+      name: "Support",
+      code: "#2C239A",
+      description: "Collection of resources",
+      image: support,
+    },
+    {
+      name: "Learn",
+      code: "#FA23E5",
+      description: "Learn ",
+      image: learn,
+    },
+    {
+      name: "Talk",
+      code: "#35C211",
+      description: "Talk",
+      image: talk,
+    },
   ]);
+
+  function onSelect(item) {
+    Alert.alert(
+      item.name,
+      "coming soon",
+      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+      { cancelable: false }
+    );
+  }
 
   return (
     <View
@@ -38,12 +87,26 @@ export default function Resources() {
         style={styles.gridView}
         spacing={10}
         renderItem={({ item }) => (
-          <View style={{ backgroundColor: item.code }}>
-            <ImageBackground source={item.image} style={styles.image}>
-              <Text style={styles.itemName}>{item.name}</Text>
-              <Text style={styles.itemDescription}>{item.description}</Text>
-            </ImageBackground>
-          </View>
+          <TouchableOpacity onPress={() => onSelect(item)}>
+            <View
+              style={[styles.itemContainer, { backgroundColor: item.code }]}
+            >
+              <View style={styles.imageContainer}>
+                <ImageBackground
+                  source={item.image}
+                  style={styles.image}
+                  imageStyle={{
+                    borderTopLeftRadius: 5,
+                    borderTopRightRadius: 5,
+                  }}
+                />
+              </View>
+              <View style={styles.itemLabelContainer}>
+                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemDescription}>{item.description}</Text>
+              </View>
+            </View>
+          </TouchableOpacity>
         )}
       />
     </View>
@@ -64,15 +127,20 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     height: 150,
   },
+  itemLabelContainer: {
+    display: "flex",
+    flexDirection: "column",
+    borderBottomStartRadius: 5,
+    borderBottomEndRadius: 5,
+  },
   itemName: {
     fontSize: 16,
+    fontFamily: "montserrat-medium",
     color: "#fff",
     fontWeight: "600",
     margin: 0,
     paddingTop: 5,
     paddingHorizontal: 5,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    borderWidth: 0,
   },
   itemDescription: {
     fontWeight: "600",
@@ -80,15 +148,15 @@ const styles = StyleSheet.create({
     color: "#fff",
     paddingHorizontal: 5,
     paddingBottom: 5,
-    backgroundColor: "rgba(0,0,0,0.5)",
     justifyContent: "flex-end",
-    borderWidth: 0,
+    fontFamily: "montserrat-regular",
   },
   image: {
     justifyContent: "flex-end",
-    borderRadius: 10,
-    height: 150,
     flex: 1,
     resizeMode: "cover",
+  },
+  imageContainer: {
+    flex: 1,
   },
 });

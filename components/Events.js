@@ -7,14 +7,10 @@ import {
   FlatList,
   ActivityIndicator,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import NavigationService from "./NavigationService";
 import firebase from "../firebase";
-import { useSafeArea } from "react-native-safe-area-context";
 import Constants from "expo-constants";
-import ActionButton from "react-native-action-button";
 import { IconButton, Card } from "react-native-paper";
-import { FlatGrid, SectionGrid } from "react-native-super-grid";
 
 function createEventCard(event) {
   if (event) {
@@ -52,7 +48,6 @@ function createEventCard(event) {
                   color={"#00A9A5"}
                   size={20}
                   style={{ margin: 0, marginLeft: -5 }}
-                  onPress={() => console.log("Show attendees")}
                 />
                 <Text style={styles.date}>{event.attendees.length}</Text>
               </View>
@@ -67,7 +62,7 @@ function createEventCard(event) {
 
 function onSelect(event) {
   const key = event.id;
-  NavigationService.navigate("JournalEntry", {
+  NavigationService.navigate("Event", {
     key,
     event,
     onGoBack: () => {
@@ -112,7 +107,6 @@ export default function Events() {
       }}
     >
       <View style={styles.statusBar} />
-
       <View
         style={{
           flex: 1,
@@ -122,8 +116,6 @@ export default function Events() {
           backgroundColor: "#EFEFEF",
         }}
       >
-        {/* <Text style={styles.pageTitle}>UMatter Events</Text> */}
-
         {events ? (
           <FlatList
             data={events}
@@ -135,17 +127,6 @@ export default function Events() {
             <ActivityIndicator size="large" color="#509C96" />
           </View>
         )}
-
-        {/* <ActionButton
-          buttonColor="#509C96"
-          onPress={() =>
-            NavigationService.navigate("NewJournalEntry", {
-              onGoBack: () => {
-                console.log("back to JournalEntries");
-              },
-            })
-          }
-        /> */}
       </View>
     </View>
   );

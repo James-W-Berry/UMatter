@@ -7,7 +7,6 @@ import * as Font from "expo-font";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import NavigationService from "./components/NavigationService";
 import { decode, encode } from "base-64";
-import { SafeAreaView } from "react-navigation";
 
 if (!global.btoa) {
   global.btoa = encode;
@@ -27,23 +26,20 @@ export default function App() {
     });
 
     setFontIsLoaded(true);
-    setUser({ loggedIn: false, isLoaded: true });
-    NavigationService.navigate("Home");
   }
 
   useEffect(() => {
     loadFont();
 
-    // firebase.auth().onAuthStateChanged(function (user) {
-    //   if (user) {
-    //     setUser({ loggedIn: true, isLoaded: true });
-    //     NavigationService.navigate("Home");
-    //   } else {
-    //setUser({ loggedIn: false, isLoaded: true });
-    //     //NavigationService.navigate("SignInPage");
-    //NavigationService.navigate("Home");
-    //   }
-    // });
+    firebase.auth().onAuthStateChanged(function (user) {
+      if (user) {
+        setUser({ loggedIn: true, isLoaded: true });
+        NavigationService.navigate("Home");
+      } else {
+        setUser({ loggedIn: false, isLoaded: true });
+        NavigationService.navigate("SignInPage");
+      }
+    });
   }, []);
 
   if (fontIsLoaded && user.isLoaded) {

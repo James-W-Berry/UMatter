@@ -8,6 +8,7 @@ import NavigationService from "./NavigationService";
 import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import ForgottenPasswordPage from "./ForgottenPasswordPage";
+import Event from "./Event";
 
 const MainNavigator = createStackNavigator({
   SignInPage: {
@@ -48,6 +49,14 @@ const MainNavigator = createStackNavigator({
     screen: Home,
     navigationOptions: {
       header: null,
+    },
+  },
+  Event: {
+    screen: Event,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
     },
   },
 });
