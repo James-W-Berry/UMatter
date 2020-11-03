@@ -11,12 +11,13 @@ const ProfileRoute = () => <Profile />;
 
 export default function Home() {
   const [index, setIndex] = useState(0);
+
   const routes = [
     {
       key: "events",
       title: "Events",
       icon: "calendar",
-      color: "#160C21",
+      color: "#2C239A",
     },
     {
       key: "resources",
@@ -36,17 +37,19 @@ export default function Home() {
           />
         );
       },
-      color: "#160C21",
+      color: "#2C239A",
     },
     {
       key: "profile",
       title: "Profile",
       icon: "account",
-      color: "#160C21",
+      color: "#2C239A",
     },
   ];
 
-  const handleIndexChange = (index) => setIndex(index);
+  const handleIndexChange = (index) => {
+    setIndex(index);
+  };
 
   const renderScene = BottomNavigation.SceneMap({
     events: EventsRoute,
@@ -56,7 +59,7 @@ export default function Home() {
 
   return (
     <BottomNavigation
-      // style={{ fontFamily: "montserrat-medium", color: "#191919" }}
+      shifting
       navigationState={{ index: index, routes: routes }}
       onIndexChange={handleIndexChange}
       renderScene={renderScene}

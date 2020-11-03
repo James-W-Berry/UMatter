@@ -12,70 +12,15 @@ import firebase from "../firebase";
 import Constants from "expo-constants";
 import { IconButton, Card } from "react-native-paper";
 
-function createEventCard(event) {
-  if (event) {
-    return (
-      <View key={event.id} style={{ margin: 10 }}>
-        <TouchableOpacity onPress={() => onSelect(event)}>
-          <Card>
-            <Card.Cover source={{ uri: event.image }} />
-
-            <Card.Content style={{ marginBottom: 0 }}>
-              <Text style={styles.title}>{event.title}</Text>
-              <Text
-                style={styles.caption}
-                numberOfLines={1}
-                style={{
-                  marginBottom: 10,
-                }}
-              >
-                {event.description}
-              </Text>
-
-              <Text style={styles.date} style={{ marginTop: 5 }}>
-                {event.date}
-              </Text>
-              <Text style={styles.date}>{event.time}</Text>
-              <View
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                }}
-              >
-                <IconButton
-                  icon="account-group"
-                  color={"#00A9A5"}
-                  size={20}
-                  style={{ margin: 0, marginLeft: -5 }}
-                />
-                <Text style={styles.date}>{event.attendees.length}</Text>
-              </View>
-            </Card.Content>
-          </Card>
-        </TouchableOpacity>
-      </View>
-    );
-  }
-  return null;
-}
-
-function onSelect(event) {
-  const key = event.id;
-  NavigationService.navigate("Event", {
-    key,
-    event,
-    onGoBack: () => {
-      console.log("navigating to events page");
-    },
-  });
-}
-
-function useEvents() {
-  const [events, setEvents] = useState([]);
+export default function Events() {
+  const [events, setEvents] = useState();
 
   useEffect(() => {
-    const unsubscribe = firebase
+    getEvents();
+  }, []);
+
+  async function getEvents() {
+    let events = await firebase
       .firestore()
       .collection("events")
       .orderBy("timestamp", "desc")
@@ -85,17 +30,54 @@ function useEvents() {
           id: doc.id,
           ...doc.data(),
         }));
-
-        setEvents(retrievedEvents);
+        return retrievedEvents;
       });
+    setEvents(events);
+  }
 
-    return () => unsubscribe();
-  }, []);
-  return events;
-}
+  function createEventCard(event) {
+    if (event) {
+      return (
+        <View key={event.id} style={{ margin: 10 }}>
+          <TouchableOpacity onPress={() => onSelect(event)}>
+            <Card>
+              <Card.Cover source={{ uri: event.image }} />
 
-export default function Events() {
-  const events = useEvents();
+              <Card.Content style={{ marginBottom: 0 }}>
+                <Text style={styles.title}>{event.title}</Text>
+                <Text
+                  style={styles.caption}
+                  numberOfLines={1}
+                  style={{
+                    marginBottom: 10,
+                  }}
+                >
+                  {event.description}
+                </Text>
+
+                <Text style={styles.date} style={{ marginTop: 5 }}>
+                  {event.date}
+                </Text>
+                <Text style={styles.date}>{event.time}</Text>
+              </Card.Content>
+            </Card>
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return null;
+  }
+
+  function onSelect(event) {
+    const key = event.id;
+    NavigationService.navigate("Event", {
+      key,
+      event,
+      onGoBack: () => {
+        getEvents();
+      },
+    });
+  }
 
   return (
     <View

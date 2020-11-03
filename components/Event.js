@@ -3,15 +3,78 @@ import {
   StyleSheet,
   Button,
   View,
-  SafeAreaView,
+  TouchableOpacity,
   Text,
   Image,
   ScrollView,
+  Modal,
+  Alert,
+  TouchableHighlight,
 } from "react-native";
-import { IconButton, Divider } from "react-native-paper";
+import { IconButton, Divider, ActivityIndicator } from "react-native-paper";
+import NavigationService from "./NavigationService";
+import firebase from "../firebase";
 
 export default function Event(props) {
   let event = props.navigation.state.params.event;
+  const userId = firebase.auth().currentUser?.uid;
+  const [isLoading, setIsLoading] = useState(false);
+  const [update, setUpdate] = useState(false);
+  const [updateMessage, setUpdateMessage] = useState("");
+  const [showAttendees, setShowAttendees] = useState(false);
+  function addToAttendees(userId, eventId) {
+    setIsLoading(true);
+    const docRef = firebase.firestore().collection("events").doc(eventId);
+
+    docRef
+      .set(
+        { attendees: firebase.firestore.FieldValue.arrayUnion(userId) },
+        { merge: true }
+      )
+      .then(() => {
+        setIsLoading(false);
+        setUpdate(true);
+        setUpdateMessage("You're attending, see you there!");
+        props.navigation.state.params.onGoBack();
+      })
+      .catch(function (error) {
+        setIsLoading(false);
+        console.log(error);
+        Alert.alert(
+          "Error",
+          "Please try again later",
+          [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+          { cancelable: false }
+        );
+      });
+  }
+
+  function removeFromAttendees(userId, eventId) {
+    setIsLoading(true);
+    const docRef = firebase.firestore().collection("events").doc(eventId);
+
+    docRef
+      .set(
+        { attendees: firebase.firestore.FieldValue.arrayRemove(userId) },
+        { merge: true }
+      )
+      .then(() => {
+        setIsLoading(false);
+        setUpdate(true);
+        setUpdateMessage("You're no longer attending :(");
+        props.navigation.state.params.onGoBack();
+      })
+      .catch(function (error) {
+        setIsLoading(false);
+        console.log(error);
+        Alert.alert(
+          "Error",
+          "Please try again later",
+          [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+          { cancelable: false }
+        );
+      });
+  }
 
   return (
     <ScrollView>
@@ -20,9 +83,37 @@ export default function Event(props) {
           flex: 1,
           display: "flex",
           alignItems: "center",
-          justifyContent: "flex-start",
+          justifyContent: "center",
         }}
       >
+        {setShowAttendees && (
+          <Modal
+            animationType="slide"
+            transparent={true}
+            visible={showAttendees}
+          >
+            <View style={styles.centeredView}>
+              <View style={styles.modalView}>
+                {event.attendees.map((attendee) => {
+                  return (
+                    <Text key={attendee} style={styles.modalText}>
+                      {attendee}
+                    </Text>
+                  );
+                })}
+
+                <TouchableHighlight
+                  style={{ ...styles.openButton, backgroundColor: "#509C96" }}
+                  onPress={() => {
+                    setShowAttendees(!showAttendees);
+                  }}
+                >
+                  <Text style={styles.textStyle}>Close</Text>
+                </TouchableHighlight>
+              </View>
+            </View>
+          </Modal>
+        )}
         <View
           style={{
             display: "flex",
@@ -41,7 +132,7 @@ export default function Event(props) {
             alignItems: "center",
             justifyContent: "flex-start",
             width: "100%",
-            height: "25%",
+            height: "50%",
           }}
         >
           <Image
@@ -86,37 +177,66 @@ export default function Event(props) {
           style={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "flex-start",
-            margin: 20,
             flex: 1,
             flexDirection: "column",
+            display: "flex",
+            marginBottom: 20,
+            justifyContent: "center",
           }}
         >
-          <View
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-            }}
+          <TouchableOpacity
+            onPress={() => setShowAttendees(true)}
+            style={{ padding: 20 }}
           >
-            <IconButton
-              icon="account-group"
-              color={"#00A9A5"}
-              size={20}
-              style={{ margin: 0, marginLeft: -5 }}
-              onPress={() => console.log("Show attendees")}
-            />
-            <Text style={styles.date}>{event.attendees.length}</Text>
-          </View>
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+              }}
+            >
+              <IconButton
+                icon="account-group"
+                color={"#00A9A5"}
+                size={20}
+                style={{ margin: 0, marginLeft: -5 }}
+              />
+              <Text style={styles.date}>{event.attendees.length}</Text>
+            </View>
+          </TouchableOpacity>
 
-          <Button
-            onclick={() => {
-              console.log("increment one to sign");
-            }}
-            title={`Sign up for ${event.title}`}
-            color="#509C96"
-            accessibilityLabel="sign up for event"
-          />
+          {isLoading ? (
+            <ActivityIndicator size="large" color="#509C96" />
+          ) : update ? (
+            <Text style={styles.caption}>{updateMessage}</Text>
+          ) : (
+            <TouchableOpacity
+              style={{
+                marginRight: 40,
+                marginLeft: 40,
+                marginTop: 10,
+                padding: 10,
+                backgroundColor: "#509C96",
+                borderRadius: 5,
+                borderWidth: 1,
+                borderColor: "#fff",
+              }}
+              onPress={() => {
+                userId
+                  ? event.attendees.includes(userId)
+                    ? removeFromAttendees(userId, event.id)
+                    : addToAttendees(userId, event.id)
+                  : NavigationService.navigate("SignInPage");
+              }}
+              underlayColor="#fff"
+            >
+              <Text style={styles.buttonText}>
+                {event.attendees.includes(userId)
+                  ? `You're attending ${event.title}. Need to cancel?`
+                  : `Sign up for ${event.title}`}
+              </Text>
+            </TouchableOpacity>
+          )}
         </View>
       </View>
     </ScrollView>
@@ -134,8 +254,45 @@ const styles = StyleSheet.create({
     fontFamily: "montserrat-regular",
     textAlign: "center",
   },
+  buttonText: {
+    fontSize: 16,
+    fontFamily: "montserrat-regular",
+    textAlign: "center",
+    color: "#fff",
+  },
   date: {
     fontSize: 16,
     fontFamily: "montserrat-regular",
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: "white",
+    borderRadius: 20,
+    padding: 35,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  openButton: {
+    borderRadius: 5,
+    padding: 10,
+    elevation: 2,
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 22,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: "center",
   },
 });

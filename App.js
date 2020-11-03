@@ -16,7 +16,6 @@ if (!global.atob) {
 }
 
 export default function App() {
-  const [user, setUser] = useState({ loggedIn: false, isLoaded: false });
   const [fontIsLoaded, setFontIsLoaded] = useState(false);
 
   async function loadFont() {
@@ -30,19 +29,9 @@ export default function App() {
 
   useEffect(() => {
     loadFont();
-
-    firebase.auth().onAuthStateChanged(function (user) {
-      if (user) {
-        setUser({ loggedIn: true, isLoaded: true });
-        NavigationService.navigate("Home");
-      } else {
-        setUser({ loggedIn: false, isLoaded: true });
-        NavigationService.navigate("SignInPage");
-      }
-    });
   }, []);
 
-  if (fontIsLoaded && user.isLoaded) {
+  if (fontIsLoaded) {
     return (
       <SafeAreaProvider>
         <Main style={styles.container} />

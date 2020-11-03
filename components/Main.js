@@ -11,6 +11,12 @@ import ForgottenPasswordPage from "./ForgottenPasswordPage";
 import Event from "./Event";
 
 const MainNavigator = createStackNavigator({
+  Home: {
+    screen: Home,
+    navigationOptions: {
+      header: null,
+    },
+  },
   SignInPage: {
     screen: SignInPage,
     navigationOptions: {
@@ -45,12 +51,7 @@ const MainNavigator = createStackNavigator({
       header: null,
     },
   },
-  Home: {
-    screen: Home,
-    navigationOptions: {
-      header: null,
-    },
-  },
+
   Event: {
     screen: Event,
     navigationOptions: {
