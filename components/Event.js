@@ -77,111 +77,150 @@ export default function Event(props) {
   }
 
   return (
-    <ScrollView>
-      <View
-        style={{
-          flex: 1,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+    <View style={{ flex: 1 }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 250 }}
       >
-        {setShowAttendees && (
-          <Modal
-            animationType="slide"
-            transparent={true}
-            visible={showAttendees}
-          >
-            <View style={styles.centeredView}>
-              <View style={styles.modalView}>
-                {event.attendees.map((attendee) => {
-                  return (
-                    <Text key={attendee} style={styles.modalText}>
-                      {attendee}
-                    </Text>
-                  );
-                })}
+        <View>
+          {setShowAttendees && (
+            <Modal
+              animationType="slide"
+              transparent={true}
+              visible={showAttendees}
+            >
+              <View style={styles.centeredView}>
+                <View style={styles.modalView}>
+                  {event.attendees.map((attendee) => {
+                    return (
+                      <Text key={attendee} style={styles.modalText}>
+                        {attendee}
+                      </Text>
+                    );
+                  })}
 
-                <TouchableHighlight
-                  style={{ ...styles.openButton, backgroundColor: "#509C96" }}
-                  onPress={() => {
-                    setShowAttendees(!showAttendees);
-                  }}
-                >
-                  <Text style={styles.textStyle}>Close</Text>
-                </TouchableHighlight>
+                  <TouchableHighlight
+                    style={{ ...styles.openButton, backgroundColor: "#509C96" }}
+                    onPress={() => {
+                      setShowAttendees(!showAttendees);
+                    }}
+                  >
+                    <Text style={styles.textStyle}>Close</Text>
+                  </TouchableHighlight>
+                </View>
               </View>
-            </View>
-          </Modal>
-        )}
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            margin: 20,
-          }}
-        >
-          <Text style={styles.title}>{event.title}</Text>
-          <Text style={styles.caption}>{event.description}</Text>
-        </View>
-
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            width: "100%",
-            height: "50%",
-          }}
-        >
-          <Image
-            style={{ width: "100%", height: "100%" }}
-            source={{
-              uri: event.image,
+            </Modal>
+          )}
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              margin: 10,
             }}
-          />
+          >
+            <Text style={styles.title}>{event.title}</Text>
+            <Text style={styles.caption}>{event.description}</Text>
+          </View>
+
+          <View
+            style={{
+              display: "flex",
+              width: "100%",
+              height: "25%",
+            }}
+          >
+            <Image
+              style={{ width: "100%", height: "100%" }}
+              source={{
+                uri: event.image,
+              }}
+            />
+          </View>
+          <Divider style={{ width: "100%" }} />
+
+          <View
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              margin: 20,
+            }}
+          >
+            <Text style={styles.caption}>{event.date}</Text>
+            <Text style={styles.caption}>{event.time}</Text>
+          </View>
+
+          <Divider style={{ width: "100%" }} />
+
+          <View
+            style={{
+              display: "flex",
+              margin: 20,
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <View
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+              }}
+            >
+              <IconButton
+                icon="map-marker"
+                color={"#00A9A5"}
+                size={40}
+                style={{ margin: 0 }}
+              />
+              <Text style={styles.date}>
+                {`Friendship Circle\n6892 W Maple Rd\nWest Bloomfield Township\nMI 48322`}
+              </Text>
+            </View>
+          </View>
+          <Divider style={{ width: "100%" }} />
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              margin: 20,
+            }}
+          >
+            <Text style={[styles.caption, { margin: 10 }]}>
+              {`Event agenda\n-agenda item 1\n-agenda item 2\n-agenda item 3`}
+            </Text>
+            <Text style={[styles.caption, { margin: 10 }]}>
+              {`any supporting materials\n-link to relevant resources page`}
+            </Text>
+          </View>
+
+          <Divider style={{ width: "100%" }} />
+
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
+              margin: 20,
+            }}
+          >
+            <Text style={styles.caption}>Event organizer:</Text>
+            <Text style={styles.caption}>{event.organizer}</Text>
+          </View>
         </View>
         <Divider style={{ width: "100%" }} />
 
         <View
           style={{
             display: "flex",
-            alignItems: "center",
-            justifyContent: "flex-start",
-            margin: 20,
-          }}
-        >
-          <Text style={styles.caption}>{event.date}</Text>
-          <Text style={styles.caption}>{event.time}</Text>
-        </View>
-        <Divider style={{ width: "100%" }} />
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            margin: 20,
-            flex: 1,
             flexDirection: "column",
-          }}
-        >
-          <Text style={styles.caption}>
-            {`Here's more information about the event\n-location of event\n-could include things to prepare for before joining \n-any supporting materials (could link to resources)\n-event organizer contact info`}
-          </Text>
-        </View>
-
-        <Divider style={{ width: "100%" }} />
-
-        <View
-          style={{
-            display: "flex",
-            alignItems: "center",
-            flex: 1,
-            flexDirection: "column",
-            display: "flex",
-            marginBottom: 20,
             justifyContent: "center",
+            alignItems: "center",
           }}
         >
           <TouchableOpacity
@@ -198,7 +237,7 @@ export default function Event(props) {
               <IconButton
                 icon="account-group"
                 color={"#00A9A5"}
-                size={20}
+                size={40}
                 style={{ margin: 0, marginLeft: -5 }}
               />
               <Text style={styles.date}>{event.attendees.length}</Text>
@@ -232,14 +271,14 @@ export default function Event(props) {
             >
               <Text style={styles.buttonText}>
                 {event.attendees.includes(userId)
-                  ? `You're attending ${event.title}. Need to cancel?`
+                  ? `You're going. Need to cancel?`
                   : `Sign up for ${event.title}`}
               </Text>
             </TouchableOpacity>
           )}
         </View>
-      </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 }
 
