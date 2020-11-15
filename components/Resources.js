@@ -16,6 +16,7 @@ import support from "../assets/support.jpeg";
 import move from "../assets/move.jpg";
 import talk from "../assets/talk.jpeg";
 import learn from "../assets/learn.jpeg";
+import write from "../assets/write.jpg";
 
 export default function Resources() {
   const [resourceTiles, setResourceTiles] = useState([
@@ -60,6 +61,12 @@ export default function Resources() {
       code: "#35C211",
       description: "Talk",
       image: talk,
+    },
+    {
+      name: "Write",
+      code: "#f1ad98",
+      description: "Write",
+      image: write,
     },
   ]);
 
