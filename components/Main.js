@@ -9,6 +9,9 @@ import SignUpPage from "./SignUpPage";
 import SignInPage from "./SignInPage";
 import ForgottenPasswordPage from "./ForgottenPasswordPage";
 import Event from "./Event";
+import JournalEntries from "./JournalEntries";
+import NewJournalEntry from "./NewJournalEntry";
+import JournalEntry from "./JournalEntry";
 
 const MainNavigator = createStackNavigator({
   Home: {
@@ -54,6 +57,30 @@ const MainNavigator = createStackNavigator({
 
   Event: {
     screen: Event,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
+    },
+  },
+  JournalEntries: {
+    screen: JournalEntries,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
+    },
+  },
+  NewJournalEntry: {
+    screen: NewJournalEntry,
+    navigationOptions: {
+      headerStyle: { backgroundColor: "#2C239A" },
+      headerTitleStyle: { color: "#509C96" },
+      headerTintColor: "#509C96",
+    },
+  },
+  JournalEntry: {
+    screen: JournalEntry,
     navigationOptions: {
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },

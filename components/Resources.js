@@ -17,6 +17,7 @@ import move from "../assets/move.jpg";
 import talk from "../assets/talk.jpeg";
 import learn from "../assets/learn.jpeg";
 import write from "../assets/write.jpg";
+import NavigationService from "./NavigationService";
 
 export default function Resources() {
   const [resourceTiles, setResourceTiles] = useState([
@@ -71,12 +72,16 @@ export default function Resources() {
   ]);
 
   function onSelect(item) {
-    Alert.alert(
-      item.name,
-      "coming soon",
-      [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-      { cancelable: false }
-    );
+    if (item.name === "Write") {
+      NavigationService.navigate("JournalEntries");
+    } else {
+      Alert.alert(
+        item.name,
+        "coming soon",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+        { cancelable: false }
+      );
+    }
   }
 
   return (

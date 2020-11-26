@@ -4,6 +4,7 @@ import { Image } from "react-native";
 import Profile from "./Profile";
 import Events from "./Events";
 import Resources from "./Resources";
+import JournalEntries from "./JournalEntries";
 
 const EventsRoute = () => <Events />;
 const ResourcesRoute = () => <Resources />;
