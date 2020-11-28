@@ -6,10 +6,11 @@ import {
   KeyboardAvoidingView,
   SafeAreaView,
   ActivityIndicator,
+  TouchableOpacity,
 } from "react-native";
 import React, { Component } from "react";
 import firebase from "../firebase";
-import NavigationService from "./NavigationService";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 
 class NewJournalEntry extends Component {
   constructor(props) {
@@ -21,6 +22,8 @@ class NewJournalEntry extends Component {
     title: null,
     body: null,
     isLoading: false,
+    counter: 0,
+    showCounter: true,
   };
 
   static navigationOptions = ({ navigation }) => {
@@ -29,7 +32,7 @@ class NewJournalEntry extends Component {
       headerRight: (
         <View style={styles.headerRightContainer}>
           {state.params.isLoading ? (
-            <View style={{ width: "100%", padding: 15, marginRight: 10 }}>
+            <View style={{ width: "50%", padding: 15, marginRight: 10 }}>
               <ActivityIndicator size="small" color="#509C96" />
             </View>
           ) : (
@@ -47,6 +50,13 @@ class NewJournalEntry extends Component {
       handleSave: this.saveNewJournalEntry,
       isLoading: this.state.isLoading,
     });
+    this.interval = setInterval(() => {
+      this.setState({ counter: this.state.counter + 1 });
+    }, 1000);
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   saveNewJournalEntry = async () => {
@@ -119,6 +129,54 @@ class NewJournalEntry extends Component {
               value={this.state.title}
               numberOfLines={1}
             />
+            {this.state.showCounter ? (
+              <View>
+                <TouchableOpacity
+                  style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginRight: 10,
+                  }}
+                  onPress={() => {
+                    this.setState({ showCounter: false });
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="timer"
+                    size={30}
+                    color="#509C96"
+                  />
+
+                  <Text
+                    style={{
+                      color: "#509C96",
+                      fontSize: 18,
+                      textAlignVertical: "top",
+                    }}
+                  >
+                    {new Date(this.state.counter * 1000)
+                      .toISOString()
+                      .substr(11, 8)}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View>
+                <TouchableOpacity
+                  onPress={() => {
+                    this.setState({ showCounter: true });
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="timer-off"
+                    size={30}
+                    color="#509C96"
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
           <View style={styles.entryContainer}>
             <TextInput
