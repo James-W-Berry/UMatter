@@ -12,6 +12,7 @@ import Event from "./Event";
 import JournalEntries from "./JournalEntries";
 import NewJournalEntry from "./NewJournalEntry";
 import JournalEntry from "./JournalEntry";
+import Games from "./Games";
 
 const MainNavigator = createStackNavigator({
   Home: {
@@ -54,7 +55,6 @@ const MainNavigator = createStackNavigator({
       header: null,
     },
   },
-
   Event: {
     screen: Event,
     navigationOptions: {
@@ -85,6 +85,19 @@ const MainNavigator = createStackNavigator({
       headerStyle: { backgroundColor: "#2C239A" },
       headerTitleStyle: { color: "#509C96" },
       headerTintColor: "#509C96",
+    },
+  },
+  Games: {
+    screen: Games,
+    navigationOptions: {
+      headerStyle: {
+        backgroundColor: "#2C239A",
+      },
+      headerTitleStyle: {
+        color: "#509C96",
+      },
+      headerTintColor: "#509C96",
+      title: "Games",
     },
   },
 });

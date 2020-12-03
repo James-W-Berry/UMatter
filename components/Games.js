@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Text,
   View,
@@ -6,87 +6,59 @@ import {
   ImageBackground,
   Alert,
   TouchableOpacity,
+  Platform,
+  Linking,
 } from "react-native";
-import { FlatGrid, SectionGrid } from "react-native-super-grid";
+import { FlatGrid } from "react-native-super-grid";
 import Constants from "expo-constants";
-import breathing from "../assets/breathing.jpeg";
-import games from "../assets/games.jpeg";
-import inspiration from "../assets/inspiration.jpeg";
-import support from "../assets/support.jpeg";
-import move from "../assets/move.jpg";
-import talk from "../assets/talk.jpeg";
-import learn from "../assets/learn.jpeg";
-import write from "../assets/write.jpg";
-import NavigationService from "./NavigationService";
+import sudoku from "../assets/sudoku.png";
+import tetris from "../assets/tetris.jpg";
+import dots from "../assets/dots.png";
 
-export default function Resources() {
+export default function Games() {
   const [resourceTiles, setResourceTiles] = useState([
     {
-      name: "Breathe",
+      name: "Sudoku",
       code: "#9302F7",
-      description: "Learn breathing practices",
-      image: breathing,
+      description: "Sudoku",
+      image: sudoku,
+      link:
+        Platform.OS === "android"
+          ? "https://play.google.com/store/apps/details?id=com.brainium.sudoku.free&hl=en_US&gl=US"
+          : "https://apps.apple.com/us/app/sudoku-com-number-games/id1193508329",
     },
     {
-      name: "Inspiration",
+      name: "Tetris",
       code: "#A80F88",
-      description: "Become inspired",
-      image: inspiration,
+      description: "Tetris",
+      image: tetris,
+      link:
+        Platform.OS === "android"
+          ? "https://play.google.com/store/apps/details?id=com.n3twork.tetris&hl=en_US&gl=US"
+          : "https://apps.apple.com/us/app/tetris/id1491074310",
     },
     {
-      name: "Play",
+      name: "Dots",
       code: "#F70B02",
-      description: "Enjoy games",
-      image: games,
-    },
-    {
-      name: "Move",
-      code: "#1FDEA8",
-      description: "Engage in physical activity",
-      image: move,
-    },
-    {
-      name: "Support",
-      code: "#2C239A",
-      description: "Collection of resources",
-      image: support,
-    },
-    {
-      name: "Learn",
-      code: "#FA23E5",
-      description: "Learn ",
-      image: learn,
-    },
-    {
-      name: "Talk",
-      code: "#35C211",
-      description: "Talk",
-      image: talk,
-    },
-    {
-      name: "Write",
-      code: "#f1ad98",
-      description: "Write",
-      image: write,
+      description: "Dots",
+      image: dots,
+      link:
+        Platform.OS === "android"
+          ? "https://play.google.com/store/apps/details?id=com.nerdyoctopus.gamedots&hl=en_US&gl=US"
+          : "https://apps.apple.com/us/app/dots-a-game-about-connecting/id632285588",
     },
   ]);
 
   function onSelect(item) {
-    switch (item.name) {
-      case "Write":
-        NavigationService.navigate("JournalEntries");
-        break;
-      case "Play":
-        NavigationService.navigate("Games");
-        break;
-      default:
-        Alert.alert(
-          item.name,
-          "coming soon",
-          [{ text: "OK", onPress: () => console.log("OK Pressed") }],
-          { cancelable: false }
-        );
-        break;
+    if (item.link !== null) {
+      Linking.openURL(item.link);
+    } else {
+      Alert.alert(
+        item.name,
+        "coming soon",
+        [{ text: "OK", onPress: () => console.log("OK Pressed") }],
+        { cancelable: false }
+      );
     }
   }
 
@@ -97,8 +69,6 @@ export default function Resources() {
         display: "flex",
       }}
     >
-      <View style={styles.statusBar} />
-
       <FlatGrid
         itemDimension={130}
         data={resourceTiles}
